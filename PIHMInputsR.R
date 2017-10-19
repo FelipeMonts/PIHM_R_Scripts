@@ -1,6 +1,9 @@
 ###########    Program to import and create PIHM input files from Hydroterre services
 ###########    Felipe Montes 2015 03 03
 
+###########   Updated 2017 10 18 ######################
+#Added the code to the PIHM_R_Scripts repository in GitHub and updated the directories
+
 ###########    Felipe Montes 2015 06 27 Update: Added a function to save the objects produced in the file PIHMInputsR.RData on the working directory. In this way these objects can be read by another program and be modified easily to produce the desired output. For example if different output format is needed for PIHMV2.2 and MM-PIHM. Also, modified the file paths to be relative file paths as suggested in Gandrud, Christopher. 2013. Reproducible Research with R and R Studio. Boca Raton: Chapman and Hall/CRC. 
 
 
