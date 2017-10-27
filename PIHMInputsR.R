@@ -281,8 +281,8 @@ riv.shape<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv+1,nro
 # Index Integer Material ID Beginning with 1
 # n Double Manning's Roughness Coefficient
 # Cwr Double Discharge Coefficient
-# KsatH Double Size Hydraulic Conductivity
-# KsatV Double Bed Hydraulic Conductivity
+# KsatH Double Side (Horizontal) Hydraulic Conductivity in m day-1
+# KsatV Double Bed Hydraulic Conductivity m day-1
 # Bed Double Bed Depth
 
 
