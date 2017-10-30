@@ -621,7 +621,7 @@ para<-read.table(paste0(inputfile.name, ".PARA"),as.is=F, fill=T);
 # This parameter file structure is very cumbersome. Need to find a way to make it reasonable
 # One option is to create a list and name the components 
 
-para.list<-list(as.vector(para[1, 1:3]),as.vector(para[2, 1:4]),as.vector(para[3, 1:3]),as.vector(para[4, 1:3]),as.vector(para[5, 1:11]),as.vector(para[6, 1:4]),as.vector(para[7, 1:5]),as.vector(para[8, 1:3]),as.vector(para[9, 1:4]),as.vector(para[10, 1:5]),as.vector(para[11, 1:3]),as.vector(para[12, 1:2]));
+para.list<-list(as.vector(para[1, 1:3]),as.vector(para[2, 1:4]),as.vector(para[3, 1:3]),as.vector(para[4, 1:3]),as.vector(para[5, 1:10]),as.vector(para[6, 1:4]),as.vector(para[7, 1:5]),as.vector(para[8, 1:3]),as.vector(para[9, 1:4]),as.vector(para[10, 1:5]),as.vector(para[11, 1:3]),as.vector(para[12, 1:2]));
 
 # Name the components of the list
 
@@ -629,7 +629,7 @@ names(para.list[[1]])<-c("Verbose","Debug","Init_type");
 names(para.list[[2]])<-c("PgwD","PsurfD", "PsnowD", "PrivStg");
 names(para.list[[3]])<-c("PRech", "PIsD"," PusD");
 names(para.list[[4]])<-c("Pet0","Pet1","Pet2");
-names(para.list[[5]])<-c("Priv0", "Priv1"," Priv2", "Priv3", "Priv4", "Priv5", "Priv6", "Priv7", "Priv8", "Priv9", "Priv10");
+names(para.list[[5]])<-c("Priv0", "Priv1"," Priv2", "Priv3", "Priv4", "Priv5", "Priv6", "Priv7", "Priv8", "Priv9") ; #, "Priv10");
 names(para.list[[6]])<-c("gwDInt", "surfDInt", "snowDint", "rivStgInt");
 names(para.list[[7]])<-c("RechInt", "IsDInt", "usDInt", "etInt", "rivFlxInt");
 names(para.list[[8]])<-c("UsatMode", "SatMode", "RivMode");
@@ -708,7 +708,11 @@ names(calib.list[[9]])<-c("rivDepth", "rivWidCoeff");
 
 
 
- #######################  Save the onjects created in the file PIHMInputsR.RData using the function save image    ###################
+ #######################  Save the objects created in the file PIHMInputsR.RData using the function save image    ###################
 
-save.image(file='PIHMInputsR.RData');
+######## Create the directory where the objects created in the file PIHMInputsR.RData are to be saved
+
+dir.create(paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project));
+
+save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\PIHMInputsR.RData'));
 
