@@ -48,16 +48,15 @@ load(paste0('./',Project,'/PIHMInputsR.RData'));
 
 dir.create(Project);
 
-#Store the name of the directory where the inputs are:
 
-DataModel.dir<-paste0('./',Project,'/') ;
-
+RevisedOutputs.dir<-paste0('./',Project,'/') ;
 
 
 
-# Create the path to read the input files by pasting DataModel.dir and the Project name together with the file ".name" ie ".mesh"
 
-inputfile.name<-paste0(DataModel.dir,Project) ;
+# Create the path to read the input files by pasting RevisedOutputs.dir and the Project name together with the file ".name" ie ".mesh"
+
+inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
 
 ################## Write out the appropiate formated "Mesh" File for the MM-PIHM input format ##################################
 
@@ -113,7 +112,7 @@ NLCD_to_PIHM[!is.na(NLCD_to_PIHM$NLCD.lc),]
 
 ######### Load the attribute file to change the LC codes from NLCD to the NEw PIHM
 
-att<-read.table("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Aug2920171550/4DataModelLoader/MergeVectorLayer000_q30_a200000.att",as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
+att<-read.table(paste0(Project.Directory,"\\",DataModel.dir,"\\",Project,".att"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
 
 names(att)
 
@@ -134,20 +133,9 @@ Revised.att<-att.expanded[order(att.expanded$Index),revised.names] ;
 names(Revised.att)[4]<-'LC'  ;
 
 
-write.table(Revised.att[,c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP')], file="C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Aug2920171550/4DataModelLoader/Revised.att" , row.names=F, quote=F , sep = "\t" ) ; # ,col.names=header.att, quote=F
+write.table(Revised.att[,c('Index', 'Soil', 'Geol', 'LC','Ppt', 'IS_IC','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(RevisedOutputs.dir,"Revised.att") , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
 
-
-
-header.att<-c( 'IND' ,  'SOIL' ,	'GEOL' ,	'LC' ,	'CMC' ,	'SNOWH' ,	'HSFC' ,	'UNSAT' ,	'GW' ,	'METEO' ,	 'LAI' , 	'SS' , 	'BC0' ,	'BC1' ,	'BC2' , 	'MACP' );
-
-
-
-write.table(att[,c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP')], file=paste0(inputfile.name, ".att") , row.names=F, quote=F , sep = "\t" ) ; # ,col.names=header.att, quote=F
-
-
-
-##     Need to merge the attributes of PIHM V2.2 with the MM-PIHM before continuing with the attribute file
 
 
 
@@ -175,21 +163,17 @@ write.table(geol,file=paste0(inputfile.name, ".geol") , row.names=F , quote=F , 
 
 
 
-###################   Write the appropiate formated "Land cover" File for the MM-PIHM input format  #################################
-
-
-write.table(lc,file=paste0(inputfile.name, ".lc") , row.names=F , col.names=c(NumLC, " ", " " ," ", " " , " " , " " , " "), quote=F , sep= "\t") ;
-
-
-
-
 ###################   Write the appropiate formated "River" File for the MM-PIHM input format  #################################
+
+### Write the First line of the .Riv File
+
+write.table(data.frame(c('NUMRIV'), 114),file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F, quote=F, sep= "\t" ) ;
 
 
 ##   Add river elements
-header.riv<-c( NumRiv, 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATERIAL' ,	'IC' ,	'BC' ,	'RES' )  ;
+names(riv.elements)<-c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'IC' ,	'BC' ,	'RES' )  ;
 
-write.table(riv.elements,file=paste0(inputfile.name, ".riv"), row.names=F , col.names=header.riv, quote=F, sep= "\t" ) ;
+write.table(riv.elements[,c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'BC' ,	'RES' )],file=paste0(inputfile.name, ".riv"), append=T, row.names=F , quote=F, sep= "\t" ) ;
 
 
 ##    Add river Shape
@@ -197,45 +181,56 @@ write.table(riv.elements,file=paste0(inputfile.name, ".riv"), row.names=F , col.
 
 ## write the word Shape as title before writting the tabel with the data
 
-Shape.title<-c('Shape');
 
-write.table(Shape.title,file=paste0(inputfile.name, ".riv") , row.names=F , col.names=F, quote=F, append=T , sep= "\t") ;
+write.table(data.frame(c('SHAPE'),NumShape),file=paste0(inputfile.name, ".riv") , row.names=F , col.names=F, quote=F, append=T , sep= "\t") ;
 
 
-header.riv.Shape<-c(NumShape, 'RIVDPTH' ,  'O_INT' ,	'C_WID' );
+header.riv.Shape<-c('INDEX', 'DPTH' ,  'OINT' ,	'CWID' );
 
 write.table(riv.shape,file=paste0(inputfile.name, ".riv"), row.names=F , col.names=header.riv.Shape, quote=F, append=T, sep = "\t") ;
 
 
 ##   Add river Material
 
-Material.title<-('Material');
-
-write.table(Material.title,file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
 
 
-header.riv.Material<-c( NumMat , 'RIV_ROUGH' ,  'CWR' ,	'RIVHK' ,	'RIVVK' ,	'BEDTHICK_CAL');
-
-write.table(riv.material,file=paste0(inputfile.name, ".riv") , row.names=F , col.names=header.riv.Material, quote=F, append=T , sep = "\t") ;
-
-##   Add initial condition
-
-IC.title<-c('IC');
-
-write.table(IC.title,file=paste0(inputfile.name, ".riv") , row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
+write.table(data.frame(c('MATERIAL'),NumMat ),file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
 
 
-write.table(riv.IC, file=paste0(inputfile.name, ".riv") , row.names=F , col.names= c(NumIC, 'HRIV'), quote=F, append=T , sep = "\t") ;
+
+
+###############################################################################################################
+#                         Print the corrected  .riv file in th right format
+#                         Taken and adapted from the R code MM_PHIMinputs on the PIHM_R_Scripts directory
+#                         2017 10 25 By Felipe Montes
+###############################################################################################################
+
+
+
+##  Convert units of Manning's roughness coefficient [day m-1/3] , River bank hydraulic conductivity (horizontal KH) and
+##   River bed hydraulic conductivity (vertical KV) [m/day] into  [s m-1/3] and [m/s] 
+
+riv.material$ROUGH<-signif(riv.material$n * 86400, 2) ;
+
+riv.material$KH<-signif(riv.material$KsatH / 86400, 2)  ;
+
+riv.material$KV<-signif(riv.material$KsatV / 86400, 2)  ;
+
+
+header.riv.Material<-c( 'INDEX' , 'ROUGH' ,  'CWR' ,	'KH' ,	'KV' ,	'BEDTHCK');
+
+
+write.table(riv.material[,c('Index','ROUGH' ,  'Cwr' ,	'KH' ,	'KV' ,	'Bed')],file=paste0(inputfile.name, ".riv") , row.names=F , col.names=header.riv.Material, quote=F, append=T , sep = "\t") ;
 
 ##   Add boundary condition
 
 
-write.table(BC[2],file=paste0(inputfile.name, ".riv"), row.names=F , col.names= c('BC'), quote=F, append=T, sep = "\t") ;
+write.table(data.frame(c('BC'),BC[2]),file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F ,quote=F, append=T, sep = "\t") ;
 
 
 ##   Add Reservoirs
 
-write.table(Res[2],file=paste0(inputfile.name, ".riv"), row.names=F , col.names=c('RES'), quote=F, append=T , sep = "\t") ;
+write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
 
 
 

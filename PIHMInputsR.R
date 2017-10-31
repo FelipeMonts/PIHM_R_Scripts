@@ -21,6 +21,8 @@
 #      set the working directory
 #     setwd("./PIHMInputsR");
 
+Project.Directory<-"C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\WE-38\\WE38_Files_PIHM_Cycles20170208\\Feb2720171451" ;
+
 setwd("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\WE-38\\WE38_Files_PIHM_Cycles20170208\\Feb2720171451")    ;
 
 #Store the name of the directory where the inputs are:
