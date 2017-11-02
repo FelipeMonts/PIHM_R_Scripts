@@ -36,7 +36,8 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')    ;
 
 ## attach('./PIHMInputsR.RData', ); Adds the database with the objects created to the path R searches for objects. It is safer than load, but one needs to remember the name of the variables when programming. 
 
-Project<-'WE38'   ;
+Project<-"MergeVectorLayer000_q30_a200000"   ;
+
 
 
 load(paste0('./',Project,'/PIHMInputsR.RData'));
@@ -46,7 +47,7 @@ load(paste0('./',Project,'/PIHMInputsR.RData'));
 ######## Store the name of the directory whre the modified MM-PIHM inputs are to be stored
 
 
-dir.create(Project);
+#dir.create(Project);
 
 
 RevisedOutputs.dir<-paste0('./',Project,'/') ;
@@ -59,21 +60,43 @@ RevisedOutputs.dir<-paste0('./',Project,'/') ;
 inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
 
 ################## Write out the appropiate formated "Mesh" File for the MM-PIHM input format ##################################
-
 ##       First, create the mesh element part
 
-header.mesh.Elements<-c(NumEle , 'NODE1' , 'NODE2' , 'NODE3' , 'NABR1' , 'NABR2' , 'NABR3') ;
+head(mesh.Elements)
+
+MESH.1<-data.frame(c('NUMELE'),NumEle);
+
+## write the first lines of the new MM-PIHM mesh file
+
+write.table(MESH.1, file=paste0(inputfile.name, ".MESH"), row.names=F ,col.names=F, quote=F, sep ="\t") ;
+
+
+MESH.2<-data.frame(c('INDEX') ,c('NODE1') , c('NODE2') , c('NODE3'), c('NABR1') , c('NABR2') ,c('NABR3')) ;
+
+write.table(MESH.2[1,], file=paste0(inputfile.name, ".MESH"), row.names=F , col.names=F, quote=F, sep ="\t", append = T) ;
+
+## write the mesh data into the new MM-PIHM mesh file
+
+write.table(mesh.Elements, file=paste0(inputfile.name, ".MESH"), row.names=F , col.names=F, quote=F, sep ="\t", append = T) ;
 
 
 
-write.table(mesh.Elements, file=paste0(inputfile.name, ".mesh"), row.names=F ,col.names=header.mesh.Elements, quote=F, sep ="\t") ;
+##       Second Create the node elements part 
+### write the first lines of the node elements
+
+head(mesh.Nodes)
+
+NumEle
+NumNode
 
 
-##       Second Creat the node elements part 
+NODES.1<-data.frame(c('NUMNODE'),NumNode )   ;
+write.table(NODES.1 , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=F, quote=F, sep ="\t") ;
 
-header.mesh.Nodes<-c(NumNode , 'X' , 'Y' , 'ZMIN' , 'ZMAX');
 
-write.table(mesh.Nodes , file=paste0(inputfile.name, ".mesh") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
+header.mesh.Nodes<-c('INDEX' , 'X' , 'Y' , 'ZMIN' , 'ZMAX');
+
+write.table(mesh.Nodes , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
 
 
 ###################   Write the appropiate formated "Attributes" File for the MM-PIHM input format  #################################
@@ -133,7 +156,7 @@ Revised.att<-att.expanded[order(att.expanded$Index),revised.names] ;
 names(Revised.att)[4]<-'LC'  ;
 
 
-write.table(Revised.att[,c('Index', 'Soil', 'Geol', 'LC','Ppt', 'IS_IC','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(RevisedOutputs.dir,"Revised.att") , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
+write.table(Revised.att[,c('Index', 'Soil', 'Geol', 'LC','Ppt', 'IS_IC','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
 
 
@@ -167,13 +190,13 @@ write.table(geol,file=paste0(inputfile.name, ".geol") , row.names=F , quote=F , 
 
 ### Write the First line of the .Riv File
 
-write.table(data.frame(c('NUMRIV'), 114),file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F, quote=F, sep= "\t" ) ;
+write.table(data.frame(c('NUMRIV'), 114),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, sep= "\t" ) ;
 
 
 ##   Add river elements
 names(riv.elements)<-c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'IC' ,	'BC' ,	'RES' )  ;
 
-write.table(riv.elements[,c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'BC' ,	'RES' )],file=paste0(inputfile.name, ".riv"), append=T, row.names=F , quote=F, sep= "\t" ) ;
+write.table(riv.elements[,c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'BC' ,	'RES' )],file=paste0(inputfile.name, ".RIV"), append=T, row.names=F , quote=F, sep= "\t" ) ;
 
 
 ##    Add river Shape
@@ -182,19 +205,19 @@ write.table(riv.elements[,c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGH
 ## write the word Shape as title before writting the tabel with the data
 
 
-write.table(data.frame(c('SHAPE'),NumShape),file=paste0(inputfile.name, ".riv") , row.names=F , col.names=F, quote=F, append=T , sep= "\t") ;
+write.table(data.frame(c('SHAPE'),NumShape),file=paste0(inputfile.name, ".RIV") , row.names=F , col.names=F, quote=F, append=T , sep= "\t") ;
 
 
 header.riv.Shape<-c('INDEX', 'DPTH' ,  'OINT' ,	'CWID' );
 
-write.table(riv.shape,file=paste0(inputfile.name, ".riv"), row.names=F , col.names=header.riv.Shape, quote=F, append=T, sep = "\t") ;
+write.table(riv.shape,file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=header.riv.Shape, quote=F, append=T, sep = "\t") ;
 
 
 ##   Add river Material
 
 
 
-write.table(data.frame(c('MATERIAL'),NumMat ),file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
+write.table(data.frame(c('MATERIAL'),NumMat ),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
 
 
 
@@ -220,17 +243,17 @@ riv.material$KV<-signif(riv.material$KsatV / 86400, 2)  ;
 header.riv.Material<-c( 'INDEX' , 'ROUGH' ,  'CWR' ,	'KH' ,	'KV' ,	'BEDTHCK');
 
 
-write.table(riv.material[,c('Index','ROUGH' ,  'Cwr' ,	'KH' ,	'KV' ,	'Bed')],file=paste0(inputfile.name, ".riv") , row.names=F , col.names=header.riv.Material, quote=F, append=T , sep = "\t") ;
+write.table(riv.material[,c('Index','ROUGH' ,  'Cwr' ,	'KH' ,	'KV' ,	'Bed')],file=paste0(inputfile.name, ".RIV") , row.names=F , col.names=header.riv.Material, quote=F, append=T , sep = "\t") ;
 
 ##   Add boundary condition
 
 
-write.table(data.frame(c('BC'),BC[2]),file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F ,quote=F, append=T, sep = "\t") ;
+write.table(data.frame(c('BC'),BC[2]),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F ,quote=F, append=T, sep = "\t") ;
 
 
 ##   Add Reservoirs
 
-write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".riv"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
+write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
 
 
 
