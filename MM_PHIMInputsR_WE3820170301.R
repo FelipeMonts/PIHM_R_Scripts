@@ -14,6 +14,9 @@
 
 
 #      set the working directory
+#     setwd("./PIHMInputsR");
+
+setwd("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\WE-38\\WE38_Files_PIHM_Cycles20170208\\Feb2720171451")    ;
 
 setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs');
 
@@ -26,6 +29,8 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs');
 
 ## attach('./PIHMInputsR.RData', ); Adds the database with the objects created to the path R searches for objects. It is safer than load, but one needs to remember the name of the variables when programming. 
 
+load('./PIHMInputsR.RData');
+
 Project<-"WE38"
 
 
@@ -34,10 +39,13 @@ load(paste0('./', Project, '/PIHMInputsR.RData'))  ;
 
 
 ########Create the directory to store the modified MM-PIHM inputs
+dir.create('./MM_Inputs');
 
 dir.create(paste0('./', Project));
 
 #Store the name of the directory where the inputs are:
+
+DataModel.dir<-"MM_Inputs" ;
 
 DataModel.dir<-Project<-"WE38" ;
 
