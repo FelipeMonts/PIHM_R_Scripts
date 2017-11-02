@@ -21,16 +21,9 @@
 #      set the working directory
 #     setwd("./PIHMInputsR");
 
-#Project.Directory<-"C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\WE-38\\WE38_Files_PIHM_Cycles20170208\\Feb2720171451" ;
+Project.Directory<-"C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\WE-38\\WE38_Files_PIHM_Cycles20170208\\Feb2720171451" ;
 
-Windows.Directory<-gsub("\\\\", "/", readClipboard())
-  'C:\Felipe\PIHM-CYCLES\PIHM\PIHM_Felipe\CNS\Manhantango\HydroTerreFullManhantango\HansYostDeepCreek\Aug2920171550'
-
-
-
-Project.Directory<-Windows.Directory
-
-setwd(Project.Directory)    ;
+setwd("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\WE-38\\WE38_Files_PIHM_Cycles20170208\\Feb2720171451")    ;
 
 #Store the name of the directory where the inputs are:
 
@@ -40,12 +33,12 @@ DataModel.dir<-"4DataModelLoader" ;
 #Store  the name of the project :
 
 
-Project<-"MergeVectorLayer000_q30_a200000"
+Project<-"WE38"
 
 
 #  read already created files from PIHM examples to study their structure
 
-# Create the path to read the input files by pasting DataModel.dir and the Project name together with the file ".name" ie ".mesh"
+# Creaet the path to read the input files by pasting DataModel.dir and the Project name together with the file ".name" ie ".mesh"
 
 inputfile.name<-(paste(".",DataModel.dir,Project, sep="/")) ;
 
@@ -56,7 +49,7 @@ list.files(paste(".",DataModel.dir, sep="/"))    ;
 
 ############## The list of files that PIHM Need - Master list  ###################
 
-PIHMMasterFiles<-c(".ATT" , ".CALIB" , ".FORC" , ".GEOL" , ".IBC" , ".INIT" , ".LC" , ".LSM", ".MESH", ".PARA" , ".RIV" , ".SOIL")   ;
+PIHMMasterFiles<-c("WE38.att" , "WE38.calib" , "WE38.forc" , "WE38.geol" , "WE38.ibc" , "WE38.init" , "WE38.lc" , "WE38.lsm", "WE38.mesh", "WE38.para" , "WE38.riv" , "WE38.soil")   ;
 
 
 # ****************************************READ THE MESH FILE .mesh****************************************************************
@@ -64,7 +57,7 @@ PIHMMasterFiles<-c(".ATT" , ".CALIB" , ".FORC" , ".GEOL" , ".IBC" , ".INIT" , ".
 
 #   Because the Messh file has in the first line the number of elements (NumEle) and the number of nodes (NumNode), we can use that information to read the table more efficiently
 
-mesh.NumEle.NumNode<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,nrows=1,skip=0, col.names=c("NumEle","NumNode"));
+mesh.NumEle.NumNode<-read.table(paste0(inputfile.name, ".mesh"),as.is=T,nrows=1,skip=0, col.names=c("NumEle","NumNode"));
 
 NumEle<-mesh.NumEle.NumNode$NumEle;
 NumNode<-mesh.NumEle.NumNode$NumNode;
@@ -75,10 +68,10 @@ NumNode<-mesh.NumEle.NumNode$NumNode;
 # Zmax is the surface elevation of the node and Zmin is the bed elevation of the node
 # see the PIHM2x_input_file_format.pdf file
 
-mesh.Elements<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,skip=1, nrows=NumEle,col.names=c('Index', 'Node.0', 'Node.1', 'Node.2', 'Nabr.0', 'Nabr.1', 'Nabr.2'));
+mesh.Elements<-read.table(paste0(inputfile.name, ".mesh"),as.is=T,skip=1, nrows=NumEle,col.names=c('Index', 'Node.0', 'Node.1', 'Node.2', 'Nabr.0', 'Nabr.1', 'Nabr.2'));
 
 
-mesh.Nodes<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,skip=NumEle+1, nrows=NumNode, col.names=c('Index','X','Y','Zmin','Zmax'));
+mesh.Nodes<-read.table(paste0(inputfile.name, ".mesh"),as.is=T,skip=NumEle+1, nrows=NumNode, col.names=c('Index','X','Y','Zmin','Zmax'));
 
 
 
@@ -118,7 +111,7 @@ mesh.Nodes<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,skip=NumEle+1, n
 # mP Integer Macropore present or not 1:Yes/ 0: No
 
 
-att<-read.table(paste0(inputfile.name, ".ATT"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
+att<-read.table(paste0(inputfile.name, ".att"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
 
 
 
@@ -130,7 +123,13 @@ att<-read.table(paste0(inputfile.name, ".ATT"),as.is=T,col.names=c('Index', 'Soi
 
 ####  The Hydroterre Soil.txt file has the information extracted from Hydroterre, that passes to PIHM-GIS to calculate soil properties and form the PIHM input .soil file
 
-HT_soil<-read.table(file = "../GSSURGO/HansYoust_Soil.txt", as.is=T, header=T) ;
+HT_soil<-read.table(paste(".",DataModel.dir,"HT_Soil_Surgo.txt",sep="/"), as.is=T,skip=2, col.names = c("MUKEY" , "SILT" , "CLAY" , "OM" , "BD")) ;
+
+
+
+
+
+
 
 
 # ******************************************READ SOIL FILE  .soil***********************************************************
@@ -160,25 +159,22 @@ HT_soil<-read.table(file = "../GSSURGO/HansYoust_Soil.txt", as.is=T, header=T) ;
 
 ## NumSoil<-read.table(paste0(inputfile.name, ".soil"),as.is=T,nrows=1)[1,1];  ####  comented just for the PIHM WE38 files, not comment to read the regular files
 
-#soil.header<-read.table(paste0(inputfile.name," (2)", ".soil"),as.is=T,nrows=1) ;
+soil.header<-read.table(paste0(inputfile.name," (2)", ".soil"),as.is=T,nrows=1) ;
 
-#NumSoil<-soil.header[1,1]; 
+NumSoil<-soil.header[1,1]; 
 
-NumSoil<-dim(HT_soil)[1] ;
-
-#soil.col_names<-soil.header[1,-1]  ;
-
+soil.col_names<-soil.header[1,-1]  ;
 
 ## soil<-read.table(paste0(inputfile.name, ".soil"),as.is=T,skip=1,col.names=c('Index', 'KsatV', 'ThetaS', 'ThetaR', 'infD', 'Alpha', 'Beta', 'hAreaF', 'macKsatV'));
 
                    
-soil<-HT_soil ;
+soil<-read.table(paste0(inputfile.name," (2)", ".soil"), as.is=T, skip=1,col.names=c("Index",soil.col_names));
 
 
 
 
 # ********************************************READ THE GEOLOGY FILE  .geol*****************************************************************
-HT_Geology<-read.table(file = "../GSSURGO/HansYoust_Geology.txt", as.is=T, header=T) ;
+
 
 
 # The geology file is very similar to the soil file. The geology file has 11 columns with attributes as follows:
@@ -206,11 +202,10 @@ HT_Geology<-read.table(file = "../GSSURGO/HansYoust_Geology.txt", as.is=T, heade
 # conductivity
 # macD Double Macropore Depth
 
+geol<-read.table(paste0(inputfile.name, ".geol"),as.is=T,skip=1,fill=T,col.names=c('Index', 'KsatH','KsatV', 'ThetaS', 'ThetaR', 'infD', 'Alpha', 'Beta', 'vAreaF', 'macKsatH','macD'));
 
-#geol<-read.table(paste0(inputfile.name, ".geol"),as.is=T,skip=1,fill=T,col.names=c('Index', 'KsatH','KsatV', 'ThetaS', 'ThetaR', 'infD', 'Alpha', 'Beta', 'vAreaF', 'macKsatH','macD'));
 
 
- geol<-HT_Geology ;
 # *****************************************READ THE LAND COVER FILE .lc **********************************************************
 
 
@@ -229,9 +224,9 @@ HT_Geology<-read.table(file = "../GSSURGO/HansYoust_Geology.txt", as.is=T, heade
 # RzD Double Root Zone Depth
 
 
-# NumLC<-read.table(paste0(inputfile.name, ".lc"),as.is=T,nrows=1)[1,1];
-# 
-# lc<-read.table(paste0(inputfile.name, ".lc"),as.is=T,skip=1,col.names=c('Index', 'LAImax', 'Rmin', 'Rs_ref', 'Albedo', 'VegFrac', 'n', 'RzD'));
+NumLC<-read.table(paste0(inputfile.name, ".lc"),as.is=T,nrows=1)[1,1];
+
+lc<-read.table(paste0(inputfile.name, ".lc"),as.is=T,skip=1,col.names=c('Index', 'LAImax', 'Rmin', 'Rs_ref', 'Albedo', 'VegFrac', 'n', 'RzD'));
 
 
 # *************************************************READ THE RIVER FILE . riv  ****************************************************
