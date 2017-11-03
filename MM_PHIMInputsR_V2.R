@@ -156,7 +156,15 @@ Revised.att<-att.expanded[order(att.expanded$Index),revised.names] ;
 names(Revised.att)[4]<-'LC'  ;
 
 
-write.table(Revised.att[,c('Index', 'Soil', 'Geol', 'LC','Ppt', 'IS_IC','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
+
+Revised.att$LAI<-0  ;
+
+Revised.att$METEO<-1  ;
+
+
+
+
+write.table(Revised.att[,c('Index', 'Soil', 'Geol', 'LC','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
 
 
