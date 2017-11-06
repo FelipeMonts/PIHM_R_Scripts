@@ -144,16 +144,23 @@ names(att)
 
 att.expanded<-merge(att,NLCD_to_PIHM, by.x="LC", by.y="NLCD.lc", all.x=T ) ;
 
-
 ###### change the name of the LC column that will be used in the revised attributes
 
 revised.names<-names(att)   ;
 
 revised.names[4]<- "PIHM.lc" ;
 
-Revised.att<-att.expanded[order(att.expanded$Index),revised.names] ;
 
-names(Revised.att)[4]<-'LC'  ;
+######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
+
+att.expanded.2<-merge(att.expanded,MUKEYS.map, by.x='Index', by.y='Ele_ID') ;
+
+###### change the name of the LC column that will be used in the revised attributes
+
+
+Revised.att<-att.expanded.2[order(att.expanded.2$Index),] ;
+
+
 
 
 
@@ -164,7 +171,15 @@ Revised.att$METEO<-1  ;
 
 
 
-write.table(Revised.att[,c('Index', 'Soil', 'Geol', 'LC','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
+######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
+
+
+
+
+
+
+
+write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'LC','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
 
 

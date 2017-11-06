@@ -121,7 +121,7 @@ mesh.Nodes<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,skip=NumEle+1, n
 att<-read.table(paste0(inputfile.name, ".ATT"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
 
 
-
+head(att)
 
 # ******************************************* READ HYDROTERRE SOIL FILE  .soil***********************************************************
 
