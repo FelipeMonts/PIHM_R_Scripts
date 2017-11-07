@@ -213,7 +213,7 @@ write.table(geol,file=paste0(inputfile.name, ".geol") , row.names=F , quote=F , 
 
 ### Write the First line of the .Riv File
 
-write.table(data.frame(c('NUMRIV'), 114),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, sep= "\t" ) ;
+write.table(data.frame(c('NUMRIV'),NumRiv ),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, sep= "\t" ) ;
 
 
 ##   Add river elements
