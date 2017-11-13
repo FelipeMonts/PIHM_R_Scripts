@@ -153,7 +153,7 @@ revised.names[4]<- "PIHM.lc" ;
 
 ######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
 
-att.expanded.2<-merge(att.expanded,MUKEYS.map, by.x='Index', by.y='Ele_ID') ;
+att.expanded.2<-merge(att.expanded,MUKEYS.map.1, by.x='Index', by.y='Ele_ID') ;
 
 ###### change the name of the LC column that will be used in the revised attributes
 
@@ -185,29 +185,29 @@ write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'LC','METEO'
 
 
 
-###################   Write the appropiate formated Soil" File for the MM-PIHM input format  #################################
-
-
-
-header.soil<-c( NumSoil , 'INFK' ,	'MAXSMC' ,	'MINSMC' ,	'DINF' ,	'ALPHA' ,	'BETA' ,	'MACHF' ,	'SATMACHK' ,	'QTZ');
-
-write.table(soil,file=paste0(inputfile.name, ".soil") , append=T , row.names=F , quote=F , sep= "\t") ;
-
-
-##     Need to merge the soil of PIHM V2.2 with the MM-PIHM before continuing with the attribute file
-
-
-
-
-###################   Write the appropiate formated "Geology" File for the MM-PIHM input format  #################################
-
-
-header.geology<-c( NumSoil , 'SATHK' ,	'SATDK' , 	'MAXSMC' , 	'MINSMC' ,	'ALPHA' ,	'BETA' , 	'MACVF' ,	'SATMACKH' ,	'DMAC' );
-
-
-write.table(geol,file=paste0(inputfile.name, ".geol") , row.names=F , quote=F , sep= "\t") ;
-
-
+# ###################   Write the appropiate formated Soil" File for the MM-PIHM input format  #################################
+# 
+# 
+# 
+# header.soil<-c( NumSoil , 'INFK' ,	'MAXSMC' ,	'MINSMC' ,	'DINF' ,	'ALPHA' ,	'BETA' ,	'MACHF' ,	'SATMACHK' ,	'QTZ');
+# 
+# write.table(soil,file=paste0(inputfile.name, ".soil") , append=T , row.names=F , quote=F , sep= "\t") ;
+# 
+# 
+# ##     Need to merge the soil of PIHM V2.2 with the MM-PIHM before continuing with the attribute file
+# 
+# 
+# 
+# 
+# ###################   Write the appropiate formated "Geology" File for the MM-PIHM input format  #################################
+# 
+# 
+# header.geology<-c( NumSoil , 'SATHK' ,	'SATDK' , 	'MAXSMC' , 	'MINSMC' ,	'ALPHA' ,	'BETA' , 	'MACVF' ,	'SATMACKH' ,	'DMAC' );
+# 
+# 
+# write.table(geol,file=paste0(inputfile.name, ".geol") , row.names=F , quote=F , sep= "\t") ;
+# 
+# 
 
 ###################   Write the appropiate formated "River" File for the MM-PIHM input format  #################################
 
