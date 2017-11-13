@@ -130,7 +130,7 @@ head(att)
 
 ####  The Hydroterre Soil.txt file has the information extracted from Hydroterre, that passes to PIHM-GIS to calculate soil properties and form the PIHM input .soil file
 
-HT_soil<-read.table(file = "../GSSURGO/HansYoust_Soil.txt", as.is=T, header=T) ;
+HT_soil<-read.table(file = "../GSSURGO/HansYoust_Soil.txt", as.is=T, header=T, skip=1) ;
 
 
 # ******************************************READ SOIL FILE  .soil***********************************************************
@@ -178,7 +178,7 @@ soil<-HT_soil ;
 
 
 # ********************************************READ THE GEOLOGY FILE  .geol*****************************************************************
-HT_Geology<-read.table(file = "../GSSURGO/HansYoust_Geology.txt", as.is=T, header=T) ;
+HT_Geology<-read.table(file = "../GSSURGO/HansYoust_Geology.txt", as.is=T, header=T, skip=1) ;
 
 
 # The geology file is very similar to the soil file. The geology file has 11 columns with attributes as follows:
