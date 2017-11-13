@@ -187,6 +187,7 @@ Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index
 
 
 
+
 # ###################   Write the appropiate formated Soil" File for the MM-PIHM input format  #################################
 # 
 # 
