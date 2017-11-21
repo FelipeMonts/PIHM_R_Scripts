@@ -93,6 +93,15 @@ NumEle
 NumNode
 
 
+######### Correct the Nodes that have incorrect height in the river segment before writing the file ################### 
+
+mesh.Nodes[mesh.Nodes$Index == 52,'Zmax']<-mesh.Nodes[mesh.Nodes$Index == 51,'Zmax']
+
+
+
+
+######## Write the mesh file ###########################################################################################
+
 NODES.1<-data.frame(c('NUMNODE'),NumNode )   ;
 write.table(NODES.1 , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=F, quote=F, sep ="\t") ;
 
@@ -103,6 +112,51 @@ write.table(mesh.Nodes , file=paste0(inputfile.name, ".MESH") , append=T , row.n
 
 
 ###################   Write the appropiate formated "Attributes" File for the MM-PIHM input format  #################################
+
+#### import the shape files from QGIS with the LC mode from each triangle ####
+
+########### Read infromation about the shape files ###########
+
+HansYoust.LC.info<-ogrInfo("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp");
+
+
+#### read the shape file that has been created in QGIS using the zonal statistics
+
+HansYoust.LC<-readOGR("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp")  ;
+
+
+str(HansYoust.LC) ;
+
+
+####  plot(HansYoust.LC);
+
+
+str(HansYoust.LC@data) ;
+
+
+#### Extract the LC index corresponding to the mode in each mesh triangle
+
+
+HansYoust.LC@data$Lc_mode<-as.factor(HansYoust.LC@data$Lc_mode) ;
+
+LC.indexs<-as.integer(levels(HansYoust.LC@data$Lc_mode))  ;
+
+str(LC.indexs)
+
+HansYoust.LC@data$LC.index<-HansYoust.LC@data$Lc_mode ;
+
+
+
+######  Merge the LC index with the rest of the attribute table
+
+######### Load the attribute file to change the LC codes from PIHM GIS to the mode from spatial statistics in QGIS
+
+att<-read.table(paste0(Project.Directory,"\\",DataModel.dir,"\\",Project,".att"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
+
+names(att) ;
+
+att.expanded.1<-merge(att,HansYoust.LC@data, by.x='Index' , by.y='Ele_ID') ;
+
 
 
 ############# Load the vegetation parameter table and the convertion parameters for PIHM - MM ################
@@ -126,32 +180,27 @@ Otherprmt.tbl<-read.table("./vegprmt.tbl", skip=NUMLC[1,2]+2, sep="", as.is=T, h
 
 NLCD_PIHM.lc<-read.table("./vegprmt.tbl", skip=NUMLC[1,2]+10, sep= ">" , as.is=T, header=F,comment.char="") ;
 
-PIHM.lc<-NLCD_PIHM.lc[,2];
+NLCD.lc<-NLCD_PIHM.lc[,2];
 
-NLCD.lc<-as.integer(sapply(strsplit(NLCD_PIHM.lc[,1], split = " "), "[" , 2)) ;
+PIHM.lc<-as.integer(sapply(strsplit(NLCD_PIHM.lc[,1], split = " "), "[" , 2)) ;
 
-NLCD_to_PIHM<-merge(data.frame(NLCD.lc, PIHM.lc), vegprmt.tbl, by.x= "PIHM.lc", by.y= "INDEX", all=T) ;
-
-
-NLCD_to_PIHM[!is.na(NLCD_to_PIHM$NLCD.lc),]
+PIHM_to_NLCD<-merge(data.frame(NLCD.lc, PIHM.lc), vegprmt.tbl, by.x= "NLCD.lc", by.y= "INDEX", all=T) ;
 
 
-######### Load the attribute file to change the LC codes from NLCD to the NEw PIHM
+PIHM_to_NLCD[!is.na(PIHM_to_NLCD$PIHM.lc), ]
 
-att<-read.table(paste0(Project.Directory,"\\",DataModel.dir,"\\",Project,".att"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
 
-names(att)
 
 ######### MErge with the NLCD_to_PIHM data to change the NLCD LC data to the MM-PIHM Land Cover
 
 
-att.expanded<-merge(att,NLCD_to_PIHM, by.x="LC", by.y="NLCD.lc", all.x=T ) ;
+att.expanded.2<-merge(att.expanded.1,PIHM_to_NLCD, by.x="LC_mode", by.y="PIHM.lc", all.x=T ) ;
 
 ###### change the name of the LC column that will be used in the revised attributes
 
 revised.names<-names(att)   ;
 
-revised.names[4]<- "PIHM.lc" ;
+revised.names[4]<- "LC" ;
 
 
 ######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
@@ -182,7 +231,7 @@ Revised.att[, 'MUKEYS.index']<-as.numeric(Revised.att[, 'MUKEYS.index']) ;
 
 Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index']<-dim(HansYoust_Soil)[1]  ;
 
- write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'LC','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
+ write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'NLCD.lc','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
 
 
@@ -221,6 +270,35 @@ write.table(data.frame(c('NUMRIV'),NumRiv ),file=paste0(inputfile.name, ".RIV"),
 
 ##   Add river elements
 names(riv.elements)<-c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'IC' ,	'BC' ,	'RES' )  ;
+
+
+############  Check river elementsfor differences in height and flow patterns #####################
+River.Nodes<-unique(c(riv.elements$FROM, riv.elements$TO))  ;
+
+River.Nodes.Elevation<-mesh.Nodes[mesh.Nodes$Index %in% River.Nodes, ] ;
+
+River.Nodes.Elevation.FROM<-merge(riv.elements,River.Nodes.Elevation, by.x='FROM' , by.y='Index', all.x=T) ;
+
+River.Nodes.Elevation.TO<-merge(riv.elements,River.Nodes.Elevation, by.x='TO' , by.y='Index', all.x=T) ;
+
+River.Nodes.Max_Elev_Dif<-River.Nodes.Elevation.FROM$Zmax - River.Nodes.Elevation.TO$Zmax ;
+           
+River.Nodes.Min_Elev_Dif<-River.Nodes.Elevation.FROM$Zmin - River.Nodes.Elevation.TO$Zmin ;
+
+River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0),]
+
+River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0),]
+
+
+
+
+River.Nodes.Elevation.FROM[River.Nodes.Elevation.FROM$FROM %in% c(50:55),]
+
+River.Nodes.Elevation.TO[River.Nodes.Elevation.TO$TO %in% c(50:55),]
+
+############### Write the riverl elemnts file .riv in the right PIHM format #######################
+
+
 
 write.table(riv.elements[,c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'BC' ,	'RES' )],file=paste0(inputfile.name, ".RIV"), append=T, row.names=F , quote=F, sep= "\t" ) ;
 
