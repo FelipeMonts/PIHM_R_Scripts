@@ -292,22 +292,41 @@ for (i in seq(2,dim(GW.Land)[2])) {
 } ;
 
 
+## find the riangle with the greTEST gw LEVEL
+
+GW.Max.Triangle<-which.max(unlist(t(GW.Land))) - (floor(which.max(unlist(t(GW.Land)))/dim(GW.Land)[2])*dim(GW.Land)[2])
+
+
+
+
+GW.Land[,GW.Max.Triangle]
+
 
 ####### attach the GW data to the shape file as attibutes
 
 
-GW.TimeSeries<-as.data.frame(t(WE38.GW.Land))
+GW.TimeSeries<-as.data.frame(t(GW.Land))
 
 row.names(GW.TimeSeries)<-seq(1,dim(GW.TimeSeries)[1]) ;
 
 
-WE38.GW.spdf<-SpatialPolygonsDataFrame(WE38.mesh,GW.TimeSeries, match.ID = T);
+GW.spdf<-SpatialPolygonsDataFrame(Output.Project.mesh,GW.TimeSeries, match.ID = T);
 
 ###### Name the columns of the attribute data frame according to the date range
 
-names(WE38.GW.spdf@data)<-c(as.character(DateTime[Rows.Time.range]),"polygonID")
+names(GW.spdf@data)<-c(as.character(GW$Time[Rows.Time.range]))
 
-DateTime[Rows.Time.range]
+GW$Time[Rows.Time.range]
+
+dim(GW.Land)
+
+
+Here I Stopped on 2017 11 21
+
+
+
+
+
 
 
 ###### Get the Polygons IDs and labeling coordinates
