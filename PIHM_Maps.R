@@ -52,21 +52,37 @@ HYDC.info$nrows
 
 HYDC<-readOGR(dsn="C:/Users/frm10/Downloads/HansYoust",layer="HYDC") ;
 
-# ### The Shape file polygons ID are from 0 to n, therefore would not match the elements ID in PIHM. 
-# ### To change that the polygon Ids can be changed to make them match
-# 
-# for ( i  in 1:WE38.mesh.info$nrows) {
-#      
-#      WE38.mesh@polygons[[i]]@ID<-as.character(i)
-# }
-# ###### Similarly for the river shape File
+summary(HYDC@ID)
+str(HYDC)
 
-#### Create the correct index for the lines objects ID from 1 to N
 
-for (i in 1:HYDC.info$nrows) {
+sapply(slot(HYDC,"lines"), function(x) slot(x,"ID"))  
+
+
+coordinates(HYDC)[[1]]
+
+Point.coords<-matrix(data=sapply(coordinates(HYDC),function(x) x[[1]]), nrow = HYDC.info$nrows, ncol = 4, byrow=T) ;
+
+Stacked.Point.coords<-rbind(Point.coords[,c(1,3)],Point.coords[,c(2,4)])   ;
   
-  HYDC@lines[[i]]@ID<-as.character(i)
-}
+  
+  
+Unique.Point.coords<-data.frame(unique(Stacked.Point.coords))  ;
+
+
+names(Unique.Point.coords)<-c("X" , "Y")
+
+Unique.Point.coords$UID<-seq(1:dim(Unique.Point.coords)[1]) ;
+
+
+Line.Point.1<-merge(Point.coords[,c(1,3)],Unique.Point.coords, by.x=c(1,2), by.y=c( "X" , "Y") , all.x=T) ;
+
+Line.Point.2<-merge(Point.coords[,c(2,4)],Unique.Point.coords, by.x=c(1,2), by.y=c( "X" , "Y") , all.x=T) ;
+
+
+Line.Point.3<-merge(Unique.Point.coords,Point.coords[,c(1,3)], by.y=c(1,2), by.x=c( "X" , "Y") , all.x=T) ;
+
+
 
 ##### Change the $ID in the SpatialLines dataframe to match the ID of the line elements
 
