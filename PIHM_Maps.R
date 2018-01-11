@@ -36,67 +36,99 @@ library(tidyr)  ;
 ########### Read infromation about the shape files ###########
 
 # HYDC.info<-ogrInfo("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\Manhantango\\HydroTerreFullManhantango\\HansYostDeepCreek\\Aug2920171550\\3DomainDecomposition\\MergeVectorLayer000.shp");
-
-
-HYDC.info<-ogrInfo("C:/Users/frm10/Downloads/HansYoust/HYDC.shp") ;
-
 ### The number of polygons in the shape file is WE38.mesh.info$nrows
-
-HYDC.info$nrows
-
-
 
 ##### Read the shape files form the shape files used in preparation of the mesh file #######
 
 # HYDC<-readOGR("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\Manhantango\\HydroTerreFullManhantango\\HansYostDeepCreek\\Aug2920171550\\3DomainDecomposition\\MergeVectorLayer000.shp" ); 
 
+
+
+
+
+
+
+# Read information about the shape file
+
+HYDC.info<-ogrInfo("C:/Users/frm10/Downloads/HansYoust/HYDC.shp") ;
+
+
+
+HYDC.info$nrows
+
+
+
+# Read  the shape file
+
 HYDC<-readOGR(dsn="C:/Users/frm10/Downloads/HansYoust",layer="HYDC") ;
 
-summary(HYDC@ID)
-str(HYDC)
 
+str(HYDC, max.level = 2)  ;
+
+
+# get the ID's of the line segments in the shape file read
 
 sapply(slot(HYDC,"lines"), function(x) slot(x,"ID"))  
 
 
+#get the coordinates of the first line segment of the shape file read
+
 coordinates(HYDC)[[1]]
 
-Point.coords<-matrix(data=sapply(coordinates(HYDC),function(x) x[[1]]), nrow = HYDC.info$nrows, ncol = 4, byrow=T) ;
+# get the coordinates of all the line segments of the shape file read in a list form
 
-Stacked.Point.coords<-rbind(Point.coords[,c(1,3)],Point.coords[,c(2,4)])   ;
-  
+
+lapply(coordinates(HYDC),function(x) x[[1]])
+
+# get the coordinates of all the line segments of the shape file read in a matrix form
+
+sapply(coordinates(HYDC),function(x) x[[1]])
+
+
+sapply(slot(HYDC,"lines"),function(x) slot(x,"ID"))
+
+
+
+
+
+
+
+Point.coords.matrix<-matrix(data=sapply(coordinates(HYDC),function(x) x[[1]]), nrow = HYDC.info$nrows, ncol = 4, byrow=T) ;
+
+Point.coords.df<-data.frame(Point.coords.matrix[,c(1,3)],Point.coords.matrix[,c(2,4)]);
+names(Point.coords.df)<-c('P1.X', 'P1.Y', 'P2.X', 'P2.Y')
+
+Point.coords.df$Line<-sapply(slot(HYDC,"lines"), function(x) slot(x,"ID")) ;
+
+
+
+
+
+Stacked.Point.coords<-rbind(Point.coords.matrix[,c(1,3)],Point.coords.matrix[,c(2,4)])   ;
+
+
+str(Stacked.Point.coords) ;
   
   
 Unique.Point.coords<-data.frame(unique(Stacked.Point.coords))  ;
 
+names(Unique.Point.coords)<-c("X" , "Y");
 
-names(Unique.Point.coords)<-c("X" , "Y")
-
-Unique.Point.coords$UID<-seq(1:dim(Unique.Point.coords)[1]) ;
-
-
-Line.Point.1<-merge(Point.coords[,c(1,3)],Unique.Point.coords, by.x=c(1,2), by.y=c( "X" , "Y") , all.x=T) ;
-
-Line.Point.2<-merge(Point.coords[,c(2,4)],Unique.Point.coords, by.x=c(1,2), by.y=c( "X" , "Y") , all.x=T) ;
+Unique.Point.coords$Point.ID<-seq(1:dim(Unique.Point.coords)[1]) ;
 
 
-Line.Point.3<-merge(Unique.Point.coords,Point.coords[,c(1,3)], by.y=c(1,2), by.x=c( "X" , "Y") , all.x=T) ;
+str(Unique.Point.coords)  ;
 
 
 
-##### Change the $ID in the SpatialLines dataframe to match the ID of the line elements
+A<-merge(Point.coords.df[,c("P1.X", "P1.Y" ,  "Line")], Unique.Point.coords, by.x=c('P1.X', 'P1.Y'), by.y=c("X" , "Y"), all.x=T)
 
-HYDC@data$ID <-as.integer(sapply(slot(HYDC,"lines"), function(x) slot(x,"ID"))) ;
-
-
+B<-merge(Point.coords.df[,c("P2.X", "P2.Y" ,  "Line")], Unique.Point.coords, by.x=c('P2.X', 'P2.Y'), by.y=c("X" , "Y"), all.x=T)
 
 
-####
 
+merge(A,B,by="Line")
 
-#### Get the ccordinates of each line to be transferred to the TRINAGLE mesh generator
-
-HYDCLines<-data.frame(matrix(data=sapply(coordinates(HYDC),function(x) x[[1]]),nrow=141, ncol=4, byrow=T)) ;
 
 
 
@@ -107,9 +139,16 @@ HYDC.nodes<-readOGR("C:/Users/frm10/Downloads/HansYoust/HYDC_nodes_Geometry.shp"
 HYDC.nodes@data
 
 From.points<-HYDCLines[,c(1,3)]   ;
-To.points<-HYDCLines[,c(2,2)]  ;
 
-merge(HYDC.nodes@data,From.points, by.x=c("xcoord"), by.y=c(1),all.x=T)
+To.points<-HYDCLines[,c(2,4)]  ;
+
+From<-merge(HYDC.nodes@data,From.points, by.x=c("xcoord","ycoord"), by.y=c(1,2), all.x=T, sort=F) ;
+
+head(From) ;
+
+To<-merge(HYDC.nodes@data,To.points, by.x=c("xcoord","ycoord"), by.y=c(1,2), all.x=T, sort=F) ;
+
+head(To) ;
 
 
 # .node files
