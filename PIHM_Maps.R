@@ -80,34 +80,38 @@ coordinates(HYDC)[[1]]
 
 lapply(coordinates(HYDC),function(x) x[[1]])
 
-# get the coordinates of all the line segments of the shape file read in a matrix form
+# get the coordinates of all the line segments of the shape file read as an  array 
 
 sapply(coordinates(HYDC),function(x) x[[1]])
 
 
-sapply(slot(HYDC,"lines"),function(x) slot(x,"ID"))
-
-
-
+# transform the array of line segments coordinates into a matrix format 
 
 
 
 
 Point.coords.matrix<-matrix(data=sapply(coordinates(HYDC),function(x) x[[1]]), nrow = HYDC.info$nrows, ncol = 4, byrow=T) ;
 
+
+# arrange the matrix of line segments coordinates into a coherent data rame with lines representd by two points consiting of a pari of x,y coordinates
+
 Point.coords.df<-data.frame(Point.coords.matrix[,c(1,3)],Point.coords.matrix[,c(2,4)]);
-names(Point.coords.df)<-c('P1.X', 'P1.Y', 'P2.X', 'P2.Y')
 
-Point.coords.df$Line<-sapply(slot(HYDC,"lines"), function(x) slot(x,"ID")) ;
+names(Point.coords.df)<-c('P1.X', 'P1.Y', 'P2.X', 'P2.Y') ;
 
+# addd a line ID to the data frame to be able to differentiate line components 
 
+#Point.coords.df$Line<-sapply(slot(HYDC,"lines"), function(x) slot(x,"ID")) ;
 
+Point.coords.df$Line<-as.character(seq(1:HYDC.info$nrows)) ;
 
+# stack the points of all the lines obtained in matrix from to remove repeated points ( there are many, all the lines that are contiguous share common points) and assign unique points a unique point ID
 
 Stacked.Point.coords<-rbind(Point.coords.matrix[,c(1,3)],Point.coords.matrix[,c(2,4)])   ;
 
 
 str(Stacked.Point.coords) ;
+
   
   
 Unique.Point.coords<-data.frame(unique(Stacked.Point.coords))  ;
@@ -119,15 +123,24 @@ Unique.Point.coords$Point.ID<-seq(1:dim(Unique.Point.coords)[1]) ;
 
 str(Unique.Point.coords)  ;
 
-
-
-A<-merge(Point.coords.df[,c("P1.X", "P1.Y" ,  "Line")], Unique.Point.coords, by.x=c('P1.X', 'P1.Y'), by.y=c("X" , "Y"), all.x=T)
-
-B<-merge(Point.coords.df[,c("P2.X", "P2.Y" ,  "Line")], Unique.Point.coords, by.x=c('P2.X', 'P2.Y'), by.y=c("X" , "Y"), all.x=T)
+#Use the new point and lines unique identity to create a line point data frame that has, each point unique id forming the lines. This is acomplished by merging the unique points data frame with each set of from and to points in the lines data frame
 
 
 
-merge(A,B,by="Line")
+From.points<-merge(Point.coords.df[,c("P1.X", "P1.Y" ,  "Line")], Unique.Point.coords, by.x=c('P1.X', 'P1.Y'), by.y=c("X" , "Y"), all.x=T);
+
+To.points<-merge(Point.coords.df[,c("P2.X", "P2.Y" ,  "Line")], Unique.Point.coords, by.x=c('P2.X', 'P2.Y'), by.y=c("X" , "Y"), all.x=T);
+
+
+
+Line.Point<-merge(From.points,To.points,by="Line");
+
+
+
+
+
+
+
 
 
 
