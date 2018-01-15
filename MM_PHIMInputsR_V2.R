@@ -17,7 +17,7 @@
 #  Tell the program where the package libraries are  #####################
 
 
-.libPaths("C:/Felipe/R_Library/library")
+.libPaths("C:/Felipe/Sotware&Coding/R_Library/library")  ;
 
 
 
@@ -39,7 +39,9 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')    ;
 
 ####### Store the name of the project to read and write files more easily #############
 
-Project<-"MergeVectorLayer000_q30_a200000"   ;
+#Project<-"MergeVectorLayer000_q30_a200000"   ;
+
+Project<-"DataModel" ;
 
 
 
@@ -95,7 +97,7 @@ NumNode
 
 ######### Correct the Nodes that have incorrect height in the river segment before writing the file ################### 
 
-mesh.Nodes[mesh.Nodes$Index == 52,'Zmax']<-mesh.Nodes[mesh.Nodes$Index == 51,'Zmax']
+# mesh.Nodes[mesh.Nodes$Index == 52,'Zmax']<-mesh.Nodes[mesh.Nodes$Index == 51,'Zmax']
 
 
 
