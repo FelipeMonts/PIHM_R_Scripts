@@ -119,33 +119,42 @@ write.table(mesh.Nodes , file=paste0(inputfile.name, ".MESH") , append=T , row.n
 
 ########### Read infromation about the shape files ###########
 
-HansYoust.LC.info<-ogrInfo("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp");
+# HansYoust.LC.info<-ogrInfo("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp");
+
+Project.LC.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/DomainDecomposition2.shp");
 
 
 #### read the shape file that has been created in QGIS using the zonal statistics
 
-HansYoust.LC<-readOGR("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp")  ;
+# HansYoust.LC<-readOGR("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp")  ;
 
+Project.LC<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/DomainDecomposition2.shp");
 
-str(HansYoust.LC) ;
+str(Project.LC, max.level = 2) ;
 
-
+plot(Project.LC) ;
 ####  plot(HansYoust.LC);
 
 
-str(HansYoust.LC@data) ;
+str(Project.LC@data) ;
 
 
 #### Extract the LC index corresponding to the mode in each mesh triangle
 
 
-HansYoust.LC@data$Lc_mode<-as.factor(HansYoust.LC@data$Lc_mode) ;
+# HansYoust.LC@data$Lc_mode<-as.factor(HansYoust.LC@data$Lc_mode) ;
 
-LC.indexs<-as.integer(levels(HansYoust.LC@data$Lc_mode))  ;
+Project.LC@data$LC_majorit<-as.factor(Project.LC@data$LC_majorit) ;
+
+# LC.indexs<-as.integer(levels(HansYoust.LC@data$Lc_mode))  ;
+
+LC.indexs<-as.integer(levels(Project.LC@data$LC_majorit))  ;
 
 str(LC.indexs)
 
-HansYoust.LC@data$LC.index<-HansYoust.LC@data$Lc_mode ;
+# HansYoust.LC@data$LC.index<-HansYoust.LC@data$Lc_mode ;
+
+Project.LC@data$LC.index<-Project.LC@data$LC_majorit
 
 
 
@@ -157,8 +166,9 @@ att<-read.table(paste0(Project.Directory,"\\",DataModel.dir,"\\",Project,".att")
 
 names(att) ;
 
-att.expanded.1<-merge(att,HansYoust.LC@data, by.x='Index' , by.y='Ele_ID') ;
+# att.expanded.1<-merge(att,HansYoust.LC@data, by.x='Index' , by.y='Ele_ID') ;
 
+att.expanded.1<-merge(att,Project.LC@data, by.x='Index' , by.y='Ele_ID') ;
 
 
 ############# Load the vegetation parameter table and the convertion parameters for PIHM - MM ################
@@ -196,7 +206,7 @@ PIHM_to_NLCD[!is.na(PIHM_to_NLCD$PIHM.lc), ]
 ######### MErge with the NLCD_to_PIHM data to change the NLCD LC data to the MM-PIHM Land Cover
 
 
-att.expanded.2<-merge(att.expanded.1,PIHM_to_NLCD, by.x="LC_mode", by.y="PIHM.lc", all.x=T ) ;
+att.expanded.2<-merge(att.expanded.1,PIHM_to_NLCD, by.x="LC_majorit", by.y="PIHM.lc", all.x=T ) ;
 
 ###### change the name of the LC column that will be used in the revised attributes
 
@@ -207,12 +217,12 @@ revised.names[4]<- "LC" ;
 
 ######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
 
-att.expanded.2<-merge(att.expanded,MUKEYS.map.1, by.x='Index', by.y='Ele_ID') ;
+att.expanded.3<-merge(att.expanded.2,MUKEYS.map.1, by.x='Index', by.y='Ele_ID') ;
 
 ###### change the name of the LC column that will be used in the revised attributes
 
 
-Revised.att<-att.expanded.2[order(att.expanded.2$Index),] ;
+Revised.att<-att.expanded.3[order(att.expanded.3$Index),] ;
 
 
 
@@ -231,7 +241,9 @@ Revised.att$METEO<-1  ;
 
 Revised.att[, 'MUKEYS.index']<-as.numeric(Revised.att[, 'MUKEYS.index']) ;
 
-Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index']<-dim(HansYoust_Soil)[1]  ;
+# Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index']<-dim(HansYoust_Soil)[1]  ;
+
+Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index']<-dim(Project_Soil)[1]  ;
 
  write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'NLCD.lc','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
