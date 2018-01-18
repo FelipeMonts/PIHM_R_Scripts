@@ -30,6 +30,30 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')    ;
 #setwd("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\WE-38\\WE38_Files_PIHM_Cycles20170208\\Feb2720171451")    ;
 
 
+###  load the libraries that are neded -- need to filter some of these  ---  
+
+# load libraries
+library(Hmisc) ;
+library(plyr) ;
+library(dplyr)  ;
+library(soilDB) ;
+library(raster) ;
+library(aqp) ;
+library(sp) ;
+library(rgdal) ;
+library(raster) ;
+library(rgeos) ; 
+library(lattice) ;
+library(MASS) ;
+library(RColorBrewer) ;
+library(ggplot2)  ;
+#library(tmap) ;
+library(tidyr)  ;
+library(devtools) ;
+library(stats)
+
+
+
 ##     Read the objects from the 'PIHMInputsR.RData' file in the current working space and put them in the global environment
 
 ## Load the objects into the global environment
@@ -249,32 +273,6 @@ Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index
 
 
 
-
-
-# ###################   Write the appropiate formated Soil" File for the MM-PIHM input format  #################################
-# 
-# 
-# 
-# header.soil<-c( NumSoil , 'INFK' ,	'MAXSMC' ,	'MINSMC' ,	'DINF' ,	'ALPHA' ,	'BETA' ,	'MACHF' ,	'SATMACHK' ,	'QTZ');
-# 
-# write.table(soil,file=paste0(inputfile.name, ".soil") , append=T , row.names=F , quote=F , sep= "\t") ;
-# 
-# 
-# ##     Need to merge the soil of PIHM V2.2 with the MM-PIHM before continuing with the attribute file
-# 
-# 
-# 
-# 
-# ###################   Write the appropiate formated "Geology" File for the MM-PIHM input format  #################################
-# 
-# 
-# header.geology<-c( NumSoil , 'SATHK' ,	'SATDK' , 	'MAXSMC' , 	'MINSMC' ,	'ALPHA' ,	'BETA' , 	'MACVF' ,	'SATMACKH' ,	'DMAC' );
-# 
-# 
-# write.table(geol,file=paste0(inputfile.name, ".geol") , row.names=F , quote=F , sep= "\t") ;
-# 
-# 
-
 ###################   Write the appropiate formated "River" File for the MM-PIHM input format  #################################
 
 ### Write the First line of the .Riv File
@@ -287,21 +285,55 @@ names(riv.elements)<-c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 
 
 
 ############  Check river elementsfor differences in height and flow patterns #####################
+
+#select the nodes that are both in the mesh and in the river segments
+#select firts the unique nodes in the river
+
 River.Nodes<-unique(c(riv.elements$FROM, riv.elements$TO))  ;
+
+head(River.Nodes)
+str(River.Nodes)
+
+# from the mesh file select the nodes that belong to the river
 
 River.Nodes.Elevation<-mesh.Nodes[mesh.Nodes$Index %in% River.Nodes, ] ;
 
-River.Nodes.Elevation.FROM<-merge(riv.elements,River.Nodes.Elevation, by.x='FROM' , by.y='Index', all.x=T) ;
+head(River.Nodes.Elevation)
+str(River.Nodes.Elevation)
 
-River.Nodes.Elevation.TO<-merge(riv.elements,River.Nodes.Elevation, by.x='TO' , by.y='Index', all.x=T) ;
+# connect the River nodes with the corresponding information in the mesh file
+
+River.Nodes.Elevation.FROM<-merge(riv.elements,River.Nodes.Elevation, by.x='FROM' , by.y='Index', all.x=T, sort=F) ;
+
+head(River.Nodes.Elevation.FROM)
+str(River.Nodes.Elevation.FROM)
+
+River.Nodes.Elevation.TO<-merge(riv.elements,River.Nodes.Elevation, by.x='TO' , by.y='Index', all.x=T,sort=F) ;
+
+head(River.Nodes.Elevation.TO)
+str(River.Nodes.Elevation.TO)
+
+#calculate the difference in elevation between the FROM and TO river nodes
 
 River.Nodes.Max_Elev_Dif<-River.Nodes.Elevation.FROM$Zmax - River.Nodes.Elevation.TO$Zmax ;
+
+head(River.Nodes.Max_Elev_Dif)
+str(River.Nodes.Max_Elev_Dif)
+
+
            
 River.Nodes.Min_Elev_Dif<-River.Nodes.Elevation.FROM$Zmin - River.Nodes.Elevation.TO$Zmin ;
 
-River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0),]
+head(River.Nodes.Min_Elev_Dif)
+str(River.Nodes.Min_Elev_Dif)
 
-River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0),]
+
+plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Elevation.FROM[,c("Zmin")]) ;
+points(River.Nodes.Elevation.TO[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="RED" ) ;
+
+River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
+
+River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
 
 
 
@@ -320,7 +352,7 @@ write.table(riv.elements[,c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGH
 ##    Add river Shape
 
 
-## write the word Shape as title before writting the tabel with the data
+## write the word Shape as title before writting the table with the data
 
 
 write.table(data.frame(c('SHAPE'),NumShape),file=paste0(inputfile.name, ".RIV") , row.names=F , col.names=F, quote=F, append=T , sep= "\t") ;
@@ -376,11 +408,15 @@ write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".RIV"), row
 
 
 
+###########################################################################################################################
+
+          # Writing code to make sure all the river segments have positive slope
+
+
+###########################################################################################################################
 
 
 
-
-
-
-
+head(River.Nodes.Elevation.FROM)
+str(River.Nodes.Elevation.FROM)
 
