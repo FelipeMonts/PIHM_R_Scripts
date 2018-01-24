@@ -313,7 +313,7 @@ River.Nodes.Elevation.TO<-merge(riv.elements,River.Nodes.Elevation, by.x='TO' , 
 head(River.Nodes.Elevation.TO)
 str(River.Nodes.Elevation.TO)
 
-#calculate the difference in elevation between the FROM and TO river nodes
+#calculate the difference in elevation between the FROM and TO river nodes. Zmax is the surface elevation, Zmin is the bed rock elevation
 
 River.Nodes.Max_Elev_Dif<-River.Nodes.Elevation.FROM$Zmax - River.Nodes.Elevation.TO$Zmax ;
 
@@ -321,26 +321,61 @@ head(River.Nodes.Max_Elev_Dif)
 str(River.Nodes.Max_Elev_Dif)
 
 
-           
-River.Nodes.Min_Elev_Dif<-River.Nodes.Elevation.FROM$Zmin - River.Nodes.Elevation.TO$Zmin ;
 
-head(River.Nodes.Min_Elev_Dif)
-str(River.Nodes.Min_Elev_Dif)
+# Explore the River nodes and segments
 
+plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Min_Elev_Dif, col="BLUE") ;
+points(River.Nodes.Elevation.TO[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="RED" ) ;
 
 plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Elevation.FROM[,c("Zmin")]) ;
-points(River.Nodes.Elevation.TO[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="RED" ) ;
+
 
 River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
 
 River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
 
 
+#####
+
+River.Nodes.Elevation.FROM$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif ;
 
 
-River.Nodes.Elevation.FROM[River.Nodes.Elevation.FROM$FROM %in% c(50:55),]
+plot(River.Nodes.Elevation.FROM$INDEX,River.Nodes.Elevation.FROM$Max_Elev_Dif)
 
-River.Nodes.Elevation.TO[River.Nodes.Elevation.TO$TO %in% c(50:55),]
+
+head(River.Nodes.Elevation.FROM)
+str(River.Nodes.Elevation.FROM)
+
+head(riv.elements)
+
+#### Correcting in order for the river segements to have non negative slope, the best option would be to get the river segements to have 0 slope. That can be achived by changing the Elevation (Zmax) of the nodes in these segments. Two choices are available, increase Zmax of the "FROM" segment or decrease the Zmax on the "TO" segments. There is one advantage of changing the "TO" segments; the last segment of the river, the outlet, has always a large slope, therefore any change in Zmax trought the rive can be adjusted with the last segment.  ######
+
+#### It will take many iterations to be able to get the river segments Zmax right. As one changes, others would become lower of higher than the neighbors that were not modified. The best way is to change and balance the complete set of river segments nodes; not to change individual nodes######   
+
+
+#### Let's Try#####
+
+
+
+
+
+
+River.Nodes.Elevation.TO$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif  ;
+
+head(River.Nodes.Elevation.TO)
+
+
+
+
+FROM.TO.River.Nodes<-merge(River.Nodes.Elevation.FROM[,c('INDEX', 'FROM' , 'TO' , 'X' , 'Y' , 'Zmax')],River.Nodes.Elevation.TO[,c('INDEX', 'FROM' , 'TO' , 'X' , 'Y' , 'Zmax')], by='INDEX',sort=F) ;
+
+
+FROM.TO.River.Nodes[order(FROM.TO.River.Nodes$INDEX),]
+  
+  
+head(FROM.TO.River.Nodesb)
+str(FROM.TO.River.Nodes)
+
 
 ############### Write the riverl elemnts file .riv in the right PIHM format #######################
 
