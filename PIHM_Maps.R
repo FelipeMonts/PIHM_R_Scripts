@@ -7,7 +7,7 @@
 ########### Tell the program where the package libraries are  #####################
 
 
-.libPaths("C:/Felipe/Sotware&Coding/R_Library/library")  ;
+.libPaths("C:/Felipe/SotwareANDCoding/R_Library/library")  ;
 
 
 ########### Call the library packages needed for the program to work #############
