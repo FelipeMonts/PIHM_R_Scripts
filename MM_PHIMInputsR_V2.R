@@ -17,7 +17,7 @@
 #  Tell the program where the package libraries are  #####################
 
 
-.libPaths("C:/Felipe/Sotware&Coding/R_Library/library")  ;
+.libPaths("C:/Felipe/SotwareANDCoding/R_Library/library")  ;
 
 
 
@@ -324,7 +324,7 @@ str(River.Nodes.Max_Elev_Dif)
 
 # Explore the River nodes and segments
 
-plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Min_Elev_Dif, col="BLUE") ;
+plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="BLUE") ;
 points(River.Nodes.Elevation.TO[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="RED" ) ;
 
 plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Elevation.FROM[,c("Zmin")]) ;
@@ -335,7 +335,6 @@ River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
 River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
 
 
-#####
 
 River.Nodes.Elevation.FROM$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif ;
 
@@ -347,6 +346,10 @@ head(River.Nodes.Elevation.FROM)
 str(River.Nodes.Elevation.FROM)
 
 head(riv.elements)
+
+
+
+
 
 #### Correcting in order for the river segements to have non negative slope, the best option would be to get the river segements to have 0 slope. That can be achived by changing the Elevation (Zmax) of the nodes in these segments. Two choices are available, increase Zmax of the "FROM" segment or decrease the Zmax on the "TO" segments. There is one advantage of changing the "TO" segments; the last segment of the river, the outlet, has always a large slope, therefore any change in Zmax trought the rive can be adjusted with the last segment.  ######
 
@@ -373,7 +376,7 @@ FROM.TO.River.Nodes<-merge(River.Nodes.Elevation.FROM[,c('INDEX', 'FROM' , 'TO' 
 FROM.TO.River.Nodes[order(FROM.TO.River.Nodes$INDEX),]
   
   
-head(FROM.TO.River.Nodesb)
+head(FROM.TO.River.Nodes)
 str(FROM.TO.River.Nodes)
 
 
