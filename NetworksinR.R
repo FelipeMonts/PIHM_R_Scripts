@@ -10,69 +10,6 @@
 ############################################################################################################################
 
 
-#  Tell the program where the package libraries are  #####################
-
-
-.libPaths("C:/Felipe/SotwareANDCoding/R_Library/library")  ;
-
-#  Set Working directory
-
-
-library(devtools)  ;
-install_github("DougLuke/UserNetR")  ;
-
-install.packages("statnet")  ;
-
-
-library(statnet)
-library(UserNetR)
-data(Moreno)
-
-gender <- Moreno %v% "gender"
-
-plot(Moreno, vertex.col = gender + 2, vertex.cex = 1.2)
-
-network.size(Moreno)
-
-summary(Moreno,print.adj=FALSE)
-
-
-netmat1 <- rbind(c(0,1,1,0,0),
-                 c(0,0,1,1,0),
-                 c(0,1,0,0,0),
-                 c(0,0,0,0,0),
-                 c(0,0,1,0,0))
-rownames(netmat1) <- c("A","B","C","D","E")
-colnames(netmat1) <- c("A","B","C","D","E")
-net1 <- network(netmat1,matrix.type="adjacency")
-class(net1)
-
-summary(net1)
-
-gplot(net1, vertex.col =2, displaylabels = TRUE)
-
-netmat2 <- rbind(c(1,2),
-                 c(1,3),
-                 c(2,3),
-                 c(2,4),
-                 c(3,2),
-                 c(5,3))
-net2 <- network(netmat2,matrix.type="edgelist")
-network.vertex.names(net2) <- c("A","B","C","D","E")
-
-summary(net2)
-
-
-set.vertex.attribute(net1, "gender", c("F", "F", "M",
-                                       "F", "M"))
-net1 %v% "alldeg" 
-  
-detach(package:statnet) ;
-
-library(igraph)  ;
-
-
-
 
 ############################################################################################################################
 
@@ -88,122 +25,21 @@ library(igraph)  ;
 
 ############################################################################################################################
 
+#  Tell the program where the package libraries are  #####################
+
+
+.libPaths("C:/Felipe/SotwareANDCoding/R_Library/library")  ;
+
+#  Set Working directory
+
+
+library(devtools)  ;
 
 
 install.packages("sand") ;
 library(sand)
-install_sand_packages() ;
+#install_sand_packages() ;
 
-g <- graph.formula(1-2, 1-3, 2-3, 2-4, 3-5, 4-5, 4-6, 4-7, 5-6, 6-7) ;
-
-V(g)
-
-E(g)
-
-str(g)
-
-
-dg <- graph.formula(1-+2, 1-+3, 2++3)
-plot(dg)
-
-
-dg <- graph.formula(Sam-+Mary, Sam-+Tom, Mary++Tom)
-str(dg)
-
-
-V(dg)$name <- c("Sam", "Mary", "Tom")
-
-V(dg)$gender <- c("M","F","M")
-
-V(dg)$color <- "red"
-
-g$name <- "Toy Graph"
-
-
-
-g.lazega <- graph.data.frame(elist.lazega, 
-                             directed="FALSE", 
-                             vertices=v.attr.lazega);
-
-
-g.lazega$name <- "Lazega Lawyers"  ;
-
-
-plot(g.lazega)
-
-is.simple(g.lazega) 
-
-mg <- g + edge(2,3) ;
-
-str(mg)
-
-is.simple(mg)
-
-g <- make_ring(10)
-g$layout <- layout_in_circle
-plot(g)
-tkplot(g)
-rglplot(g)
-
-
-g <- barabasi.game(100)
-plot(g, layout=layout_with_fr, vertex.size=4,
-     vertex.label.dist=0.5, vertex.color="red", edge.arrow.size=0.5)
-
-# CHUNK 8
-library(igraphdata)
-data(karate)
-# Reproducible layout
-set.seed(42)
-l <- layout.kamada.kawai(karate)
-# Plot undecorated first.
-par(mfrow=c(1,1))
-plot(karate, layout=l, vertex.label=NA)
-# Now decorate, starting with labels.
-V(karate)$label <- sub("Actor ", "", V(karate)$name)
-# Two leaders get shapes different from club members.
-V(karate)$shape <- "circle"
-V(karate)[c("Mr Hi", "John A")]$shape <- "rectangle"
-# Differentiate two factions by color.
-V(karate)[Faction == 1]$color <- "red"
-V(karate)[Faction == 2]$color <- "dodgerblue"
-# Vertex area proportional to vertex strength
-# (i.e., total weight of incident edges).
-V(karate)$size <- 4*sqrt(graph.strength(karate))
-V(karate)$size2 <- V(karate)$size * .5
-# Weight edges by number of common activities
-E(karate)$width <- E(karate)$weight
-# Color edges by within/between faction.
-F1 <- V(karate)[Faction==1]
-F2 <- V(karate)[Faction==2]
-E(karate)[ F1 %--% F1 ]$color <- "pink"
-E(karate)[ F2 %--% F2 ]$color <- "lightblue"
-E(karate)[ F1 %--% F2 ]$color <- "yellow"
-# Offset vertex labels for smaller points (default=0).
-V(karate)$label.dist <- 
-  ifelse(V(karate)$size >= 10, 0, 0.75)
-# Plot decorated graph, using same layout.
-plot(karate, layout=l)
-
-
-# CHUNK 9
-
-data(lazega)
-# Office location indicated by color.
-colbar <- c("red", "dodgerblue", "goldenrod")
-v.colors <- colbar[V(lazega)$Office]
-# Type of practice indicated by vertex shape.
-v.shapes <- c("circle", "square")[V(lazega)$Practice]
-# Vertex size proportional to years with firm.
-v.size <- 3.5*sqrt(V(lazega)$Years)
-set.seed(42)
-l <- layout.fruchterman.reingold(lazega)
-plot(lazega, layout=l, vertex.color=v.colors,
-     vertex.shape=v.shapes, vertex.size=v.size)
-
-
-
-#####   trying with the river network  ####################
 
 # From MM_PIHMInputsR.V2.R
 
