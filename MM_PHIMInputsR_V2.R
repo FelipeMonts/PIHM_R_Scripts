@@ -353,10 +353,23 @@ head(riv.elements)
 
 #### Correcting in order for the river segements to have non negative slope, the best option would be to get the river segements to have 0 slope. That can be achived by changing the Elevation (Zmax) of the nodes in these segments. Two choices are available, increase Zmax of the "FROM" segment or decrease the Zmax on the "TO" segments. There is one advantage of changing the "TO" segments; the last segment of the river, the outlet, has always a large slope, therefore any change in Zmax trought the rive can be adjusted with the last segment.  ######
 
-#### It will take many iterations to be able to get the river segments Zmax right. As one changes, others would become lower of higher than the neighbors that were not modified. The best way is to change and balance the complete set of river segments nodes; not to change individual nodes######   
+#### It will take many iterations to be able to get the river segments Zmax right. As one changes, others would become lower of higher than the neighbors that were not modified. The best way is to change and balance the complete set of river segments nodes; not to change individual nodes###### 
+
+#### This was accomplished using the Grpah and Networks analysis packages in R. The code NetworksinR.R was developed for that
+# The results were completed manually in excell and are read into R using the package XLConnect
 
 
-#### Let's Try#####
+library(XLConnect);
+
+
+Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
+
+head(Correct.Nodes)
+
+plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
+
+
+River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
 
 
 
