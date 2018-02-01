@@ -57,14 +57,6 @@ plot(g.River, layout=layout_nicely,vertex.size= 1, edge.arrow.size=0.1, vertex.l
 
 tkplot(g.River, canvas.width=1800, canvas.height=900, layout=layout_nicely,vertex.size= 1, edge.arrow.size=0.1, vertex.label=NA)
 
-plot(g.River,layout=as.matrix.data.frame(River.Nodes.Elevation[,c('Zmax','Zmax')]), vertex.size= 2, edge.arrow.size=0.1, vertex.label=NA)
-
-tkplot(g.River,canvas.width=1800, canvas.height=900,layout=as.matrix.data.frame(River.Nodes.Elevation[,c('Zmax','Zmax')]), vertex.size= 2, edge.arrow.size=0.1, vertex.label=NA)
-
-
-
-
-
 vcount(g.River) 
 
 ecount(g.River)
@@ -72,10 +64,6 @@ ecount(g.River)
 str(g.River)
 V(g.River)
 E(g.River)
-
-tkplot(g.River)
-
-
 
 
 ##### Add the river nodes from the unrefined river mesh#########################
