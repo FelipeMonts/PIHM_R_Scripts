@@ -25,7 +25,7 @@
 
 Windows.Directory<-gsub("\\\\", "/", readClipboard())
 #  C:\Felipe\PIHM-CYCLES\PIHM\PIHM_Felipe\CNS\Manhantango\HydroTerreFullManhantango\HansYostDeepCreek\Aug2920171550
-
+# C:\Aun Trabajo en Proceso\HansYostDeepCreek\Aug2920171550
 
 
 Project.Directory<-Windows.Directory

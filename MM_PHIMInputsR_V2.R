@@ -109,11 +109,14 @@ write.table(MESH.2[1,], file=paste0(inputfile.name, ".MESH"), row.names=F , col.
 write.table(mesh.Elements, file=paste0(inputfile.name, ".MESH"), row.names=F , col.names=F, quote=F, sep ="\t", append = T) ;
 
 
+head(mesh.Elements)
+
 
 ##       Second Create the node elements part 
 ### write the first lines of the node elements
 
 head(mesh.Nodes)
+str(mesh.Nodes)
 
 NumEle
 NumNode
@@ -121,10 +124,34 @@ NumNode
 
 ######### Correct the Nodes that have incorrect height in the river segment before writing the file ################### 
 
-# mesh.Nodes[mesh.Nodes$Index == 52,'Zmax']<-mesh.Nodes[mesh.Nodes$Index == 51,'Zmax']
+library(XLConnect);
+
+
+Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
+
+head(Correct.Nodes)
+str(Correct.Nodes)
+
+plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
+
+
+River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
 
 
 
+
+New.mesh.Nodes<-merge(mesh.Nodes,River.Nodes.Elevation.Corrected, by=c('X', 'Y'),all.x=T, sort=F)  ;
+
+str(New.mesh.Nodes)
+
+head(New.mesh.Nodes)
+
+New.mesh.Nodes[!is.na(New.mesh.Nodes$Zmax.Correct),c('Zmax.x')]<-New.mesh.Nodes[!is.na(New.mesh.Nodes$Zmax.Correct),c('Zmax.Correct')]
+
+Rev.mesh.Nodes<-New.mesh.Nodes[order(New.mesh.Nodes$Index.x),c('Index.x' , 'X' , 'Y', 'Zmin.x' , 'Zmax.x')] ;
+
+#New.mesh.Nodes[401:600,]
+head(Rev.mesh.Nodes)
 
 ######## Write the mesh file ###########################################################################################
 
@@ -134,7 +161,10 @@ write.table(NODES.1 , file=paste0(inputfile.name, ".MESH") , append=T , row.name
 
 header.mesh.Nodes<-c('INDEX' , 'X' , 'Y' , 'ZMIN' , 'ZMAX');
 
-write.table(mesh.Nodes , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
+#write.table(New.mesh.Nodes , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
+
+
+write.table(Rev.mesh.Nodes[,c('Index.x' , 'X' , 'Y', 'Zmin.x' , 'Zmax.x')] , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
 
 
 ###################   Write the appropiate formated "Attributes" File for the MM-PIHM input format  #################################
@@ -283,39 +313,83 @@ write.table(data.frame(c('NUMRIV'),NumRiv ),file=paste0(inputfile.name, ".RIV"),
 ##   Add river elements
 names(riv.elements)<-c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'IC' ,	'BC' ,	'RES' )  ;
 
+###########################################################################################################################
 
-############  Check river elementsfor differences in height and flow patterns #####################
+# Writing code to make sure all the river segments have positive slope
+
+
+###########################################################################################################################
+
+
+
+
+############  Check river elements for differences in height and flow patterns #####################
 
 #select the nodes that are both in the mesh and in the river segments
-#select firts the unique nodes in the river
+#select first the unique nodes in the river
 
-River.Nodes<-unique(c(riv.elements$FROM, riv.elements$TO))  ;
+River.Nodes<-unique(c(riv.elements$FromNode, riv.elements$ToNode))  ;
 
 head(River.Nodes)
 str(River.Nodes)
 
 # from the mesh file select the nodes that belong to the river
 
+# New.River.Nodes.Elevation<-River.Nodes.Elevation.Corrected[River.Nodes.Elevation.Corrected$Index %in% River.Nodes, ]
 River.Nodes.Elevation<-mesh.Nodes[mesh.Nodes$Index %in% River.Nodes, ] ;
+
+
+
+# head(New.River.Nodes.Elevation)
+# str(New.River.Nodes.Elevation)
 
 head(River.Nodes.Elevation)
 str(River.Nodes.Elevation)
 
 # connect the River nodes with the corresponding information in the mesh file
 
+# New.River.Nodes.Elevation.FROM<-merge(riv.elements,New.River.Nodes.Elevation, by.x='FromNode' , by.y='Index', all.x=T, sort=F) ;
 River.Nodes.Elevation.FROM<-merge(riv.elements,River.Nodes.Elevation, by.x='FROM' , by.y='Index', all.x=T, sort=F) ;
+
+
+# head(New.River.Nodes.Elevation.FROM,50)
+# str(New.River.Nodes.Elevation.FROM)
+
 
 head(River.Nodes.Elevation.FROM)
 str(River.Nodes.Elevation.FROM)
 
+
+# New.River.Nodes.Elevation.TO<-merge(riv.elements,New.River.Nodes.Elevation, by.x='ToNode' , by.y='Index', all.x=T,sort=F) ;
+
 River.Nodes.Elevation.TO<-merge(riv.elements,River.Nodes.Elevation, by.x='TO' , by.y='Index', all.x=T,sort=F) ;
+
+
+# head(New.River.Nodes.Elevation.TO,50)
+# str(New.River.Nodes.Elevation.TO)
+
+
+
 
 head(River.Nodes.Elevation.TO)
 str(River.Nodes.Elevation.TO)
 
 #calculate the difference in elevation between the FROM and TO river nodes. Zmax is the surface elevation, Zmin is the bed rock elevation
 
+# New.River.Nodes.Elevation.FROM_TO<-merge(New.River.Nodes.Elevation.FROM,New.River.Nodes.Elevation.TO,by='Index', sort=T) ;
+
+#head(New.River.Nodes.Elevation.FROM_TO)
+
+
+#New.River.Nodes.Elevation.FROM_TO$Max_Elev_Dif<-New.River.Nodes.Elevation.FROM_TO$Zmax.Correct.x - New.River.Nodes.Elevation.FROM_TO$Zmax.Correct.y
+
+#head(New.River.Nodes.Elevation.FROM_TO,50)
+
 River.Nodes.Max_Elev_Dif<-River.Nodes.Elevation.FROM$Zmax - River.Nodes.Elevation.TO$Zmax ;
+
+# head(New.River.Nodes.Max_Elev_Dif,100)
+# str(New.River.Nodes.Max_Elev_Dif)
+
 
 head(River.Nodes.Max_Elev_Dif)
 str(River.Nodes.Max_Elev_Dif)
@@ -324,15 +398,30 @@ str(River.Nodes.Max_Elev_Dif)
 
 # Explore the River nodes and segments
 
+# plot(New.River.Nodes.Elevation.FROM[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="BLUE", ylim=c(-10,10)) ;
+# points(New.River.Nodes.Elevation.TO[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="RED" ) ;
+
+
 plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="BLUE") ;
 points(River.Nodes.Elevation.TO[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="RED" ) ;
 
-plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Elevation.FROM[,c("Zmin")]) ;
+
+# New.River.Nodes.Elevation.FROM[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
+# 
+# New.River.Nodes.Elevation.TO[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
+# 
 
 
 River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
 
 River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
+
+
+# New.River.Nodes.Elevation.FROM$Max_Elev_Dif<-New.River.Nodes.Max_Elev_Dif ;
+# 
+# 
+# plot(New.River.Nodes.Elevation.FROM$INDEX,New.River.Nodes.Elevation.FROM$Max_Elev_Dif)
+# 
 
 
 
@@ -349,51 +438,7 @@ head(riv.elements)
 
 
 
-
-
-#### Correcting in order for the river segements to have non negative slope, the best option would be to get the river segements to have 0 slope. That can be achived by changing the Elevation (Zmax) of the nodes in these segments. Two choices are available, increase Zmax of the "FROM" segment or decrease the Zmax on the "TO" segments. There is one advantage of changing the "TO" segments; the last segment of the river, the outlet, has always a large slope, therefore any change in Zmax trought the rive can be adjusted with the last segment.  ######
-
-#### It will take many iterations to be able to get the river segments Zmax right. As one changes, others would become lower of higher than the neighbors that were not modified. The best way is to change and balance the complete set of river segments nodes; not to change individual nodes###### 
-
-#### This was accomplished using the Grpah and Networks analysis packages in R. The code NetworksinR.R was developed for that
-# The results were completed manually in excell and are read into R using the package XLConnect
-
-
-library(XLConnect);
-
-
-Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
-
-head(Correct.Nodes)
-
-plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
-
-
-River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
-
-
-
-
-
-
-River.Nodes.Elevation.TO$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif  ;
-
-head(River.Nodes.Elevation.TO)
-
-
-
-
-FROM.TO.River.Nodes<-merge(River.Nodes.Elevation.FROM[,c('INDEX', 'FROM' , 'TO' , 'X' , 'Y' , 'Zmax')],River.Nodes.Elevation.TO[,c('INDEX', 'FROM' , 'TO' , 'X' , 'Y' , 'Zmax')], by='INDEX',sort=F) ;
-
-
-FROM.TO.River.Nodes[order(FROM.TO.River.Nodes$INDEX),]
-  
-  
-head(FROM.TO.River.Nodes)
-str(FROM.TO.River.Nodes)
-
-
-############### Write the riverl elemnts file .riv in the right PIHM format #######################
+############### Write the river elements file .riv in the right PIHM format #######################
 
 
 
@@ -459,15 +504,8 @@ write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".RIV"), row
 
 
 
-###########################################################################################################################
-
-          # Writing code to make sure all the river segments have positive slope
-
-
-###########################################################################################################################
 
 
 
-head(River.Nodes.Elevation.FROM)
-str(River.Nodes.Elevation.FROM)
+
 
