@@ -95,7 +95,14 @@ Neighbor_Mukeys<-MUKEYS.map.1[MUKEYS.map.1$Ele_ID %in% unique(unlist(Mukey_Gaps_
 
 Neighbor_Mukeys_para.Soil<-Project_Soil[Project_Soil$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('MUKEY', 'SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
 
+names(Neighbor_Mukeys_para.Soil)<-c('MUKEY', paste0('SOIL.', c('SILT' , 'CLAY' , 'OM' ,  'BD'))) ;
+
+
+
 Neighbor_Mukeys_para.Geology<-Project_Geology[Project_Geology$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('MUKEY', 'SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
+
+names(Neighbor_Mukeys_para.Geology)<-c('MUKEY', paste0('GEOL.', c('SILT' , 'CLAY' , 'OM' ,  'BD'))) ;
+
 
 Mukey_Gaps_indx_neighbors.para<-merge(merge(Neighbor_Mukeys,Neighbor_Mukeys_para.Soil, by.x='MUKEYS.mode', by.y='MUKEY', all.x=T), Neighbor_Mukeys_para.Geology, by.x='MUKEYS.mode', by.y='MUKEY', all.x=T) ;
 
@@ -104,18 +111,29 @@ Mukey_Gaps_indx_neighbors.para<-merge(merge(Neighbor_Mukeys,Neighbor_Mukeys_para
 
 Mukey_Gaps_Nabr.0<-merge(Mukey_Gaps_indx_neighbors[,c('Index', 'Nabr.0')],Mukey_Gaps_indx_neighbors.para, by.x='Nabr.0', by.y='Ele_ID', all.x=T, sort=F ) ;
 
+names(Mukey_Gaps_Nabr.0)<-c(names(Mukey_Gaps_Nabr.0)[1:4], paste0('Nabr.0.',names(Mukey_Gaps_indx_neighbors.para)[4:11]))
+
+
 Mukey_Gaps_Nabr.1<-merge(Mukey_Gaps_indx_neighbors[,c('Index', 'Nabr.1')],Mukey_Gaps_indx_neighbors.para, by.x='Nabr.1', by.y='Ele_ID', all.x=T , sort=F )  ;
+
+names(Mukey_Gaps_Nabr.1)<-c(names(Mukey_Gaps_Nabr.1)[1:4], paste0('Nabr.1.',names(Mukey_Gaps_indx_neighbors.para)[4:11]))
 
 
 Mukey_Gaps_Nabr.2<-merge(Mukey_Gaps_indx_neighbors[,c('Index', 'Nabr.2')],Mukey_Gaps_indx_neighbors.para, by.x='Nabr.2', by.y='Ele_ID' , all.x=T , sort=F )  ;
 
+names(Mukey_Gaps_Nabr.2)<-c(names(Mukey_Gaps_Nabr.2)[1:4], paste0('Nabr.2.',names(Mukey_Gaps_indx_neighbors.para)[4:11]))
+
+####  Gathering all the data of neighbors together to be ready to take the mean of the neighbor triangles 
+
+Mukey_Gaps_All.Nabr<-merge(merge(Mukey_Gaps_Nabr.0,Mukey_Gaps_Nabr.1,by='Index'),Mukey_Gaps_Nabr.2,by='Index')  ;
 
 
-#Mukey_Gaps_All.Nabr<-merge(merge(Mukey_Gaps_Nabr.0,Mukey_Gaps_Nabr.1,by='Index'),Mukey_Gaps_Nabr.2,by='Index')  ;
 
 
 
-apply(data.frame(Mukey_Gaps_Nabr.0[order(Mukey_Gaps_Nabr.0$Index),c('SILT.x')],Mukey_Gaps_Nabr.1[order(Mukey_Gaps_Nabr.1$Index),c('SILT.x')],Mukey_Gaps_Nabr.2[order(Mukey_Gaps_Nabr.2$Index),c('SILT.x')]),na.rm=T)
+
+
+apply(data.frame(Mukey_Gaps_Nabr.0[order(Mukey_Gaps_Nabr.0$Index),c('Index', 'SILT.x')],Mukey_Gaps_Nabr.1[order(Mukey_Gaps_Nabr.1$Index),c('Index', 'SILT.x')],Mukey_Gaps_Nabr.2[order(Mukey_Gaps_Nabr.2$Index),c('Index', 'SILT.x')]),na.rm=T)
 
 
 
