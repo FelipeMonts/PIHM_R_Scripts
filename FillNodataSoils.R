@@ -129,25 +129,32 @@ Mukey_Gaps_All.Nabr<-merge(merge(Mukey_Gaps_Nabr.0,Mukey_Gaps_Nabr.1,by='Index')
 
 
 
-
-
-
-
-apply(data.frame(Mukey_Gaps_Nabr.0[order(Mukey_Gaps_Nabr.0$Index),c('Index', 'SILT.x')],Mukey_Gaps_Nabr.1[order(Mukey_Gaps_Nabr.1$Index),c('Index', 'SILT.x')],Mukey_Gaps_Nabr.2[order(Mukey_Gaps_Nabr.2$Index),c('Index', 'SILT.x')]),na.rm=T)
-
-
-
-
-
 ######## Average the representative Mukeys properties  of the neighboring triangles for Soils
 
-Mukey_Gaps_All.Nabr$Avg.SILT<-apply(Mukey_Gaps_All.Nabr[, c('SILT.x', 'SILT.y' , 'SILT')], MARGIN=1,FUN='mean', na.rm=T) ;
+Mukey_Gaps_All.Nabr$Avg.SOIL.SILT<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.SOIL.SILT', 'Nabr.1.SOIL.SILT' , 'Nabr.2.SOIL.SILT')], MARGIN=1,FUN='mean', na.rm=T) ;
 
-Mukey_Gaps_All.Nabr$Avg.CLAY<-apply(Mukey_Gaps_All.Nabr[, c('CLAY.x', 'CLAY.y' , 'CLAY')], MARGIN=1,FUN='mean', na.rm=T) ;
+Mukey_Gaps_All.Nabr$Avg.SOIL.CLAY<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.SOIL.CLAY', 'Nabr.1.SOIL.CLAY' , 'Nabr.2.SOIL.CLAY')], MARGIN=1,FUN='mean', na.rm=T) ;
 
-Mukey_Gaps_All.Nabr$Avg.OM<-apply(Mukey_Gaps_All.Nabr[, c('OM.x', 'OM.y' , 'OM')], MARGIN=1,FUN='mean', na.rm=T) ;
+Mukey_Gaps_All.Nabr$Avg.SOIL.OM<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.SOIL.OM', 'Nabr.1.SOIL.OM' , 'Nabr.2.SOIL.OM')], MARGIN=1,FUN='mean', na.rm=T) ;
 
-Mukey_Gaps_All.Nabr$Avg.BD<-apply(Mukey_Gaps_All.Nabr[, c('BD.x', 'BD.y' , 'BD')], MARGIN=1,FUN='mean', na.rm=T) ;
+Mukey_Gaps_All.Nabr$Avg.SOIL.BD<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.SOIL.BD', 'Nabr.1.SOIL.BD' , 'Nabr.2.SOIL.BD')], MARGIN=1,FUN='mean', na.rm=T) ;
+
+
+######## Average the representative Mukeys properties  of the neighboring triangles for Geology ##############
+
+Mukey_Gaps_All.Nabr$Avg.GEOL.SILT<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.GEOL.SILT', 'Nabr.1.GEOL.SILT' , 'Nabr.2.GEOL.SILT')], MARGIN=1,FUN='mean', na.rm=T) ;
+
+Mukey_Gaps_All.Nabr$Avg.GEOL.CLAY<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.GEOL.CLAY', 'Nabr.1.GEOL.CLAY' , 'Nabr.2.GEOL.CLAY')], MARGIN=1,FUN='mean', na.rm=T) ;
+
+Mukey_Gaps_All.Nabr$Avg.GEOL.OM<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.GEOL.OM', 'Nabr.1.GEOL.OM' , 'Nabr.2.GEOL.OM')], MARGIN=1,FUN='mean', na.rm=T) ;
+
+Mukey_Gaps_All.Nabr$Avg.GEOL.BD<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.GEOL.BD', 'Nabr.1.GEOL.BD' , 'Nabr.2.GEOL.BD')], MARGIN=1,FUN='mean', na.rm=T) ;
+
+
+head(Mukey_Gaps_All.Nabr) 
+
+str(Mukey_Gaps_All.Nabr)
+
 
 
 Mukey_Gaps_All.Nabr$New.MUKEY<--999  ;
@@ -156,7 +163,6 @@ Mukey_Gaps_All.Nabr$New.MUKEY<--999  ;
 
 
 Project_Soil[which(is.na.data.frame(Project_Soil)==T,arr.ind=T)]<--999  ;
-
 
 
 ######## Add new rows to the Soil. file to include the new created soil parameters from neighbors and create a revised soil parameter file
@@ -174,7 +180,7 @@ Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_
 
 
 
-Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]), c('MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD' )]<-Mukey_Gaps_All.Nabr[,c('New.MUKEY', 'Avg.SILT', 'Avg.CLAY' , 'Avg.OM' , 'Avg.BD')] ;
+Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]), c('MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD' )]<-Mukey_Gaps_All.Nabr[,c('New.MUKEY', 'Avg.SOIL.SILT', 'Avg.SOIL.CLAY' , 'Avg.SOIL.OM' , 'Avg.SOIL.BD')] ;
 
 
 
@@ -186,8 +192,9 @@ Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_
 ## some of the dominant components Mukeys do no have data vailable. The strategy to fill these gaps is to gte the average of the Mukeys parameters of the neighboring Triangles.
 ##
 ##########################################################################################################################
-Project_Geology
+# Create a new revised soil data file
 
+Project_Soil.Rev<-Project_Soil ;
 
 
 
