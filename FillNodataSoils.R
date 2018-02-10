@@ -64,7 +64,7 @@ inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
 
 ##########################################################################################################################
 ##
-## some of the dominant components Mukeys do no have data available. The strategy to fill these gaps is to get the average of the Mukeys parameters of the neighboring Triangles.
+## some of the dominant components Mukeys do no have data available. The strategy to fill these gaps is to get the average of the Mukeys parameters of the neighboring Triangles. The same happens with the Geology data and the same strategy can be used to complete the Geology data as well.
 ##
 ##########################################################################################################################
 
@@ -73,7 +73,7 @@ inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
 Project_Soil_NA<-data.frame(which(is.na(Project_Soil), arr.ind=T)) ;
 
 
-# Wich mukeys do not have data
+# Which mukeys do not have data
 
 
 Mukey_Gaps<-Project_Soil[unique(Project_Soil_NA$row),'MUKEY'] ;
@@ -88,19 +88,19 @@ Mukey_Gaps_indx<-MUKEYS.map.1[MUKEYS.map.1$MUKEYS.mode %in% Mukey_Gaps, ]    ;
 
 Mukey_Gaps_indx_neighbors<-mesh.Elements[mesh.Elements$Index %in% Mukey_Gaps_indx$Ele_ID, c('Index' , 'Nabr.0' , 'Nabr.1' , 'Nabr.2')]   ;
 
-###### retrieve the representative mukeys of the neighboring triangles
+###### retrieve the representative mukeys of the neighboring triangles for the Soil and Geology parameters
 
 Neighbor_Mukeys<-MUKEYS.map.1[MUKEYS.map.1$Ele_ID %in% unique(unlist(Mukey_Gaps_indx_neighbors, use.names = F)), ]  ;
 
 
-###### retrieve the representative mukeys of the neighboring triangles
+Neighbor_Mukeys_para.Soil<-Project_Soil[Project_Soil$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('MUKEY', 'SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
 
-Neighbor_Mukeys_para<-Project_Soil[Project_Soil$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('MUKEY', 'SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
+Neighbor_Mukeys_para.Geology<-Project_Geology[Project_Geology$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('MUKEY', 'SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
 
-Mukey_Gaps_indx_neighbors.para<-merge(Neighbor_Mukeys,Neighbor_Mukeys_para, by.x='MUKEYS.mode', by.y='MUKEY', all.x=T) ;
+Mukey_Gaps_indx_neighbors.para<-merge(merge(Neighbor_Mukeys,Neighbor_Mukeys_para.Soil, by.x='MUKEYS.mode', by.y='MUKEY', all.x=T), Neighbor_Mukeys_para.Geology, by.x='MUKEYS.mode', by.y='MUKEY', all.x=T) ;
 
 
-#######  Put together the representative MUKEYS parameters for Neighbouring trinagles
+#######  Put together the representative MUKEYS parameters for Neighbouring triangles
 
 Mukey_Gaps_Nabr.0<-merge(Mukey_Gaps_indx_neighbors[,c('Index', 'Nabr.0')],Mukey_Gaps_indx_neighbors.para, by.x='Nabr.0', by.y='Ele_ID', all.x=T, sort=F ) ;
 
@@ -111,10 +111,17 @@ Mukey_Gaps_Nabr.2<-merge(Mukey_Gaps_indx_neighbors[,c('Index', 'Nabr.2')],Mukey_
 
 
 
-Mukey_Gaps_All.Nabr<-merge(merge(Mukey_Gaps_Nabr.0,Mukey_Gaps_Nabr.1,by='Index'),Mukey_Gaps_Nabr.2,by='Index')  ;
+#Mukey_Gaps_All.Nabr<-merge(merge(Mukey_Gaps_Nabr.0,Mukey_Gaps_Nabr.1,by='Index'),Mukey_Gaps_Nabr.2,by='Index')  ;
 
 
-######## Average the representative Mukeys properties  of the neighboring triangles
+
+apply(data.frame(Mukey_Gaps_Nabr.0[order(Mukey_Gaps_Nabr.0$Index),c('SILT.x')],Mukey_Gaps_Nabr.1[order(Mukey_Gaps_Nabr.1$Index),c('SILT.x')],Mukey_Gaps_Nabr.2[order(Mukey_Gaps_Nabr.2$Index),c('SILT.x')]),na.rm=T)
+
+
+
+
+
+######## Average the representative Mukeys properties  of the neighboring triangles for Soils
 
 Mukey_Gaps_All.Nabr$Avg.SILT<-apply(Mukey_Gaps_All.Nabr[, c('SILT.x', 'SILT.y' , 'SILT')], MARGIN=1,FUN='mean', na.rm=T) ;
 
@@ -137,127 +144,23 @@ Project_Soil[which(is.na.data.frame(Project_Soil)==T,arr.ind=T)]<--999  ;
 ######## Add new rows to the Soil. file to include the new created soil parameters from neighbors and create a revised soil parameter file
 
 
+
+# Create a new revised soil data file
+
 Project_Soil.Rev<-Project_Soil ;
 
-Project_Soil[seq(dim(Project_Soil)[1],dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]), c('INDEX')]<-seq(dim(Project_Soil)[1],dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]) ;
+# Add the newly created data from neighbors to the soil data files 
 
-seq(dim(Project_Soil)[1],dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1])
 
+Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]), c('INDEX')]<-seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]) ;
 
 
 
+Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]), c('MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD' )]<-Mukey_Gaps_All.Nabr[,c('New.MUKEY', 'Avg.SILT', 'Avg.CLAY' , 'Avg.OM' , 'Avg.BD')] ;
 
 
 
-####### Replace the values in the table 
-
-# HansYoust_Soil[HansYoust_Soil$MUKEY == Mukey_Gaps,c('SILT' , 'CLAY' , 'OM' ,  'BD') ] <-Neighbor_Mukeys_avg ;
-
-Project_Soil[Project_Soil$MUKEY == Mukey_Gaps,c('SILT' , 'CLAY' , 'OM' ,  'BD') ] <-Neighbor_Mukeys_avg ;
-
-######## Need to replace the other triangles that have the same mukey
-
-Neighbor_Mukeys_2<-unlist(Mukey_Gaps_indx_neighbors[2,c('Nabr.0' , 'Nabr.1' , 'Nabr.2')],use.names = F, recursive=T)  ;
-
-Neighbor_Mukeys<-MUKEYS.map.1[MUKEYS.map.1$Ele_ID %in% Neighbor_Mukeys_2, ]    ;
-
-# Neighbor_Mukeys_para<-HansYoust_Soil[HansYoust_Soil$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
-
-Neighbor_Mukeys_para<-Project_Soil[Project_Soil$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
-
-######## Average the representative Mukeys properties  of the neighboring triangles
-
-Neighbor_Mukeys_avg<-apply(Neighbor_Mukeys_para, MARGIN = c(2), FUN = 'mean') ;
-
-# HansYoust_Soil[dim(HansYoust_Soil)[1]+1,'INDEX']<-dim(HansYoust_Soil)[1]+1  ;
-
-Project_Soil[dim(Project_Soil)[1]+1,'INDEX']<-dim(Project_Soil)[1]+1 
-
-# HansYoust_Soil[dim(HansYoust_Soil)[1],c('SILT' , 'CLAY' , 'OM' ,  'BD')]<-Neighbor_Mukeys_avg ;
-
-Project_Soil[dim(Project_Soil)[1],c('SILT' , 'CLAY' , 'OM' ,  'BD')]<-Neighbor_Mukeys_avg ;
-
-
-# HansYoust_Soil[dim(HansYoust_Soil)[1],!names(HansYoust_Soil) %in% c( 'MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD', 'INDEX')] <- -999   ;
-
-Project_Soil[dim(Project_Soil)[1],!names(Project_Soil) %in% c( 'MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD', 'INDEX')] <- -999   ;
-
-
-
-
-# ###########################################################################################################################
-# 
-# ###     Prepare the Geology data for PIHM based on the properties of the depest layer of the horizon
-# ###     of the dominant components of each map unit selected by the procedure used for soils data
-# 
-# ###########################################################################################################################
-
-
-Mukey.deepest<-Mukey.Pedon@horizons[Mukey.Pedon@horizons$hzdepb_r == Mukey.Pedon@horizons$soil.depth,]  ;
-
-str(Mukey.deepest) ;
-
-# HansYoust_deepest<-Mukey.deepest [, c("mukey_ID", "silttotal_r", "claytotal_r" , "om_r" , "dbthirdbar_r")] ;
-
-Project_deepest<-Mukey.deepest [, c("mukey_ID", "silttotal_r", "claytotal_r" , "om_r" , "dbthirdbar_r")] ;
-
-
-
-# names(HansYoust_deepest)<-c('MUKEY','SILT',  'CLAY',	'OM',	'BD'); 
-
-names(Project_deepest)<-c('MUKEY','SILT',  'CLAY',	'OM',	'BD'); 
-
-Mukey.deepest.NA<-Mukey.deepest[is.na(Mukey.deepest$claytotal_r),'mukey_ID']  ;
-
-###    Some horizons do not have complete data for the deepest layer. Therefore the next step is to
-### take the data from the layer inmediately above the deepest 
-
-
-
-Mukey.deepest.2<-Mukey.Pedon@horizons[Mukey.Pedon@horizons$mukey_ID %in% Mukey.deepest.NA , ]; 
-
-
-Mukey.deepest_1<-Mukey.deepest.2[which(Mukey.deepest.2$hzdepb_r == Mukey.deepest.2$soil.depth)-1, c("mukey_ID", "silttotal_r", "claytotal_r" , "om_r" , "dbthirdbar_r")] ;
-
-names(Mukey.deepest_1)<-c('MUKEY','SILT',  'CLAY',	'OM',	'BD');
-
-
-# HansYoust_deepest[HansYoust_deepest$MUKEY %in% Mukey.deepest.NA, ]<-Mukey.deepest_1  ;
-
-Project_deepest[Project_deepest$MUKEY %in% Mukey.deepest.NA, ]<-Mukey.deepest_1  ;
-
-# HansYoust_deepest[, c('SILT',  'CLAY',	'OM',	'BD')] <-signif(HansYoust_deepest[, c('SILT',  'CLAY',	'OM',	'BD')], digits=4);
-
-Project_deepest[, c('SILT',  'CLAY',	'OM',	'BD')] <-signif(Project_deepest[, c('SILT',  'CLAY',	'OM',	'BD')], digits=4) ;
-
-####### write the geology data in a format that PIHM can read trough the Data model Loader step in PIHM-GIS
-####### include an index to replace the MUKEY with the index, as PIHM does not read the MUKEYS and needs an integer index instead
-
-
-# HansYoust_Geology<-merge(HansYoust_deepest, MUKEYS.map.2, by.x='MUKEY', by.y='MUKEYS', all=T) ;
-
-Project_Geology<-merge(Project_deepest, MUKEYS.map.2, by.x='MUKEY', by.y='MUKEYS', all=T) ;
-
-
-# names(HansYoust_Geology)<-c('MUKEY','SILT',  'CLAY',	'OM',	'BD', 'INDEX'); 
-
-names(Project_Geology)<-c('MUKEY','SILT',  'CLAY',	'OM',	'BD', 'INDEX'); 
-
-str(Project_Geology) ;
-
-head(Project_Geology)  ;
-
-# NUMGEOL<-data.frame(c('NUMGEOL'), dim(HansYoust_Geology)[1]) ;
-
-NUMGEOL<-data.frame(c('NUMGEOL'), dim(Project_Geology)[1]) ;
-
-##### Adding the additional columns for the new PIHM-MM module inputs
-
-# HansYoust_Geology$KINF<-HansYoust_Geology$KSATV<-HansYoust_Geology$KSATH<-HansYoust_Geology$MAXSMC<-HansYoust_Geology$MINSMC<-HansYoust_Geology$ALPHA<-HansYoust_Geology$BETA<-HansYoust_Geology$MACHF<-HansYoust_Geology$MACVF<-HansYoust_Geology$DMAC<-HansYoust_Geology$QTZ<- -999 ;
-
-Project_Geology$KINF<-Project_Geology$KSATV<-Project_Geology$KSATH<-Project_Geology$MAXSMC<-Project_Geology$MINSMC<-Project_Geology$ALPHA<-Project_Geology$BETA<-Project_Geology$MACHF<-Project_Geology$MACVF<-Project_Geology$DMAC<-Project_Geology$QTZ<- -999 ;
-
-
+Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]),c('QTZ', 'DMAC', 'MACVF', 'MACHF', 'BETA', 'ALPHA', 'MINSMC', 'MAXSMC', 'KSATH', 'KSATV' ,'KINF')]<--999
 
 
 ################################################################################################################################
@@ -265,12 +168,13 @@ Project_Geology$KINF<-Project_Geology$KSATV<-Project_Geology$KSATH<-Project_Geol
 ## some of the dominant components Mukeys do no have data vailable. The strategy to fill these gaps is to gte the average of the Mukeys parameters of the neighboring Triangles.
 ##
 ##########################################################################################################################
+Project_Geology
+
 
 
 
 ###### retrieve the representative mukeys of the neighboring triangles
 
-# Neighbor_Mukeys_para<-HansYoust_Geology[HansYoust_Geology$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
 
 Neighbor_Mukeys_para<-Project_Geology[Project_Geology$MUKEY %in% Neighbor_Mukeys$MUKEYS.mode, c('SILT' , 'CLAY' , 'OM' ,  'BD') ] ;
 
