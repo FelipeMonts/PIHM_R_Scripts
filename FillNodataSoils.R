@@ -254,44 +254,7 @@ write.table(Project_Geology[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSA
 write.table(DINF_etc, file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
 
 
-
-
-
-# 
-# ####################### done for now #################################################################################
-# ###########################################################################################################################
-# 
-# ###     Prepare depth to bed rock data to be incorporated into the mesh file when a uniform soil profile depth
-# ###     is not what is desired 
-# 
-# ###########################################################################################################################
-
-##### Read the nodes and the corresponding Mukey from the TX file formed from Qgis
-
-
-HansYoust.Nodes.Mukeys.info<-ogrInfo(paste0(RevisedOutputs.dir, 'NodesMukeys.shp'));
-
-
-HansYoust.Nodes.Mukeys<-readOGR(paste0(RevisedOutputs.dir, 'NodesMukeys.shp'))  ;
-
-str(HansYoust.Nodes.Mukeys)  ;
-
-
-
-#### Extract the Mukeys corresponding to each Node
-
-
-HansYoust.Nodes.Mukeys@data$Mukey.factor<-as.factor(HansYoust.Nodes.Mukeys$Mukeys) ;
-
-head(HansYoust.Nodes.Mukeys@data) 
-
-####  Convert the Mukeys into a factor and extract the levels of the factor to get the Mukeys from which we need soil 
-####  bedrock information
-
-NODE.MUKEYS<-levels(HansYoust.Nodes.Mukeys@data$Mukey.factor)  ;
-
-str(NODE.MUKEYS)
-
+save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\FillNoDataSoils.RData'));
 
 
 
