@@ -208,6 +208,11 @@ Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Mu
 
 
 
+######### in the Project_GEology.Rev data frame, Fill all the NAN and NA with the no-data key -999
+
+
+Project_Geology.Rev[which(is.na.data.frame(Project_Geology.Rev)==T,arr.ind=T)]<--999  ;
+
 #############################################################################################################################
 #
 #
@@ -252,6 +257,9 @@ write.table(Project_Geology[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSA
 
 
 write.table(DINF_etc, file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
+
+
+
 
 
 save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\FillNoDataSoils.RData'));
