@@ -33,6 +33,16 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')
 #  C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/WE-38/WE38_Files_PIHM_Cycles20170208/SWATPIHMRcode 
 
 
+
+library(Hmisc) ;
+library(plyr) ;
+library(dplyr)  ;
+library(soilDB) ;
+library(raster) ;
+library(aqp) ;
+library(sp) ;
+library(rgdal) ;
+
 ####### Store the name of the project to read and write files more easily #############
 
 #Project<-"MergeVectorLayer000_q30_a200000"   ;
@@ -44,6 +54,8 @@ Project<-"DataModel" ;
 load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
 
 load(paste0('./',Project,'/FillNoDataSoils.RData'));
+
+load(paste0('./',Project,'/MM_PHIMInputsR_V2.RData')) ;
 
 ######## Store the name of the directory whre the modified MM-PIHM inputs are to be stored
 
@@ -84,10 +96,14 @@ Nodes.Mukeys@data$Mukey.factor<-as.factor(Nodes.Mukeys@data$HansYoustG) ;
 
 head(Nodes.Mukeys@data) 
 
+levels(Nodes.Mukeys@data$Mukey.factor)
+
 ####  Convert the Mukeys into a factor and extract the levels of the factor to get the Mukeys from which we need soil 
 ####  bedrock information
 
 Mukeys_Nodes<-levels(Nodes.Mukeys@data$Mukey.factor)  ;
+
+
 
 
 
@@ -140,12 +156,16 @@ Pedon.info.Nodes<- SDA_query(Pedon.query.Nodes);
 head(Pedon.info.Nodes) ;
 str(Pedon.info.Nodes)  ;
 
+
+### MAp Unit No. 539762 is a water body and is not available to query from the SDA_query function
+
+
+
 # filter components that are the major components of each unit map with the Flag majcompflag=='Yes'
 
 Pedon.info.Nodes.MajorC<-Pedon.info.Nodes[which(Pedon.info.Nodes$majcompflag == 'Yes'),]  ;
 head(Pedon.info.Nodes.MajorC) ; 
 str(Pedon.info.Nodes.MajorC)  ;
-
 
 
 # check if there are mukeys with more than one dominant component
@@ -197,7 +217,7 @@ depths(Mukey.Pedon.Nodes)<-mukey_ID ~ hzdept_r + hzdepb_r  ;
 str(Mukey.Pedon.Nodes) ;
 
 
-plot(Mukey.Pedon.Nodes, name='hzname',color='dbthirdbar_r')  ;
+plot(Mukey.Pedon.Nodes, name='hzname',color='claytotal_r')  ;
 
 
 # Add soil profile depth  soil.depth in meters (cm/100) .
@@ -217,12 +237,89 @@ Mukey.Pedon.Nodes@site
 
 ##get the coordinates of the nodes from the shape file
 
-head(coordinates(Nodes.Mukeys))
+head(Nodes.Mukeys@data)
+str(Nodes.Mukeys@data)
 
-Nodes.Mukeys.Unique.Point.coords<-data.frame(unique(coordinates(Nodes.Mukeys))) ;
+head(Nodes.Mukeys@coords)
+str(Nodes.Mukeys@coords)
+rownames(Nodes.Mukeys@data)
+
+Nodes.Mukeys.Coords<-data.frame(Nodes.Mukeys@coords,Nodes.Mukeys@data)  ;
+
+
+#### Each point in node in the triangle is repeated a number of times equal to the number of trianlges that share that node
+
+duplicated(Nodes.Mukeys@coords) ;
+
+head(Nodes.Mukeys.Coords[order(Nodes.Mukeys.Coords$coords.x1),])
+
+Unique.Nodes.Mukeys.Coords<-unique(Nodes.Mukeys.Coords)
+head(Unique.Nodes.Mukeys.Coords)
+str(Unique.Nodes.Mukeys.Coords)
+
+
 
 ## Merge the nodes data with the soil depth of the GSSURGO extracted data
 
+head(Mukey.Pedon.Nodes@site)
+str(Mukey.Pedon.Nodes@site)
 
-head(merge(Nodes.Mukeys@data,Mukey.Pedon.Nodes@site, by.x='Mukey.factor', by.y='mukey_ID', all.x=T, sort=F))
+Mukey.Pedon.Nodes@site$Mukey.factor<-as.factor(Mukey.Pedon.Nodes@site$mukey_ID);
+
+levels(Mukey.Pedon.Nodes@site$Mukey.factor);
+levels(Unique.Nodes.Mukeys.Coords$Mukey.factor);
+
+
+Nodes.Mukeys.Soil.Depth<-merge(Unique.Nodes.Mukeys.Coords, Mukey.Pedon.Nodes@site, by='Mukey.factor') ;
+ 
+head(Nodes.Mukeys.Soil.Depth)
+str(Nodes.Mukeys.Soil.Depth)
+
+#### Check if there are nodes wihout soil depth ###
+
+
+anyNA(Nodes.Mukeys.Soil.Depth$soil.depth)
+
+range(Nodes.Mukeys.Soil.Depth$soil.depth)
+
+plot(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys.Soil.Depth$soil.depth)
+with(Nodes.Mukeys.Soil.Depth, text(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys.Soil.Depth$soil.depth, labels=Nodes.Mukeys.Soil.Depth$mukey_ID, cex=1, srt=90, pos=4) )
+
+###### Merge with the mesh file from the MM_PHIMInpoutsR_####
+
+
+head(Rev.mesh.Nodes)
+str(Rev.mesh.Nodes)
+
+Rev.mesh.Soil.Depth<-merge(Rev.mesh.Nodes,Nodes.Mukeys.Soil.Depth, by.x=c('X','Y'), by.y=c('coords.x1' , 'coords.x2'), all.x=T, sort=F) ;
+
+#### Check if there are any rows with NA in the soil depth column
+
+anyNA(Rev.mesh.Soil.Depth$soil.depth)
+
+Rev.mesh.Soil.Depth[which(is.na(Rev.mesh.Soil.Depth$soil.depth)),] ;
+
+###  The missing points are water bodies with mukey 539762  and would need to be corrected
+
+### Points with Mukey 539759 are urban land Urban land-Udults complex
+
+### Points with Mukey 539758 are Weikert and Klinesville shaly silt loams, steep
+
+
+
+
+#### calculate Zmin from Zmax and soil depth
+
+Rev.mesh.Soil.Depth$Zmin.SSURGO<-Rev.mesh.Soil.Depth$Zmax.x-Rev.mesh.Soil.Depth$soil.depth ;
+
+## check if there is any negative difference between Zmax-Zmin.SSURGO
+
+
+Rev.mesh.Soil.Depth$Diff.Z<-Rev.mesh.Soil.Depth$Zmax.x-Rev.mesh.Soil.Depth$Zmin.SSURGO ;
+
+Rev.mesh.Soil.Depth[which(Rev.mesh.Soil.Depth$Diff.Z <= 0),]
+
+plot(Rev.mesh.Soil.Depth$Index.x, Rev.mesh.Soil.Depth$Diff.Z) 
+
+Rev.mesh.Soil.Depth[which(Rev.mesh.Soil.Depth$Diff.Z <= 0.50),]
 

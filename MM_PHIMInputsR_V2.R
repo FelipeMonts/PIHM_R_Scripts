@@ -503,7 +503,7 @@ write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".RIV"), row
 
 
 
-
+save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\MM_PHIMInputsR_V2.RData'));
 
 
 
