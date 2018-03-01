@@ -58,6 +58,11 @@ library(stats)
 
 ## Load the objects into the global environment
 
+load(paste0('./',Project,'/PIHMInputsR.RData'));
+
+load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
+
+
 ## attach('./PIHMInputsR.RData', ); Adds the database with the objects created to the path R searches for objects. It is safer than load, but one needs to remember the name of the variables when programming. 
 
 
@@ -67,9 +72,8 @@ library(stats)
 
 Project<-"DataModel" ;
 
+###
 
-
-load(paste0('./',Project,'/PIHMInputsR.RData'));
 
 
 
@@ -211,6 +215,28 @@ str(LC.indexs)
 Project.LC@data$LC.index<-Project.LC@data$LC_majorit
 
 
+head(Project.LC@data$LC.index)
+
+
+########################################################################################################################## 
+
+
+# Because land cover index 11 in NLCD is open water, and index 12 is permanent snow, they should be incorporated as water/ snow bodies. To work around this limitation for small triangles or small ponds that does not contribute to the simulation result, they can be represented as emergent herbaceous wetlands, NLCD index 95 .
+
+
+##########################################################################################################################
+
+
+
+#Change Project.LC@data$LC.index that have index 11 to index 95
+
+#inspect the levels of Project.LC@data$LC.index 
+
+levels(Project.LC@data$LC.index)<-c(levels(Project.LC@data$LC_majorit),"95")
+
+Project.LC@data$LC.index[which(Project.LC@data$LC.index == "11")]<-"95"   ;
+
+
 
 ######  Merge the LC index with the rest of the attribute table
 
@@ -252,6 +278,7 @@ PIHM.lc<-as.integer(sapply(strsplit(NLCD_PIHM.lc[,1], split = " "), "[" , 2)) ;
 
 PIHM_to_NLCD<-merge(data.frame(NLCD.lc, PIHM.lc), vegprmt.tbl, by.x= "NLCD.lc", by.y= "INDEX", all=T) ;
 
+head(PIHM_to_NLCD)
 
 PIHM_to_NLCD[!is.na(PIHM_to_NLCD$PIHM.lc), ]
 
@@ -279,7 +306,7 @@ att.expanded.3<-merge(att.expanded.2,MUKEYS.map.1, by.x='Index', by.y='Ele_ID') 
 Revised.att<-att.expanded.3[order(att.expanded.3$Index),] ;
 
 
-
+head(Revised.att)
 
 
 Revised.att$LAI<-0  ;
