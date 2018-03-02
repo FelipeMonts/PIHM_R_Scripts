@@ -159,10 +159,23 @@ str(Mukey_Gaps_All.Nabr)
 
 Mukey_Gaps_All.Nabr$New.MUKEY<--999  ;
 
-######### in the Project_Soil data frame, Fill all the NAN and NA with the no-data key -999
+######### in the Project_Soil data frame, find all the NA and NAN and replace them with silt=0.33, clay=0.33. OM=0.5, BD= 1.0
+
+#Find all the NAN and NA in the Project_Soil data frame
+
+Project_Soil.NA<-which(is.na.data.frame(Project_Soil)==T,arr.ind=T) ;
+
+#Select wich rows have NAN and NA
+
+Project_Soil.NA.Rows<-unique(Project_Soil.NA[,1])  ;
+
+# replace NA and NAN in silt, clay, OM, BD with the standarized arbitrary values  with silt=0.33, clay=0.33. OM=0.5, BD= 1.0
+
+StandardSoilValues<-data.frame(Silt=0.33, Clay=0.33, OM=0.5, BD=1.0)
+
+Project_Soil[Project_Soil.NA.Rows, c(2,3,4,5)]<-StandardSoilValues
 
 
-Project_Soil[which(is.na.data.frame(Project_Soil)==T,arr.ind=T)]<--999  ;
 
 
 ######## Add new rows to the Soil. file to include the new created soil parameters from neighbors and create a revised soil parameter file
