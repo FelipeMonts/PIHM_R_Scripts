@@ -171,7 +171,7 @@ Project_Soil.NA.Rows<-unique(Project_Soil.NA[,1])  ;
 
 # replace NA and NAN in silt, clay, OM, BD with the standarized arbitrary values  with silt=0.33, clay=0.33. OM=0.5, BD= 1.0
 
-StandardSoilValues<-data.frame(Silt=0.33, Clay=0.33, OM=0.5, BD=1.0)
+StandardSoilValues<-data.frame(Silt=33.3, Clay=33.3, OM=0.5, BD=1.0)
 
 Project_Soil[Project_Soil.NA.Rows, c(2,3,4,5)]<-StandardSoilValues
 
@@ -221,10 +221,29 @@ Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Mu
 
 
 
-######### in the Project_GEology.Rev data frame, Fill all the NAN and NA with the no-data key -999
+######### in the Project_Geology.Rev data frame, Fill all the NAN and NA with the no-data key -999
+
+######### in the Project_Geology.Rev data frame, find all the NA and NAN and replace them with silt=0.33, clay=0.33. OM=0.5, BD= 1.0
 
 
-Project_Geology.Rev[which(is.na.data.frame(Project_Geology.Rev)==T,arr.ind=T)]<--999  ;
+#Find all the NAN and NA in the Project_Geology.Rev data frame
+
+Project_Geology.Rev.NA<-which(is.na.data.frame(Project_Geology.Rev)==T,arr.ind=T) ;
+
+#Select wich rows have NAN and NA
+
+Project_Geology.Rev.NA.Rows<-unique(Project_Geology.Rev.NA[,1])  ;
+
+# replace NA and NAN in silt, clay, OM, BD with the standarized arbitrary values  with silt=0.33, clay=0.33. OM=0.5, BD= 1.0
+
+
+Project_Geology.Rev[Project_Geology.Rev.NA.Rows, c(2,3,4,5)]<-StandardSoilValues
+
+
+
+
+
+
 
 #############################################################################################################################
 #

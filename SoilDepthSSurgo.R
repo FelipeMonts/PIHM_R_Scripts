@@ -156,10 +156,13 @@ Pedon.info.Nodes<- SDA_query(Pedon.query.Nodes);
 head(Pedon.info.Nodes) ;
 str(Pedon.info.Nodes)  ;
 
+########################################## IMPORTANT ###########################################################
 
-### MAp Unit No. 539762 is a water body and is not available to query from the SDA_query function
+### Map Unit No. 539762 is a water body and is not available to query from the SDA_query function
 
+### Map Unit No. 539759 are urban land Urban land-Udults complex
 
+###############################################################################################################
 
 # filter components that are the major components of each unit map with the Flag majcompflag=='Yes'
 
@@ -332,7 +335,8 @@ Rev.mesh.Nodes.SSURGO<-Rev.mesh.Soil.Depth[order(Rev.mesh.Soil.Depth$Index.x),c(
 head(Rev.mesh.Nodes.SSURGO)
 str(Rev.mesh.Nodes.SSURGO)
 
-
+plot(Rev.mesh.Nodes.SSURGO$Index.x, (Rev.mesh.Nodes.SSURGO$Zmax.x-Rev.mesh.Nodes.SSURGO$Zmin.SSURGO))
+with(Rev.mesh.Nodes.SSURGO, text(Rev.mesh.Nodes.SSURGO$Index.x,(Rev.mesh.Nodes.SSURGO$Zmax.x-Rev.mesh.Nodes.SSURGO$Zmin.SSURGO), labels=Rev.mesh.Nodes.SSURGO$Index.x, cex=1, srt=90, pos=4) )
 
 #### write the revised mesh file########################################################################################
 
