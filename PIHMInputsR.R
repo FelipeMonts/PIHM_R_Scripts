@@ -40,9 +40,9 @@ DataModel.dir<-"4DataModelLoader" ;
 #Store  the name of the project :
 
 
-#Project<-"MergeVectorLayer000_q30_a200000"
+Project<-"MergeVectorLayer000_q25_a100000"
 
-Project<-"DataModel"  ;
+#Project<-"DataModel"  ;
 
 #  read already created files from PIHM examples to study their structure
 

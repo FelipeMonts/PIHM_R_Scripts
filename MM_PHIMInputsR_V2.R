@@ -58,6 +58,8 @@ library(stats)
 
 ## Load the objects into the global environment
 
+Project<-"MergeVectorLayer000_q25_a100000" ;
+
 load(paste0('./',Project,'/PIHMInputsR.RData'));
 
 load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
@@ -68,9 +70,9 @@ load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
 
 ####### Store the name of the project to read and write files more easily #############
 
-#Project<-"MergeVectorLayer000_q30_a200000"   ;
+Project<-"MergeVectorLayer000_q25_a100000"   ;
 
-Project<-"DataModel" ;
+#Project<-"DataModel" ;
 
 ###
 
@@ -245,6 +247,14 @@ Project.LC@data$LC.index[which(Project.LC@data$LC.index == "11")]<-"95"   ;
 att<-read.table(paste0(Project.Directory,"\\",DataModel.dir,"\\",Project,".att"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
 
 names(att) ;
+
+
+###### and Alternative to bypass the creation of the att table is to create it here by loading the soils and geology indicess and start the att table from there
+
+
+
+
+
 
 # att.expanded.1<-merge(att,HansYoust.LC@data, by.x='Index' , by.y='Ele_ID') ;
 
