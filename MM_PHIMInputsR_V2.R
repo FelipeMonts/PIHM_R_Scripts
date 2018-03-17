@@ -251,15 +251,15 @@ names(att) ;
 
 ###### and Alternative to bypass the creation of the att table is to create it here by loading the soils and geology indicess and start the att table from there
 
-
-
-
+att<-Project.GSSURGO@data[,c("Ele_ID" ,"MUKEYS.index","MUKEYS.index")]
+names(att)<-c('Index', 'Soil', 'Geol')
 
 
 # att.expanded.1<-merge(att,HansYoust.LC@data, by.x='Index' , by.y='Ele_ID') ;
 
 att.expanded.1<-merge(att,Project.LC@data, by.x='Index' , by.y='Ele_ID') ;
 
+str(att)
 
 ############# Load the vegetation parameter table and the convertion parameters for PIHM - MM ################
 
@@ -316,17 +316,16 @@ att.expanded.3<-merge(att.expanded.2,MUKEYS.map.1, by.x='Index', by.y='Ele_ID') 
 Revised.att<-att.expanded.3[order(att.expanded.3$Index),] ;
 
 
+Revised.att$METEO<-1 ;
+
+Revised.att$LAI<-Revised.att$SS<-Revised.att$BC0<-Revised.att$BC1<-Revised.att$BC2<-0 ;
+
 head(Revised.att)
-
-
-Revised.att$LAI<-0  ;
-
-Revised.att$METEO<-1  ;
 
 
 # #############################################################################################################################
 # 
-# #   Still need to corret the attribute tables with the correct soil index in the triangles that do have MUKEYs Gaps
+# #   Still need to correct the attribute tables with the correct soil index in the triangles that do have MUKEYs Gaps
 # 
 # ###########################################################################################################################
 
@@ -336,8 +335,9 @@ Revised.att[, 'MUKEYS.index']<-as.numeric(Revised.att[, 'MUKEYS.index']) ;
 
 Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index']<-dim(Project_Soil)[1]  ;
 
- write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'NLCD.lc','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
+# write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'NLCD.lc','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
+write.table(Revised.att[,c('Index' , 'Soil' , 'Geol', 'NLCD.lc', 'METEO',	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
 
 ###################   Write the appropiate formated "River" File for the MM-PIHM input format  #################################
@@ -386,7 +386,7 @@ str(River.Nodes.Elevation)
 # connect the River nodes with the corresponding information in the mesh file
 
 # New.River.Nodes.Elevation.FROM<-merge(riv.elements,New.River.Nodes.Elevation, by.x='FromNode' , by.y='Index', all.x=T, sort=F) ;
-River.Nodes.Elevation.FROM<-merge(riv.elements,River.Nodes.Elevation, by.x='FROM' , by.y='Index', all.x=T, sort=F) ;
+River.Nodes.Elevation.FROM<-merge(riv.elements,River.Nodes.Elevation, by.x='FromNode' , by.y='Index', all.x=T, sort=F) ;
 
 
 # head(New.River.Nodes.Elevation.FROM,50)
@@ -399,7 +399,7 @@ str(River.Nodes.Elevation.FROM)
 
 # New.River.Nodes.Elevation.TO<-merge(riv.elements,New.River.Nodes.Elevation, by.x='ToNode' , by.y='Index', all.x=T,sort=F) ;
 
-River.Nodes.Elevation.TO<-merge(riv.elements,River.Nodes.Elevation, by.x='TO' , by.y='Index', all.x=T,sort=F) ;
+River.Nodes.Elevation.TO<-merge(riv.elements,River.Nodes.Elevation, by.x='ToNode' , by.y='Index', all.x=T,sort=F) ;
 
 
 # head(New.River.Nodes.Elevation.TO,50)
@@ -439,8 +439,8 @@ str(River.Nodes.Max_Elev_Dif)
 # points(New.River.Nodes.Elevation.TO[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="RED" ) ;
 
 
-plot(River.Nodes.Elevation.FROM[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="BLUE") ;
-points(River.Nodes.Elevation.TO[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="RED" ) ;
+plot(River.Nodes.Elevation.FROM[,c("Index")],River.Nodes.Max_Elev_Dif, col="BLUE") ;
+points(River.Nodes.Elevation.TO[,c("Index")],River.Nodes.Max_Elev_Dif, col="RED" ) ;
 
 
 # New.River.Nodes.Elevation.FROM[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
@@ -449,9 +449,9 @@ points(River.Nodes.Elevation.TO[,c("INDEX")],River.Nodes.Max_Elev_Dif, col="RED"
 # 
 
 
-River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
+River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("Index")] ;
 
-River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
+River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("Index")]  ;
 
 
 # New.River.Nodes.Elevation.FROM$Max_Elev_Dif<-New.River.Nodes.Max_Elev_Dif ;
@@ -465,7 +465,7 @@ River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
 River.Nodes.Elevation.FROM$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif ;
 
 
-plot(River.Nodes.Elevation.FROM$INDEX,River.Nodes.Elevation.FROM$Max_Elev_Dif)
+plot(River.Nodes.Elevation.FROM$Index,River.Nodes.Elevation.FROM$Max_Elev_Dif)
 
 
 head(River.Nodes.Elevation.FROM)
@@ -541,6 +541,8 @@ write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".RIV"), row
 
 
 save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\MM_PHIMInputsR_V2.RData'));
+
+
 
 
 
