@@ -454,6 +454,7 @@ River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("Index")] ;
 River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("Index")]  ;
 
 
+
 # New.River.Nodes.Elevation.FROM$Max_Elev_Dif<-New.River.Nodes.Max_Elev_Dif ;
 # 
 # 

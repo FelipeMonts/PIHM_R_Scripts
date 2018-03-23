@@ -33,6 +33,10 @@
 #  Set Working directory
 
 
+Project<-"MergeVectorLayer000_q25_a100000" ;
+
+
+
 library(devtools)  ;
 
 
@@ -43,32 +47,9 @@ library(sand)
 load(paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\MM_PHIMInputsR_V2.RData'));
 
 
-# From MM_PIHMInputsR.V2.R
-
-g.River.edges<-FROM.TO.River.Nodes[,c('FROM.x', 'TO.x', 'INDEX')]  ;
-
-g.River.vertices<-River.Nodes.Elevation ;
-
-g.River<-graph.data.frame(g.River.edges, vertices=g.River.vertices, directed = T) ;
-
-tkplot(g.River,layout=as.matrix.data.frame(River.Nodes.Elevation[,c('X', 'Y')]), vertex.size= 1, edge.arrow.size=0.1, vertex.label=NA)
-
-plot(g.River,layout=as.matrix.data.frame(River.Nodes.Elevation[,c('X', 'Y')]), vertex.size= 1, edge.arrow.size=0.1, vertex.label=NA)
-
-plot(g.River, layout=layout_nicely,vertex.size= 1, edge.arrow.size=0.1, vertex.label=NA)
-
-tkplot(g.River, canvas.width=1800, canvas.height=900, layout=layout_nicely,vertex.size= 1, edge.arrow.size=0.1, vertex.label=NA)
-
-vcount(g.River) 
-
-ecount(g.River)
-
-str(g.River)
-V(g.River)
-E(g.River)
 
 
-##### Add the river nodes from the unrefined river mesh#########################
+##### Add the river nodes from the  river mesh#########################
 library(sp) ;
 
 library(rgdal) ;
@@ -76,14 +57,16 @@ library(rgdal) ;
 
 # Read information about the shape file
 
-MergedRiver.info<-ogrInfo('C:/Aun Trabajo en Proceso/HansYostDeepCreek/MergedRiver.shp');
+MergedRiver.info<-ogrInfo('C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/Stream8000_sln32_dens150m_xln_Decomp.shp');
+
+
 
 MergedRiver.info$nrows 
 
 
 # Read  the shape file
 
-MergedRiver<-readOGR('C:/Aun Trabajo en Proceso/HansYostDeepCreek/MergedRiver.shp') ;
+MergedRiver<-readOGR('C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/Stream8000_sln32_dens150m_xln_Decomp.shp');
 
 
 str(MergedRiver, max.level = 2)  ;
@@ -116,7 +99,7 @@ sapply(coordinates(MergedRiver),function(x) x[[1]])
 MergedRiver.coords.matrix<-matrix(data=sapply(coordinates(MergedRiver),function(x) x[[1]]), nrow = MergedRiver.info$nrows, ncol = 4, byrow=T) ;
 
 
-# arrange the matrix of line segments coordinates into a coherent data rame with lines representd by two points consiting of a pari of x,y coordinates
+# arrange the matrix of line segments coordinates into a coherent data frame with lines representd by two points consiting of a pari of x,y coordinates
 
 MergedRiver.coords.df<-data.frame(MergedRiver.coords.matrix[,c(1,3)],MergedRiver.coords.matrix[,c(2,4)]);
 
@@ -132,6 +115,7 @@ MergedRiver.coords.df$Line.ID<-as.character(seq(1:MergedRiver.info$nrows)) ;
 
 MergedRiver.Stacked.Point.coords<-rbind(MergedRiver.coords.matrix[,c(1,3)],MergedRiver.coords.matrix[,c(2,4)])   ;
 
+head(MergedRiver.Stacked.Point.coords) ;
 
 str(MergedRiver.Stacked.Point.coords) ;
 
@@ -159,12 +143,18 @@ str(MergedRiver.From.points) ;
 
 MergedRiver.To.points<-merge(MergedRiver.coords.df[,c("P2.X", "P2.Y" ,  "Line.ID")], MergedRiver.Unique.Point.coords, by.x=c('P2.X', 'P2.Y'), by.y=c("X" , "Y"), all.x=T);
 
+head(MergedRiver.To.points)
+
+str(MergedRiver.To.points)
 
 
 MergedRiver.Line.Point<-merge(MergedRiver.From.points,MergedRiver.To.points,by="Line.ID");
 
-str(MergedRiver.Line.Point)
+
 head(MergedRiver.Line.Point)
+
+str(MergedRiver.Line.Point)
+
 
 ###### Put together the  Merged river and the refined river nodes ######
 
@@ -180,12 +170,27 @@ head(Refined.Merged.Nodes)
 str(Refined.Merged.Nodes)
 summary(Refined.Merged.Nodes)
 
-g.River.2.edges<-FROM.TO.River.Nodes[,c('FROM.x', 'TO.x', 'INDEX')]  ;
+
+g.River.2.edges<-MergedRiver.Line.Point[,c("Point.ID.x", "Point.ID.y" , "Line.ID") ] ;
+
+g.River.2.edges<-g.River.2.edges[order(g.River.2.edges$Line.ID),] ;
+
+head(g.River.2.edges,20)
+
+# g.River.2.edges<-FROM.TO.River.Nodes[,c('FROM.x', 'TO.x', 'INDEX')]  ;
 
 g.River.2.vertices<-Refined.Merged.Nodes[, c('Index', 'X', 'Y','Zmax', 'Point.ID') ] ;
 
 
+head(g.River.2.vertices)
+
+#g.River.2.vertices<-Refined.Merged.Nodes[, c('Index', 'X', 'Y','Zmax', 'Point.ID') ] ;
+
+
 g.River.2<-graph.data.frame(g.River.2.edges, vertices=g.River.2.vertices, directed = T) ;
+
+str(g.River.2);
+
 
 
 plot(g.River.2, layout=layout_nicely,vertex.size= 1, edge.arrow.size=0.1, vertex.label=NA)
@@ -206,10 +211,8 @@ V(g.River.2)[!is.na(Point.ID)]$color='Red'
 
 tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.1, vertex.label=g.River.2.vertices$Index, vertex.label.cex=1, vertex.label.dist=1)   ;
 
-tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.1, vertex.label=paste(g.River.2.vertices$Index,round(g.River.2.vertices$Zmax,2),sep="-"), vertex.label.cex=1, vertex.label.dist=1) ;
+tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=paste(g.River.2.vertices$Index,round(g.River.2.vertices$Zmax,2),sep="-"), vertex.label.cex=1, vertex.label.dist=1) ;
 
-
-tkplot(g.River.2[1:100], canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.1, vertex.label=paste(g.River.2.vertices$Index,round(g.River.2.vertices$Zmax,2),sep="-"), vertex.label.cex=1, vertex.label.dist=1);
 
 g.River.sub<-induced.subgraph(g.River.2,seq(1,30)) ;
 
@@ -217,7 +220,7 @@ V(g.River.sub)[is.na(Point.ID)]$color='Blue'
 V(g.River.sub)[!is.na(Point.ID)]$color='Red'
 
 
-tkplot(g.River.sub, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.1,vertex.label=paste(V(g.River.sub)$name,round(V(g.River.sub)$Zmax,2),sep="-"),vertex.label.cex=1, vertex.label.dist=1,margin=0.2) ;
+tkplot(g.River.sub, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=1.0,vertex.label=paste(V(g.River.sub)$name,round(V(g.River.sub)$Zmax,2),sep="-"),vertex.label.cex=1, vertex.label.dist=1,margin=0.2) ;
 
 
 str(g.River.sub)
@@ -230,7 +233,7 @@ list.vertex.attributes(g.River.sub)
 list.edge.attributes(g.River.sub)
 
 
-# Correct  vertex Zmax based on the grap and visial inspection
+# Correct  vertex Zmax based on the grap and visual inspection
 
 Ncorrec<-Refined.Merged.Nodes ;
 
