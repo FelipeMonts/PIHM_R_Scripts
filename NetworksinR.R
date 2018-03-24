@@ -199,7 +199,7 @@ tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,ve
 
 is.simple(g.River.2)
 
-E(g.River.2)
+E(graph.data.frame)
 degree(g.River.2, mode="in")
 which(degree(g.River.2) == 0)
 degree(g.River.2, mode="out")
@@ -207,6 +207,7 @@ which(degree(g.River.2, mode="out") == 2)
 
 V(g.River.2)[is.na(Point.ID)]$color='Blue'
 V(g.River.2)[!is.na(Point.ID)]$color='Red'
+
 
 
 tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.1, vertex.label=g.River.2.vertices$Index, vertex.label.cex=1, vertex.label.dist=1)   ;
@@ -232,6 +233,54 @@ list.vertex.attributes(g.River.sub)
 
 list.edge.attributes(g.River.sub)
 
+
+
+Edgs<-as_data_frame(g.River.2, what=c("edges"));
+
+Vertcs<-as_data_frame(g.River.2, what=c("vertices"))
+
+from.Vertcs<-merge(Edgs, Vertcs, by.x="from", by.y="name", all.x=T ) ;
+
+to.Vertcs<-merge(Edgs, Vertcs, by.x="to", by.y="name", all.x=T ) ;
+
+Edgs.Zmax<-merge(from.Vertcs, to.Vertcs, by="Line.ID") ;
+
+Edgs.Zmax$Elev.Dif<-Edgs.Zmax$Zmax.x-Edgs.Zmax$Zmax.y ;
+
+head(Edgs.Zmax)
+
+g.River.3.edges<-merge(Edgs,Edgs.Zmax, by="Line.ID")[,c("from" , "to" , "Line.ID" , "from.x" , "to.x" , "X.x" , "Y.x" , "Zmax.x" , "Point.ID.x" , "to.y" , "from.y" , "X.y" , "Y.y" , "Zmax.y" , "Point.ID.y" ,"Elev.Dif"  )] ;
+
+names(g.River.3.edges)
+
+
+g.River.3<-graph.data.frame(g.River.3.edges, vertices=g.River.2.vertices, directed = T) ;
+
+
+V(g.River.3)[is.na(Point.ID)]$color='Blue'
+V(g.River.3)[!is.na(Point.ID)]$color='Red'
+
+
+
+
+tkplot(g.River.3, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=g.River.2.vertices$Index, vertex.label.cex=1, vertex.label.dist=1, edge.label=round(g.River.3.edges$Elev.Dif,2), edge.label.cex=1)  ;
+
+
+
+
+tkplot(graph.data.frame(g.River.3.edges[g.River.3.edges$Elev.Dif<0,]),canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5,vertex.label=g.River.2.vertices$Index, vertex.label.cex=1, vertex.label.dist=1, edge.label=round(g.River.3.edges$Elev.Dif,2), edge.label.cex=1)
+
+
+g.River.3.sub<-subgraph.edges(g.River.3,E(g.River.3)[inc(g.River.3.edges$Elev.Dif<0)] );
+
+tkplot(g.River.3.sub,canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=V(g.River.3.sub), vertex.label.cex=1, vertex.label.dist=1, edge.label=E(g.River.3.sub), edge.label.cex=1) ;
+
+V(g.River.3.sub)
+E(g.River.3.sub)
+
+list.edge.attributes(g.River.3.sub)
+
+edge_attr(g.River.3.sub,"Elev.Dif")
 
 # Correct  vertex Zmax based on the grap and visual inspection
 
