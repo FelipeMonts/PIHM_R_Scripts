@@ -275,6 +275,10 @@ g.River.3.sub<-subgraph.edges(g.River.3,E(g.River.3)[inc(g.River.3.edges$Elev.Di
 
 tkplot(g.River.3.sub,canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=V(g.River.3.sub), vertex.label.cex=1, vertex.label.dist=1, edge.label=E(g.River.3.sub), edge.label.cex=1) ;
 
+
+
+as_long_data_frame(g.River.3.sub)
+
 V(g.River.3.sub)
 E(g.River.3.sub)
 
