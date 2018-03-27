@@ -261,6 +261,10 @@ V(g.River.3)[is.na(Point.ID)]$color='Blue'
 V(g.River.3)[!is.na(Point.ID)]$color='Red'
 
 
+edge_attr(g.River.3, 'Elev.Dif'))
+
+
+
 
 
 tkplot(g.River.3, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=g.River.2.vertices$Index, vertex.label.cex=1, vertex.label.dist=1, edge.label=round(g.River.3.edges$Elev.Dif,2), edge.label.cex=1)  ;
@@ -271,16 +275,43 @@ tkplot(g.River.3, canvas.width=1800, canvas.height=900, layout=layout_nicely ,ve
 tkplot(graph.data.frame(g.River.3.edges[g.River.3.edges$Elev.Dif<0,]),canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5,vertex.label=g.River.2.vertices$Index, vertex.label.cex=1, vertex.label.dist=1, edge.label=round(g.River.3.edges$Elev.Dif,2), edge.label.cex=1)
 
 
-g.River.3.sub<-subgraph.edges(g.River.3,E(g.River.3)[inc(g.River.3.edges$Elev.Dif<0)] );
-
-tkplot(g.River.3.sub,canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=V(g.River.3.sub), vertex.label.cex=1, vertex.label.dist=1, edge.label=E(g.River.3.sub), edge.label.cex=1) ;
 
 
 
-as_long_data_frame(g.River.3.sub)
+g.River.3.sub<-subgraph.edges(g.River.3,eids=which(E(g.River.3)$Elev.Dif < 0 ));
+
+g.River.3.sub.data<-as_long_data_frame(g.River.3.sub) ;
+
+vertex.attributes(g.River.3.sub)
+
+V(g.River.3.sub)$name
+
+tkplot(g.River.3.sub,canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.3.sub)$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, vertex.label.dist=1, edge.label=round(g.River.3.sub.data$Elev.Dif,3),edge.label.cex=1) ;
+
+
+g.River.4.sub<-make_ego_graph(g.River.3,2,as_ids(V(g.River.3.sub)), mode=c("all"))  ;
+
+length(g.River.4.sub)
+
+V(g.River.4.sub[[3]])
+
+as_long_data_frame(g.River.4.sub[[3]])
+
+
+tkplot(g.River.4.sub[[2]],canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.4.sub[[2]])$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, edge.label=round(E(g.River.4.sub[[2]])$Elev.Dif,3),vertex.label.dist=1,edge.label.cex=1) ;
+
+
+
+
+g.River.3.sub.data<-as_long_data_frame(g.River.3.sub) ;
 
 V(g.River.3.sub)
 E(g.River.3.sub)
+
+
+
+
+
 
 list.edge.attributes(g.River.3.sub)
 
