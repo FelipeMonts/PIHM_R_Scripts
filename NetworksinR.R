@@ -40,7 +40,7 @@ Project<-"MergeVectorLayer000_q25_a100000" ;
 library(devtools)  ;
 
 
-install.packages("sand") ;
+#install.packages("sand") ;
 library(sand)
 #install_sand_packages() ;
 
@@ -282,60 +282,80 @@ g.River.3.sub<-subgraph.edges(g.River.3,eids=which(E(g.River.3)$Elev.Dif < 0 ));
 
 g.River.3.sub.data<-as_long_data_frame(g.River.3.sub) ;
 
+g.River.3.sub.data$from
+
+
 vertex.attributes(g.River.3.sub)
 
-V(g.River.3.sub)$name
+V(g.River.3.sub)[g.River.3.sub.data$from]
 
 tkplot(g.River.3.sub,canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.3.sub)$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, vertex.label.dist=1, edge.label=round(g.River.3.sub.data$Elev.Dif,3),edge.label.cex=1) ;
 
 
-g.River.4.sub<-make_ego_graph(g.River.3,2,as_ids(V(g.River.3.sub)), mode=c("all"))  ;
+g.River.4.sub<-make_ego_graph(g.River.3,3,as_ids(V(g.River.3.sub)[g.River.3.sub.data$from]), mode=c("all"))  ;
 
 length(g.River.4.sub)
 
-V(g.River.4.sub[[3]])
+V(g.River.4.sub[[1]])
 
-as_long_data_frame(g.River.4.sub[[3]])
-
-
-tkplot(g.River.4.sub[[2]],canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.4.sub[[2]])$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, edge.label=round(E(g.River.4.sub[[2]])$Elev.Dif,3),vertex.label.dist=1,edge.label.cex=1) ;
+as_long_data_frame(g.River.4.sub[[1]])
 
 
+for (i in seq(1:length(g.River.4.sub))) {
+ 
+  tkplot(g.River.4.sub[[i]],canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.4.sub[[i]])$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, edge.label=round(E(g.River.4.sub[[i]])$Elev.Dif,3),vertex.label.dist=1,edge.label.cex=1) ; 
+  
+}
 
 
-g.River.3.sub.data<-as_long_data_frame(g.River.3.sub) ;
+str(g.River.3.sub.data$Point.ID.x)
 
-V(g.River.3.sub)
-E(g.River.3.sub)
+mesh.Elements[which(mesh.Elements$Index %in% g.River.3.sub.data$Point.ID.y),]
+mesh.Nodes[which(mesh.Nodes$Index %in% g.River.3.sub.data$Point.ID.y),]
+
+str(mesh.Elements$Index)
+str(mesh.Nodes)
+
+
+mesh.Nodes.corrected<-mesh.Nodes   ;
+
+
+###################### Correct the River nodes to the right elevation ################################################
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 13 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 13 ),c( 'Zmax')]-0.317
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 18 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 18 ),c( 'Zmax')]-0.705
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 34 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 34 ),c( 'Zmax')]-0.62
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 46 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 46 ),c( 'Zmax')]-1.375
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 47 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 47 ),c( 'Zmax')]-1.375
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 56 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 56 ),c( 'Zmax')]-0.0532
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 83 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 83 ),c( 'Zmax')]-2.3411
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 91 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 91 ),c( 'Zmax')]-0.1081
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 98 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 98 ),c( 'Zmax')]-2.4131
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 130 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 130 ),c( 'Zmax')]-0.232
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 199 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 199),c( 'Zmax')]-0.3711
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 216 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 216 ),c( 'Zmax')]-1.398
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 228 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 228 ),c( 'Zmax')]-1.2191
 
 
 
 
 
-
-list.edge.attributes(g.River.3.sub)
-
-edge_attr(g.River.3.sub,"Elev.Dif")
-
-# Correct  vertex Zmax based on the grap and visual inspection
-
-Ncorrec<-Refined.Merged.Nodes ;
 
 #The correction is easy to do in Excel
 
 
-library(XLConnect);
-
-writeWorksheetToFile('C:/Users/frm10/Downloads/Ncorrec.xlsx', Ncorrec, sheet="Ncorrec", startRow=2);
-
-Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
-
-head(Correct.Nodes)
-
-plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
-
-
-River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
-
+# library(XLConnect);
+# 
+# writeWorksheetToFile('C:/Users/frm10/Downloads/Ncorrec.xlsx', Ncorrec, sheet="Ncorrec", startRow=2);
+# 
+# Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
+# 
+# head(Correct.Nodes)
+# 
+# plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
+# 
+# 
+# River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
+# 
 
 

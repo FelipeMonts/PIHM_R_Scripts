@@ -128,21 +128,21 @@ NumEle
 NumNode
 
 
-######### Correct the Nodes that have incorrect height in the river segment before writing the file ################### 
-
-library(XLConnect);
-
-
-Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
-
-head(Correct.Nodes)
-str(Correct.Nodes)
-
-plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
-
-
-River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
-
+# ######### Correct the Nodes that have incorrect height in the river segment before writing the file ################### 
+# 
+# library(XLConnect);
+# 
+# 
+# Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
+# 
+# head(Correct.Nodes)
+# str(Correct.Nodes)
+# 
+# plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
+# 
+# 
+# River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
+# 
 
 
 
@@ -374,6 +374,7 @@ str(River.Nodes)
 
 # New.River.Nodes.Elevation<-River.Nodes.Elevation.Corrected[River.Nodes.Elevation.Corrected$Index %in% River.Nodes, ]
 River.Nodes.Elevation<-mesh.Nodes[mesh.Nodes$Index %in% River.Nodes, ] ;
+#River.Nodes.Elevation<-mesh.Nodes.corrected[mesh.Nodes.corrected$Index %in% River.Nodes, ] ;
 
 
 
@@ -450,6 +451,8 @@ points(River.Nodes.Elevation.TO[,c("Index")],River.Nodes.Max_Elev_Dif, col="RED"
 
 
 River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("Index")] ;
+
+#River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), ] ;
 
 River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("Index")]  ;
 
