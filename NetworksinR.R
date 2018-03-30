@@ -199,7 +199,7 @@ tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,ve
 
 is.simple(g.River.2)
 
-E(graph.data.frame)
+E(g.River.2)
 degree(g.River.2, mode="in")
 which(degree(g.River.2) == 0)
 degree(g.River.2, mode="out")
@@ -215,29 +215,29 @@ tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,ve
 tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=paste(g.River.2.vertices$Index,round(g.River.2.vertices$Zmax,2),sep="-"), vertex.label.cex=1, vertex.label.dist=1) ;
 
 
-g.River.sub<-induced.subgraph(g.River.2,seq(1,30)) ;
+# g.River.sub<-induced.subgraph(g.River.2,seq(1,30)) ;
+# 
+# V(g.River.sub)[is.na(Point.ID)]$color='Blue'
+# V(g.River.sub)[!is.na(Point.ID)]$color='Red'
+# 
+# 
+# tkplot(g.River.sub, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=1.0,vertex.label=paste(V(g.River.sub)$name,round(V(g.River.sub)$Zmax,2),sep="-"),vertex.label.cex=1, vertex.label.dist=1,margin=0.2) ;
+# 
+# 
+# str(g.River.sub)
+# 
+# 
+# V(g.River.sub)$name
+# 
+# list.vertex.attributes(g.River.sub)
+# 
+# list.edge.attributes(g.River.sub)
 
-V(g.River.sub)[is.na(Point.ID)]$color='Blue'
-V(g.River.sub)[!is.na(Point.ID)]$color='Red'
 
 
-tkplot(g.River.sub, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=1.0,vertex.label=paste(V(g.River.sub)$name,round(V(g.River.sub)$Zmax,2),sep="-"),vertex.label.cex=1, vertex.label.dist=1,margin=0.2) ;
+Edgs<-igraph::as_data_frame(g.River.2, what=c("edges"));
 
-
-str(g.River.sub)
-
-
-V(g.River.sub)$name
-
-list.vertex.attributes(g.River.sub)
-
-list.edge.attributes(g.River.sub)
-
-
-
-Edgs<-as_data_frame(g.River.2, what=c("edges"));
-
-Vertcs<-as_data_frame(g.River.2, what=c("vertices"))
+Vertcs<-igraph::as_data_frame(g.River.2, what=c("vertices")) ;
 
 from.Vertcs<-merge(Edgs, Vertcs, by.x="from", by.y="name", all.x=T ) ;
 
@@ -261,7 +261,7 @@ V(g.River.3)[is.na(Point.ID)]$color='Blue'
 V(g.River.3)[!is.na(Point.ID)]$color='Red'
 
 
-edge_attr(g.River.3, 'Elev.Dif'))
+edge_attr(g.River.3, 'Elev.Dif')
 
 
 
@@ -282,8 +282,6 @@ g.River.3.sub<-subgraph.edges(g.River.3,eids=which(E(g.River.3)$Elev.Dif < 0 ));
 
 g.River.3.sub.data<-as_long_data_frame(g.River.3.sub) ;
 
-g.River.3.sub.data$from
-
 
 vertex.attributes(g.River.3.sub)
 
@@ -303,7 +301,7 @@ as_long_data_frame(g.River.4.sub[[1]])
 
 for (i in seq(1:length(g.River.4.sub))) {
  
-  tkplot(g.River.4.sub[[i]],canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.4.sub[[i]])$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, edge.label=round(E(g.River.4.sub[[i]])$Elev.Dif,3),vertex.label.dist=1,edge.label.cex=1) ; 
+  tkplot(g.River.4.sub[[i]],canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.4.sub[[i]])$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, edge.label=round(E(g.River.4.sub[[i]])$Elev.Dif,8),vertex.label.dist=1,edge.label.cex=1) ; 
   
 }
 
@@ -322,20 +320,37 @@ mesh.Nodes.corrected<-mesh.Nodes   ;
 
 ###################### Correct the River nodes to the right elevation ################################################
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 13 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 13 ),c( 'Zmax')]-0.317
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 18 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 18 ),c( 'Zmax')]-0.705
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 34 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 34 ),c( 'Zmax')]-0.62
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 46 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 46 ),c( 'Zmax')]-1.375
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 47 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 47 ),c( 'Zmax')]-1.375
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 56 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 56 ),c( 'Zmax')]-0.0532
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 83 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 83 ),c( 'Zmax')]-2.3411
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 91 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 91 ),c( 'Zmax')]-0.1081
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 98 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 98 ),c( 'Zmax')]-2.4131
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 130 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 130 ),c( 'Zmax')]-0.232
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 199 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 199),c( 'Zmax')]-0.3711
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 216 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 216 ),c( 'Zmax')]-1.398
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 228 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 228 ),c( 'Zmax')]-1.2191
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 13 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 13 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 13),c("Elev.Dif")]
 
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 18 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 18 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 18),c("Elev.Dif")]
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 34 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 34 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 34),c("Elev.Dif")]
+
+ mesh.Nodes.corrected[which(mesh.Nodes$Index == 46 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 46 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 46),c("Elev.Dif")]
+
+ mesh.Nodes.corrected[which(mesh.Nodes$Index == 47 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 47 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 46),c("Elev.Dif")]
+ 
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 56 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 56 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 56),c("Elev.Dif")]
+
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 83 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 83 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 83),c("Elev.Dif")]
+
+
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 91 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 91 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 91),c("Elev.Dif")]
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 98 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 98 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 98),c("Elev.Dif")]
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 130 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 130 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 130),c("Elev.Dif")]
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 199 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 199),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 198),c("Elev.Dif")]
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 216 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 216 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 215),c("Elev.Dif")]
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 228 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 228 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 227),c("Elev.Dif")]
+
+mesh.Nodes.corrected[which(mesh.Nodes$Index == 234 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 234 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 233),c("Elev.Dif")]
 
 
 
