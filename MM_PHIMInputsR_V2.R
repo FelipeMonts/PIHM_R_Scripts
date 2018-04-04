@@ -70,7 +70,7 @@ load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
 
 ####### Store the name of the project to read and write files more easily #############
 
-Project<-"MergeVectorLayer000_q25_a100000"   ;
+# Project<-"MergeVectorLayer000_q25_a100000"   ;
 
 #Project<-"DataModel" ;
 
@@ -188,7 +188,7 @@ Project.LC.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/DomainDeco
 
 # HansYoust.LC<-readOGR("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp")  ;
 
-Project.LC<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/DomainDecomposition2.shp");
+Project.LC<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000.shp");
 
 str(Project.LC, max.level = 2) ;
 
@@ -204,7 +204,7 @@ str(Project.LC@data) ;
 
 # HansYoust.LC@data$Lc_mode<-as.factor(HansYoust.LC@data$Lc_mode) ;
 
-Project.LC@data$LC_majorit<-as.factor(Project.LC@data$LC_majorit) ;
+Project.LC@data$LC_majorit<-as.factor(Project.LC@data$HY_LC_majo) ;
 
 # LC.indexs<-as.integer(levels(HansYoust.LC@data$Lc_mode))  ;
 
