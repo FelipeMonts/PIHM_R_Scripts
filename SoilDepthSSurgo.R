@@ -289,13 +289,14 @@ range(Nodes.Mukeys.Soil.Depth$soil.depth)
 plot(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys.Soil.Depth$soil.depth)
 with(Nodes.Mukeys.Soil.Depth, text(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys.Soil.Depth$soil.depth, labels=Nodes.Mukeys.Soil.Depth$mukey_ID, cex=1, srt=90, pos=4) )
 
-###### Merge with the mesh file from the MM_PHIMInpoutsR_V2.R####
+############    Merge with the mesh file from the PIHMInputsR.R ##########################################
 
 
-head(mesh.Nodes.corrected)
-str(mesh.Nodes.corrected)
 
-Rev.mesh.Soil.Depth<-merge(Rev.mesh.Nodes,Nodes.Mukeys.Soil.Depth, by.x=c('X','Y'), by.y=c('coords.x1' , 'coords.x2'), all.x=T, sort=F) ;
+head(mesh.Nodes)
+str(mesh.Nodes)
+
+Rev.mesh.Soil.Depth<-merge(mesh.Nodes,Nodes.Mukeys.Soil.Depth, by.x=c('X','Y'), by.y=c('coords.x1' , 'coords.x2'), all.x=T, sort=F) ;
 
 #### Check if there are any rows with NA in the soil depth column
 
@@ -314,30 +315,37 @@ Rev.mesh.Soil.Depth[which(is.na(Rev.mesh.Soil.Depth$soil.depth)),] ;
 
 Rev.mesh.Soil.Depth[which(is.na(Rev.mesh.Soil.Depth$soil.depth)),c('soil.depth')]<-0.555 ;
 
+head(Rev.mesh.Soil.Depth)
 #### calculate Zmin from Zmax and soil depth
 
-Rev.mesh.Soil.Depth$Zmin.SSURGO<-Rev.mesh.Soil.Depth$Zmax.x-Rev.mesh.Soil.Depth$soil.depth ;
+Rev.mesh.Soil.Depth$Zmin.SSURGO<-Rev.mesh.Soil.Depth$Zmax.Riv.Corr-Rev.mesh.Soil.Depth$soil.depth ;
 
 ## check if there is any negative difference between Zmax-Zmin.SSURGO
 
 
-Rev.mesh.Soil.Depth$Diff.Z<-Rev.mesh.Soil.Depth$Zmax.x-Rev.mesh.Soil.Depth$Zmin.SSURGO ;
+Rev.mesh.Soil.Depth$Diff.Z<-Rev.mesh.Soil.Depth$Zmax.Riv.Corr-Rev.mesh.Soil.Depth$Zmin.SSURGO ;
 
-Rev.mesh.Soil.Depth[which(Rev.mesh.Soil.Depth$Diff.Z <= 0),]
+Rev.mesh.Soil.Depth[which(Rev.mesh.Soil.Depth$Diff.Z <= 0),] ;
 
-plot(Rev.mesh.Soil.Depth$Index.x, Rev.mesh.Soil.Depth$Diff.Z) 
+plot(Rev.mesh.Soil.Depth$Index, Rev.mesh.Soil.Depth$Diff.Z)  ;
 
-Rev.mesh.Soil.Depth[which(Rev.mesh.Soil.Depth$Diff.Z <= 0.20),]
+Rev.mesh.Soil.Depth[which(Rev.mesh.Soil.Depth$Diff.Z <= 0.20),]  ;
 
 #### put together the columns needed for the mesh file
 
-Rev.mesh.Nodes.SSURGO<-Rev.mesh.Soil.Depth[order(Rev.mesh.Soil.Depth$Index.x),c('Index.x', 'X' , 'Y' , 'Zmin.SSURGO','Zmax.x' )]
+Rev.mesh.Nodes.SSURGO<-Rev.mesh.Soil.Depth[order(Rev.mesh.Soil.Depth$Index),c('Index', 'X' , 'Y' , 'Zmin' ,'Zmin.SSURGO','Zmax' , 'Zmax.Riv.Corr' )] ;
 
 head(Rev.mesh.Nodes.SSURGO)
 str(Rev.mesh.Nodes.SSURGO)
 
-plot(Rev.mesh.Nodes.SSURGO$Index.x, (Rev.mesh.Nodes.SSURGO$Zmax.x-Rev.mesh.Nodes.SSURGO$Zmin.SSURGO))
-with(Rev.mesh.Nodes.SSURGO, text(Rev.mesh.Nodes.SSURGO$Index.x,(Rev.mesh.Nodes.SSURGO$Zmax.x-Rev.mesh.Nodes.SSURGO$Zmin.SSURGO), labels=Rev.mesh.Nodes.SSURGO$Index.x, cex=1, srt=90, pos=4) )
+plot(Rev.mesh.Nodes.SSURGO$Index, (Rev.mesh.Nodes.SSURGO$Zmax-Rev.mesh.Nodes.SSURGO$Zmin.SSURGO))   ;
+
+
+
+
+
+
+
 
 #### write the revised mesh file########################################################################################
 
@@ -394,4 +402,5 @@ header.mesh.Nodes<-c('INDEX' , 'X' , 'Y' , 'ZMIN' , 'ZMAX');
 write.table(Rev.mesh.Nodes.SSURGO , file=paste0(inputfile.name, "_REV_SSURGO.MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
 
 
+save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\SoilDepthSSurgo.RData'));
 

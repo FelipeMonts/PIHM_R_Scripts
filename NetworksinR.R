@@ -410,42 +410,42 @@ str(mesh.Elements$Index)
 str(mesh.Nodes)
 
 
-mesh.Nodes.corrected<-mesh.Nodes   ;
+mesh.Nodes$Zmax.Riv.Corr<-mesh.Nodes$Zmax   ;
 
 
 ###################### Correct the River nodes to the right elevation ################################################
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 13 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 13 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 13),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 13 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 13 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 13),c("Elev.Dif")]
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 18 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 18 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 18),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 18 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 18 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 18),c("Elev.Dif")]
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 34 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 34 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 34),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 34 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 34 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 34),c("Elev.Dif")]
 
- mesh.Nodes.corrected[which(mesh.Nodes$Index == 46 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 46 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 46),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 46 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 46 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 46),c("Elev.Dif")]
 
- mesh.Nodes.corrected[which(mesh.Nodes$Index == 47 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 47 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 46),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 47 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 47 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 46),c("Elev.Dif")]
  
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 56 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 56 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 56),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 56 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 56 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 56),c("Elev.Dif")]
 
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 83 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 83 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 83),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 83 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 83 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 83),c("Elev.Dif")]
 
 
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 91 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 91 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 91),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 91 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 91 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 91),c("Elev.Dif")]
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 98 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 98 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 98),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 98 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 98 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 98),c("Elev.Dif")]
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 130 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 130 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 130),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 130 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 130 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 130),c("Elev.Dif")]
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 199 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 199),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 198),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 199 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 199),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 198),c("Elev.Dif")]
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 216 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 216 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 215),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 216 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 216 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 215),c("Elev.Dif")]
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 228 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 228 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 227),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 228 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 228 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 227),c("Elev.Dif")]
 
-mesh.Nodes.corrected[which(mesh.Nodes$Index == 234 ),c( 'Zmax')]<-mesh.Nodes[which(mesh.Nodes$Index == 234 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 233),c("Elev.Dif")]
+mesh.Nodes[which(mesh.Nodes$Index == 234 ),c( 'Zmax.Riv.Corr')]<-mesh.Nodes[which(mesh.Nodes$Index == 234 ),c( 'Zmax')] + g.River.3.sub.data[which(g.River.3.sub.data$Point.ID.y== 233),c("Elev.Dif")]
 
 
 
