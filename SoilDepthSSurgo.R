@@ -289,7 +289,7 @@ range(Nodes.Mukeys.Soil.Depth$soil.depth)
 plot(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys.Soil.Depth$soil.depth)
 with(Nodes.Mukeys.Soil.Depth, text(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys.Soil.Depth$soil.depth, labels=Nodes.Mukeys.Soil.Depth$mukey_ID, cex=1, srt=90, pos=4) )
 
-###### Merge with the mesh file from the MM_PHIMInpoutsR_####
+###### Merge with the mesh file from the MM_PHIMInpoutsR_V2.R####
 
 
 head(mesh.Nodes.corrected)
