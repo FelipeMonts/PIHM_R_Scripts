@@ -243,13 +243,17 @@ Mukey.Pedon.Nodes@site
 
 head(Nodes.Mukeys@data)
 str(Nodes.Mukeys@data)
+str(unique.data.frame(Nodes.Mukeys@data))
 
 head(Nodes.Mukeys@coords)
-str(Nodes.Mukeys@coords)
+str(unique(Nodes.Mukeys@coords))
 rownames(Nodes.Mukeys@data)
+
+
 
 Nodes.Mukeys.Coords<-data.frame(Nodes.Mukeys@coords,Nodes.Mukeys@data)  ;
 
+head(Nodes.Mukeys.Coords)
 
 #### Each point in node in the triangle is repeated a number of times equal to the number of trianlges that share that node
 
@@ -258,7 +262,7 @@ duplicated(Nodes.Mukeys@coords) ;
 head(Nodes.Mukeys.Coords[order(Nodes.Mukeys.Coords$coords.x1),])
 
 Unique.Nodes.Mukeys.Coords<-unique(Nodes.Mukeys.Coords)
-head(Unique.Nodes.Mukeys.Coords)
+head(Unique.Nodes.Mukeys.Coords,20)
 str(Unique.Nodes.Mukeys.Coords)
 
 
@@ -340,68 +344,6 @@ str(Rev.mesh.Nodes.SSURGO)
 
 plot(Rev.mesh.Nodes.SSURGO$Index, (Rev.mesh.Nodes.SSURGO$Zmax-Rev.mesh.Nodes.SSURGO$Zmin.SSURGO))   ;
 
-
-
-
-
-
-
-
-
-
-#### write the revised mesh file########################################################################################
-
-################## Write out the appropiate formated "Mesh" File for the MM-PIHM input format ##################################
-##       First, create the mesh element part
-
-head(mesh.Elements)
-
-MESH.1<-data.frame(c('NUMELE'),NumEle);
-
-## write the first lines of the new MM-PIHM mesh file
-
-write.table(MESH.1, file=paste0(inputfile.name, "_REV_SSURGO.MESH"), row.names=F ,col.names=F, quote=F, sep ="\t") ;
-
-
-MESH.2<-data.frame(c('INDEX') ,c('NODE1') , c('NODE2') , c('NODE3'), c('NABR1') , c('NABR2') ,c('NABR3')) ;
-
-write.table(MESH.2[1,], file=paste0(inputfile.name, "_REV_SSURGO.MESH"), row.names=F , col.names=F, quote=F, sep ="\t", append = T) ;
-
-## write the mesh data into the new MM-PIHM mesh file
-
-write.table(mesh.Elements, file=paste0(inputfile.name, "_REV_SSURGO.MESH"), row.names=F , col.names=F, quote=F, sep ="\t", append = T) ;
-
-
-head(mesh.Elements)
-
-
-##       Second Create the node elements part 
-### write the first lines of the node elements
-
-head(mesh.Nodes)
-str(mesh.Nodes)
-
-NumEle
-NumNode
-
-
-
-
-
-######## Write the mesh file ###########################################################################################
-
-NODES.1<-data.frame(c('NUMNODE'),NumNode )   ;
-write.table(NODES.1 , file=paste0(inputfile.name, "_REV_SSURGO.MESH") , append=T , row.names=F ,col.names=F, quote=F, sep ="\t") ;
-
-
-header.mesh.Nodes<-c('INDEX' , 'X' , 'Y' , 'ZMIN' , 'ZMAX');
-
-#write.table(New.mesh.Nodes , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
-
-
-#write.table(Rev.mesh.Nodes[,c('Index.x' , 'X' , 'Y', 'Zmin.x' , 'Zmax.x')] , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
-
-write.table(Rev.mesh.Nodes.SSURGO , file=paste0(inputfile.name, "_REV_SSURGO.MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
 
 
 save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\SoilDepthSSurgo.RData'));

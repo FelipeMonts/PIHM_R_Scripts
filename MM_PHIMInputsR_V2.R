@@ -65,6 +65,12 @@ load(paste0('./',Project,'/PIHMInputsR.RData'));
 load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
 
 
+load(paste0('./',Project,'/FillNoDataSoils.RData'));
+
+load(paste0('./',Project,'/NetworksinR.RData'));
+
+load(paste0('./',Project,'/SoilDepthSSurgo.RData'));
+
 ## attach('./PIHMInputsR.RData', ); Adds the database with the objects created to the path R searches for objects. It is safer than load, but one needs to remember the name of the variables when programming. 
 
 
@@ -127,34 +133,19 @@ str(mesh.Nodes)
 NumEle
 NumNode
 
+head(mesh.Nodes)
+str(mesh.Nodes)
 
-# ######### Correct the Nodes that have incorrect height in the river segment before writing the file ################### 
-# 
-# library(XLConnect);
-# 
-# 
-# Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
-# 
-# head(Correct.Nodes)
-# str(Correct.Nodes)
-# 
-# plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
-# 
-# 
-# River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
-# 
+head(Rev.mesh.Nodes.SSURGO)
+str(Rev.mesh.Nodes.SSURGO)
 
 
+Rev.mesh.Nodes<-merge(x=mesh.Nodes,y=unique.data.frame(Rev.mesh.Nodes.SSURGO), by=c( 'X', 'Y' , 'Index' , 'Zmin'), all.x=T, all.y=F, sort=F ) ;
 
-New.mesh.Nodes<-merge(mesh.Nodes,River.Nodes.Elevation.Corrected, by=c('X', 'Y'),all.x=T, sort=F)  ;
+head(Rev.mesh.Nodes)
+str(Rev.mesh.Nodes)
 
-str(New.mesh.Nodes)
-
-head(New.mesh.Nodes)
-
-New.mesh.Nodes[!is.na(New.mesh.Nodes$Zmax.Correct),c('Zmax.x')]<-New.mesh.Nodes[!is.na(New.mesh.Nodes$Zmax.Correct),c('Zmax.Correct')]
-
-Rev.mesh.Nodes<-New.mesh.Nodes[order(New.mesh.Nodes$Index.x),c('Index.x' , 'X' , 'Y', 'Zmin.x' , 'Zmax.x')] ;
+Rev.mesh.Nodes<-Rev.mesh.Nodes[order(Rev.mesh.Nodes$Index),c('Index' , 'X' , 'Y', 'Zmin.x' , 'Zmax.x')] ;
 
 #New.mesh.Nodes[401:600,]
 head(Rev.mesh.Nodes)
