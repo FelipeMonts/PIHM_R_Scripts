@@ -23,12 +23,18 @@
 
 #Project.Directory<-"C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_Felipe\\CNS\\WE-38\\WE38_Files_PIHM_Cycles20170208\\Feb2720171451" ;
 
-Windows.Directory<-gsub("\\\\", "/", readClipboard())
+Windows.Directory<-gsub("\\\\", "/", readClipboard())  ;
+
+
 #  C:\Felipe\PIHM-CYCLES\PIHM\PIHM_Felipe\CNS\Manhantango\HydroTerreFullManhantango\HansYostDeepCreek\Aug2920171550
 # C:\Aun Trabajo en Proceso\HansYostDeepCreek\Aug2920171550
 
 
-Project.Directory<-Windows.Directory
+Project.Directory<-Windows.Directory  ;
+
+setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')
+
+
 
 setwd(Project.Directory)    ;
 

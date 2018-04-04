@@ -210,10 +210,10 @@ V(g.River.2)[!is.na(Point.ID)]$color='Red'
 
 
 
-tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.1, vertex.label=g.River.2.vertices$Index, vertex.label.cex=1, vertex.label.dist=1)   ;
-
-tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=paste(g.River.2.vertices$Index,round(g.River.2.vertices$Zmax,2),sep="-"), vertex.label.cex=1, vertex.label.dist=1) ;
-
+# tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.1, vertex.label=g.River.2.vertices$Index, vertex.label.cex=1, vertex.label.dist=1)   ;
+# 
+# tkplot(g.River.2, canvas.width=1800, canvas.height=900, layout=layout_nicely ,vertex.size= 2, edge.arrow.size=0.5, vertex.label=paste(g.River.2.vertices$Index,round(g.River.2.vertices$Zmax,2),sep="-"), vertex.label.cex=1, vertex.label.dist=1) ;
+# 
 
 # g.River.sub<-induced.subgraph(g.River.2,seq(1,30)) ;
 # 
@@ -356,21 +356,6 @@ mesh.Nodes.corrected[which(mesh.Nodes$Index == 234 ),c( 'Zmax')]<-mesh.Nodes[whi
 
 
 
-#The correction is easy to do in Excel
-
-
-# library(XLConnect);
-# 
-# writeWorksheetToFile('C:/Users/frm10/Downloads/Ncorrec.xlsx', Ncorrec, sheet="Ncorrec", startRow=2);
-# 
-# Correct.Nodes<-readWorksheetFromFile('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Ncorrec.xlsx', sheet="Ncorrec", startRow = 1, endRow = 305, startCol= 1, endCol=8 );
-# 
-# head(Correct.Nodes)
-# 
-# plot(Correct.Nodes$Index,Correct.Nodes$Zmax.Correct)
-# 
-# 
-# River.Nodes.Elevation.Corrected<-RNEC<-Correct.Nodes[,c('Index' , 'X' , 'Y' , 'Zmin' , 'Zmax' , 'Zmax.Correct')] ;
-# 
+save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\NetworksinR.RData')); 
 
 

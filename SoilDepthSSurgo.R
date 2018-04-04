@@ -47,6 +47,7 @@ library(rgdal) ;
 
 Project<-"MergeVectorLayer000_q25_a100000" ;
 
+
 #Project<-"DataModel" ;
 
 
@@ -75,13 +76,13 @@ inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
 # 
 # ###########################################################################################################################
 
-##### Read the nodes and the corresponding Mukey from the TX file formed from Qgis
+##### Read the nodes and the corresponding Mukey from the TX file formed from the shape file that extracted the nodes of the mesh shape file in Qgis
 
 
-Nodes.Mukeys.info<-ogrInfo('C:/Aun Trabajo en Proceso/HansYostDeepCreek/DomainDecomposition2NodesGSSURGO.shp');
+Nodes.Mukeys.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000_Nodes.shp");
 
 
-Nodes.Mukeys<-readOGR('C:/Aun Trabajo en Proceso/HansYostDeepCreek/DomainDecomposition2NodesGSSURGO.shp')  ;
+Nodes.Mukeys<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000_Nodes.shp")  ;
 
 str(Nodes.Mukeys, max.level = 3)  ;
 
@@ -92,7 +93,7 @@ str(Nodes.Mukeys@data)
 ####  bedrock information
 
 
-Nodes.Mukeys@data$Mukey.factor<-as.factor(Nodes.Mukeys@data$HansYoustG) ;
+Nodes.Mukeys@data$Mukey.factor<-as.factor(Nodes.Mukeys@data$HY_SOIL_ma) ;
 
 head(Nodes.Mukeys@data) 
 
@@ -291,8 +292,8 @@ with(Nodes.Mukeys.Soil.Depth, text(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys
 ###### Merge with the mesh file from the MM_PHIMInpoutsR_####
 
 
-head(Rev.mesh.Nodes)
-str(Rev.mesh.Nodes)
+head(mesh.Nodes.corrected)
+str(mesh.Nodes.corrected)
 
 Rev.mesh.Soil.Depth<-merge(Rev.mesh.Nodes,Nodes.Mukeys.Soil.Depth, by.x=c('X','Y'), by.y=c('coords.x1' , 'coords.x2'), all.x=T, sort=F) ;
 
