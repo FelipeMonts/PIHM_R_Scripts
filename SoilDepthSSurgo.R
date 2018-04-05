@@ -56,7 +56,9 @@ load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
 
 load(paste0('./',Project,'/FillNoDataSoils.RData'));
 
-load(paste0('./',Project,'/MM_PHIMInputsR_V2.RData')) ;
+load(paste0('./',Project,'/NetworksinR.RData')) ;
+
+
 
 ######## Store the name of the directory whre the modified MM-PIHM inputs are to be stored
 
@@ -79,10 +81,10 @@ inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
 ##### Read the nodes and the corresponding Mukey from the TX file formed from the shape file that extracted the nodes of the mesh shape file in Qgis
 
 
-Nodes.Mukeys.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000_Nodes.shp");
+Nodes.Mukeys.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000_Nodes_Geom_Duplicate_Mukey.shp");
 
 
-Nodes.Mukeys<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000_Nodes.shp")  ;
+Nodes.Mukeys<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000_Nodes_Geom_Duplicate_Mukey.shp")  ;
 
 str(Nodes.Mukeys, max.level = 3)  ;
 
@@ -93,7 +95,7 @@ str(Nodes.Mukeys@data)
 ####  bedrock information
 
 
-Nodes.Mukeys@data$Mukey.factor<-as.factor(Nodes.Mukeys@data$HY_SOIL_ma) ;
+Nodes.Mukeys@data$Mukey.factor<-as.factor(Nodes.Mukeys@data$HansYoustGS) ;
 
 head(Nodes.Mukeys@data) 
 
@@ -301,6 +303,10 @@ head(mesh.Nodes)
 str(mesh.Nodes)
 
 Rev.mesh.Soil.Depth<-merge(mesh.Nodes,Nodes.Mukeys.Soil.Depth, by.x=c('X','Y'), by.y=c('coords.x1' , 'coords.x2'), all.x=T, sort=F) ;
+
+head(Rev.mesh.Soil.Depth)
+
+str(Rev.mesh.Soil.Depth)
 
 #### Check if there are any rows with NA in the soil depth column
 

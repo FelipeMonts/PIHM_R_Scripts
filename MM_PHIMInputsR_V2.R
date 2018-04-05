@@ -140,12 +140,13 @@ head(Rev.mesh.Nodes.SSURGO)
 str(Rev.mesh.Nodes.SSURGO)
 
 
-Rev.mesh.Nodes<-merge(x=mesh.Nodes,y=unique.data.frame(Rev.mesh.Nodes.SSURGO), by=c( 'X', 'Y' , 'Index' , 'Zmin'), all.x=T, all.y=F, sort=F ) ;
+Rev.mesh.Nodes<-merge(x=mesh.Nodes,y=Rev.mesh.Nodes.SSURGO, by=c( 'X', 'Y' , 'Index' , 'Zmin'), all.x=T, all.y=F, sort=F ) ;
 
 head(Rev.mesh.Nodes)
 str(Rev.mesh.Nodes)
 
-Rev.mesh.Nodes<-Rev.mesh.Nodes[order(Rev.mesh.Nodes$Index),c('Index' , 'X' , 'Y', 'Zmin.x' , 'Zmax.x')] ;
+Rev.mesh.Nodes<-Rev.mesh.Nodes[order(Rev.mesh.Nodes$Index),c('Index' , 'X' , 'Y', 'Zmin.SSURGO' , 'Zmax.Riv.Corr.x')] ;
+
 
 #New.mesh.Nodes[401:600,]
 head(Rev.mesh.Nodes)
@@ -161,7 +162,7 @@ header.mesh.Nodes<-c('INDEX' , 'X' , 'Y' , 'ZMIN' , 'ZMAX');
 #write.table(New.mesh.Nodes , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
 
 
-write.table(Rev.mesh.Nodes[,c('Index.x' , 'X' , 'Y', 'Zmin.x' , 'Zmax.x')] , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
+write.table(Rev.mesh.Nodes[,c('Index' , 'X' , 'Y', 'Zmin.SSURGO' , 'Zmax.Riv.Corr.x')] , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
 
 
 ###################   Write the appropiate formated "Attributes" File for the MM-PIHM input format  #################################
@@ -324,11 +325,13 @@ Revised.att[, 'MUKEYS.index']<-as.numeric(Revised.att[, 'MUKEYS.index']) ;
 
 # Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index']<-dim(HansYoust_Soil)[1]  ;
 
-Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index']<-dim(Project_Soil)[1]  ;
+Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [, 'MUKEYS.index']<-seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]) ;
 
-# write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'NLCD.lc','METEO', 'LAI','S', 'BC.0', 'BC.1', 'BC.2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
-write.table(Revised.att[,c('Index' , 'Soil' , 'Geol', 'NLCD.lc', 'METEO',	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
+
+write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'NLCD.lc','METEO', 'LAI','SS', 'BC0', 'BC1', 'BC2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
+
+#write.table(Revised.att[,c('Index' , 'Soil' , 'Geol', 'NLCD.lc', 'METEO',	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
 
 ###################   Write the appropiate formated "River" File for the MM-PIHM input format  #################################
@@ -378,7 +381,11 @@ str(River.Nodes.Elevation)
 # connect the River nodes with the corresponding information in the mesh file
 
 # New.River.Nodes.Elevation.FROM<-merge(riv.elements,New.River.Nodes.Elevation, by.x='FromNode' , by.y='Index', all.x=T, sort=F) ;
-River.Nodes.Elevation.FROM<-merge(riv.elements,River.Nodes.Elevation, by.x='FromNode' , by.y='Index', all.x=T, sort=F) ;
+
+head(riv.elements)
+str(riv.elements) 
+
+River.Nodes.Elevation.FROM<-merge(riv.elements,Rev.mesh.Nodes.SSURGO, by.x='FROM' , by.y='Index', all.x=T, sort=F) ;
 
 
 # head(New.River.Nodes.Elevation.FROM,50)
@@ -391,7 +398,7 @@ str(River.Nodes.Elevation.FROM)
 
 # New.River.Nodes.Elevation.TO<-merge(riv.elements,New.River.Nodes.Elevation, by.x='ToNode' , by.y='Index', all.x=T,sort=F) ;
 
-River.Nodes.Elevation.TO<-merge(riv.elements,River.Nodes.Elevation, by.x='ToNode' , by.y='Index', all.x=T,sort=F) ;
+River.Nodes.Elevation.TO<-merge(riv.elements,Rev.mesh.Nodes.SSURGO, by.x='FROM' , by.y='Index', all.x=T,sort=F) ;
 
 
 # head(New.River.Nodes.Elevation.TO,50)
@@ -431,8 +438,8 @@ str(River.Nodes.Max_Elev_Dif)
 # points(New.River.Nodes.Elevation.TO[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="RED" ) ;
 
 
-plot(River.Nodes.Elevation.FROM[,c("Index")],River.Nodes.Max_Elev_Dif, col="BLUE") ;
-points(River.Nodes.Elevation.TO[,c("Index")],River.Nodes.Max_Elev_Dif, col="RED" ) ;
+plot(River.Nodes.Elevation.FROM[,c('INDEX')],River.Nodes.Max_Elev_Dif, col="BLUE") ;
+points(River.Nodes.Elevation.TO[,c('INDEX')],River.Nodes.Max_Elev_Dif, col="RED" ) ;
 
 
 # New.River.Nodes.Elevation.FROM[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
@@ -441,11 +448,11 @@ points(River.Nodes.Elevation.TO[,c("Index")],River.Nodes.Max_Elev_Dif, col="RED"
 # 
 
 
-River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c("Index")] ;
+River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c('INDEX')] ;
 
 #River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), ] ;
 
-River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("Index")]  ;
+River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c('INDEX')]  ;
 
 
 
@@ -460,7 +467,7 @@ River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c("Index")]  ;
 River.Nodes.Elevation.FROM$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif ;
 
 
-plot(River.Nodes.Elevation.FROM$Index,River.Nodes.Elevation.FROM$Max_Elev_Dif)
+plot(River.Nodes.Elevation.FROM$INDEX,River.Nodes.Elevation.FROM$Max_Elev_Dif)
 
 
 head(River.Nodes.Elevation.FROM)

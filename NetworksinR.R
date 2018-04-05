@@ -394,11 +394,11 @@ V(g.River.4.sub[[1]])
 as_long_data_frame(g.River.4.sub[[1]])
 
 
-for (i in seq(1:length(g.River.4.sub))) {
- 
-  tkplot(g.River.4.sub[[i]],canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.4.sub[[i]])$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, edge.label=round(E(g.River.4.sub[[i]])$Elev.Dif,8),vertex.label.dist=1,edge.label.cex=1) ; 
-  
-}
+# for (i in seq(1:length(g.River.4.sub))) {
+#  
+#   tkplot(g.River.4.sub[[i]],canvas.width=1800, canvas.height=900, layout=layout_nicely ,V(g.River.4.sub[[i]])$name, vertex.size= 2, edge.arrow.size=0.5, vertex.label.cex=1, edge.label=round(E(g.River.4.sub[[i]])$Elev.Dif,8),vertex.label.dist=1,edge.label.cex=1) ; 
+#   
+# }
 
 
 str(g.River.3.sub.data$Point.ID.x)
