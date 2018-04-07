@@ -227,10 +227,11 @@ head(Project.LC@data$LC.index)
 #inspect the levels of Project.LC@data$LC.index 
 
 levels(Project.LC@data$LC.index)<-c(levels(Project.LC@data$LC_majorit),"95")
+head(Project.LC@data)
 
-Project.LC@data$LC.index[which(Project.LC@data$LC.index == "11")]<-"95"   ;
+Project.LC@data$LC.index[which(Project.LC@data$LC.index == "11")]<-c("95")   ;
 
-
+Project.LC@data$LC.index[which(Project.LC@data$LC.index == "95")] ;
 
 ######  Merge the LC index with the rest of the attribute table
 
@@ -245,13 +246,13 @@ names(att) ;
 
 att<-Project.GSSURGO@data[,c("Ele_ID" ,"MUKEYS.index","MUKEYS.index")]
 names(att)<-c('Index', 'Soil', 'Geol')
+str(att)
 
-
-# att.expanded.1<-merge(att,HansYoust.LC@data, by.x='Index' , by.y='Ele_ID') ;
 
 att.expanded.1<-merge(att,Project.LC@data, by.x='Index' , by.y='Ele_ID') ;
 
-str(att)
+head(att.expanded.1)
+str(att.expanded.1)
 
 ############# Load the vegetation parameter table and the convertion parameters for PIHM - MM ################
 
@@ -289,7 +290,8 @@ PIHM_to_NLCD[!is.na(PIHM_to_NLCD$PIHM.lc), ]
 ######### MErge with the NLCD_to_PIHM data to change the NLCD LC data to the MM-PIHM Land Cover
 
 
-att.expanded.2<-merge(att.expanded.1,PIHM_to_NLCD, by.x="LC_majorit", by.y="PIHM.lc", all.x=T ) ;
+att.expanded.2<-merge(att.expanded.1,PIHM_to_NLCD, by.x="LC.index", by.y="PIHM.lc", all.x=T ) ;
+head(att.expanded.2)
 
 ###### change the name of the LC column that will be used in the revised attributes
 
@@ -302,10 +304,11 @@ revised.names[4]<- "LC" ;
 
 att.expanded.3<-merge(att.expanded.2,MUKEYS.map.1, by.x='Index', by.y='Ele_ID') ;
 
-###### change the name of the LC column that will be used in the revised attributes
-
 
 Revised.att<-att.expanded.3[order(att.expanded.3$Index),] ;
+
+head(Revised.att)
+
 
 
 Revised.att$METEO<-1 ;
