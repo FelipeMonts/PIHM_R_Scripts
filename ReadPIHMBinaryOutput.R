@@ -106,7 +106,9 @@ setwd("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_R_Scripts/MM_PIHM_outputs") ;
 
 ############### Create a project directory where all processed results will be stored#############
 
-Output.Project<-c("HansYoust.1711211109")  ;
+# Output.Project<-c("HansYoust.1711211109")  ;
+
+Output.Project<-c("Project.1804101838")  ;
 
 dir.create(paste0("./",Output.Project)) ;
 ####
@@ -128,7 +130,7 @@ library("hexView") ;
 ###############################################################################################################
 list.files(paste0("./",Output.Project))   ;
 
-file_info<-file.info(paste0('./',Output.Project,'/', 'HansYoust.recharge.dat'))   ; # information about the binary file
+file_info<-file.info(paste0('./',Output.Project,'/', 'Project.rivflx0.dat'))   ; # information about the binary file
 
 word.size=8 ;  # eight bytes per word
 
