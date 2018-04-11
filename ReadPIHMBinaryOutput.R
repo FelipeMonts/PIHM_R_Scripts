@@ -108,7 +108,7 @@ setwd("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_R_Scripts/MM_PIHM_outputs") ;
 
 # Output.Project<-c("HansYoust.1711211109")  ;
 
-Output.Project<-c("Project.1804101838")  ;
+Output.Project<-c("Project.1804102016")  ;
 
 dir.create(paste0("./",Output.Project)) ;
 ####
@@ -119,47 +119,10 @@ dir.create(paste0("./",Output.Project)) ;
 #                             
 ###############################################################################################################
 
-library("foreign") ;
-library("dplyr") ;
-library("hexView") ;
-
-
-
-###############################################################################################################
-#                      Read binary files 
-###############################################################################################################
-list.files(paste0("./",Output.Project))   ;
-
-file_info<-file.info(paste0('./',Output.Project,'/', 'Project.rivflx0.dat'))   ; # information about the binary file
-
-word.size=8 ;  # eight bytes per word
-
-Triangle.no=NumEle ; # number of triangles in the output simulation
-
-No.Rows<-file_info$size/word.size/(Triangle.no+1) ; # number of rows obtained by dividing the file size in bytes
-# by wordsize*(Tiangle.no +1 (time stamp))  
-
-Read_data<-readBin(paste0('./',Output.Project,'/', 'HansYoust.recharge.dat') , "numeric" , size=word.size, n=file_info$size/word.size) ; # read the binary filw
-
-Recharge<-as.data.frame(matrix(data=Read_data, ncol=Triangle.no+1, byrow=T)); # create a matrix with the binary file
-# and then transforme it into a dataframe.
-
-
-Recharge$Time<-as.POSIXct(Recharge[,1], origin="1970-01-01", tz="UTC") ;
-
-
-##############################Program to plot the messh files in PIHM
-##############################Based on the Book SpatialData analyisis in R
-####    Preeeliminaries
-
-
-
-
-
-########### Call the library packages needed for the program to work #############
-
-
-
+library(foreign) ;
+library(dplyr) ;
+library(hexView) ;
+library(lattice) ;
 library(rgdal);
 
 library(sp);
@@ -179,92 +142,158 @@ library(dplyr)  ;
 library(tidyr)  ;
 
 
-########### Read infromation about the shape files ###########
+###############################################################################################################
+#                      Read binary files from PIHM Output
+###############################################################################################################
 
-Output.Project.mesh.info<-ogrInfo("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Aug2920171550/3DomainDecomposition/MergeVectorLayer000_q30_a200000.shp");
-
-
-### The number of polygons in the shape file is WE38.mesh.info$nrows
-
-Output.Project.mesh.info$nrows
+############  Table 2: Description of PIHM output variables.  ########
 
 
-##### Read the shape files form the shape files used in preparation of the mesh file #######
+# Variable Extension Description Unit
+# SURF surf Surface water level m
+# UNSAT unsat Unsaturated water storage m
+# GW gw Element groundwater level m
+# RIVSTG stage River stage m
+# RIVGW rivgw River groundwater level m
+# SNOW snow Water-equivalent snow depth m
+# CMC is Canopy interception m
+# INFIL infil Infiltration rate m s???1
+# RECHARGE recharge Recharge rate m s???1
+# EC ec Canopy evaporation m s???1
+# ETT ett Total transpiration m s???1
+# EDIR edir Soil evaporation m s???1
+# RIVFLX0 rivflx0 Longitudinal flow to river m3 s???1
+# RIVFLX1 rivflx1 Longitudinal flow from river m3 s???1
+# RIVFLX2 rivflx2 Lateral overland flow to river from left m3 s???1
+# RIVFLX3 rivflx3 Lateral overland flow to river from right m3 s???1
+# RIVFLX4 rivflx4 Lateral groundwater flow to river from left m3 s???1
+# RIVFLX5 rivflx5 Lateral groundwater flow to river from right m3 s???1
+# RIVFLX6 rivflx6 Leakage flow from river to aquifer m3 s???1
+# RIVFLX7 rivflx7 Longitudinal flow to river aquifer m3 s???1
+# RIVFLX8 rivflx8 Longitudinal flow from river aquifer m3 s???1
+# RIVFLX9 rivflx9 Lateral groundwater flow to aquifer from left m3 s???1
+# RIVFLX10 rivflx10 Lateral groundwater flow to aquifer from right m3 s???1
+# SUBFLX subflx[0-2] Subsurface water flux m3 s???1
+# SURFFLX surfflx[0-2] Surface water flux m3 s???1
 
-Output.Project.mesh<-readOGR("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Aug2920171550/3DomainDecomposition/MergeVectorLayer000_q30_a200000.shp" ); 
-
-### The Shape file polygons ID are from 0 to n, therefore would not match the elements ID in PIHM. 
-### To change that the polygon Ids can be changed to make them match
-
-for ( i  in 1:Output.Project.mesh.info$nrows) {
-  
-  Output.Project.mesh@polygons[[i]]@ID<-as.character(i)
-}
-
-###### Similarly for the river shape File
-
-Output.Project.river.info<-ogrInfo('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Aug2920171550/2VectorProcessing/Stream10000_sln30_xln_Decomp.shp' )    ;
-
-
-Output.Project.river.info$nrows
-
-
-Output.Project.river<-readOGR('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Aug2920171550/2VectorProcessing/Stream10000_sln30_xln_Decomp.shp' )
-
-
-for ( i  in 1:Output.Project.river.info$nrows) {
-  
-  Output.Project.river@lines[[i]]@ID<-as.character(i)
-}
-
-
-
-##### plot the shape File
-
-plot(Output.Project.mesh, col="light green",lwd=2);
-lines(Output.Project.river,col="BLUE",lwd=3) ;
-title("Output.Project MESH") ;
-
-
-####### read the dataframe with the attributes collected from the ground water output obtaqined from pihm
-
-# ########## Identify the output runs that are in the output file
-# 
-# PIHM.runs<-list.files(path=".\\output")   ;
-# 
-# length(PIHM.runs) ;
-# 
-# print(PIHM.runs)  ;
-# 
-
-##########################################Read the ground water table data ####################################
 
 ###############################################################################################################
-#                      Read binary files 
+#                      Read binary files from River Segments
 ###############################################################################################################
 
 
-list.files("./")   ;
+list.files(paste0("./",Output.Project))   ;
 
-file_info<-file.info(paste0('./',Output.Project,'/', 'HansYoust.gw.dat'))   ; # information about the binary file
+file_info<-file.info(paste0('./',Output.Project,'/', 'Project.rivflx0.dat'))   ; # information about the binary file
 
 word.size=8 ;  # eight bytes per word
 
-Triangle.no=NumEle ; # number of triangles in the output simulation
+NUMRIV=241 ; # number of river elements in the output simulation
+
+No.Rows<-file_info$size/word.size/(NUMRIV+1) ; # number of rows obtained by dividing the file size in bytes
+# by wordsize*(Tiangle.no +1 (time stamp))  
+
+Read_data<-readBin(paste0('./',Output.Project,'/', 'Project.rivflx0.dat') , "numeric" , size=word.size, n=file_info$size/word.size) ; # read the binary file
+
+rivflx0<-as.data.frame(matrix(data=Read_data, ncol=NUMRIV+1, byrow=T)); # create a matrix with the binary file
+# and then transforme it into a dataframe.
+
+
+rivflx0$Time<-as.POSIXct(rivflx0[,1], origin="1970-01-01", tz="UTC") ;
+str(rivflx0)
+
+plot(rivflx0$Time, rivflx0[,3] , type= "l" , col="RED") ;
+
+xyplot()
+
+
+
+
+###############################################################################################################
+#                      Read binary files from triangles
+###############################################################################################################
+
+list.files(paste0("./",Output.Project))   ;
+
+
+file_info<-file.info(paste0('./',Output.Project,'/', 'Project.gw.dat'))   ; # information about the binary file
+
+word.size=8 ;  # eight bytes per word
+
+Triangle.no=NumEle=1958 ; # number of triangles in the output simulation
 
 No.Rows<-file_info$size/word.size/(Triangle.no+1) ; # number of rows obtained by dividing the file size in bytes
 # by wordsize*(Tiangle.no +1 (time stamp))  
 
-Read_data<-readBin(paste0('./',Output.Project,'/', 'HansYoust.recharge.dat') , "numeric" , size=word.size, n=file_info$size/word.size) ; # read the binary filw
+Read_data<-readBin(paste0('./',Output.Project,'/', 'Project.gw.dat') , "numeric" , size=word.size, n=file_info$size/word.size) ; # read the binary file
 
-GW<-as.data.frame(matrix(data=Read_data, ncol=Triangle.no+1, byrow=T)); # create a matrix with the binary file
+gw<-as.data.frame(matrix(data=Read_data, ncol=Triangle.no+1, byrow=T)); # create a matrix with the binary file
 # and then transforme it into a dataframe.
 
 
-GW$Time<-as.POSIXct(GW[,1], origin="1970-01-01", tz="UTC") ;
+gw$Time<-as.POSIXct(Recharge[,1], origin="1970-01-01", tz="UTC") ;
+str(gw)
+
+plot(gw$Time,gw[,3])
 
 
-length(GW$Time)
+
+###############################################################################################################
+#                              Read Mesh Triangle Shape files 
+###############################################################################################################
+
+
+
+########### Read infromation about the shape files ###########
+
+Project.mesh.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000.shp")  ; 
+
+
+
+### The number of polygons in the shape file is  Project.mesh.info$nrows
+
+Project.mesh.info$nrows
+
+#### read the shape file that has been created in QGIS using the zonal statistics
+
+# HansYoust.GSSURGO<-readOGR("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/GSSURGO/HY_GSURGO.shp")  ;
+
+Project.mesh<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000.shp")  ;  
+
+
+
+
+###############################################################################################################
+#                              Read River Shape files 
+###############################################################################################################
+
+
+Project.river.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/Stream8000_sln32_dens150m_xln_Decomp.shp")   ;
+
+
+### The number of river segments in the shape file is  Project.river.info$nrows
+
+Project.river.info$nrows
+
+
+Project.river<-readOGR('C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Aug2920171550/2VectorProcessing/Stream10000_sln30_xln_Decomp.shp' )
+
+
+###############################################################################################################
+#                             Plot the triangle mesh and the river
+###############################################################################################################
+
+plot(Project.mesh, col="light green",lwd=1);
+lines(Project.river,col="BLUE",lwd=2) ;
+title("Project MESH & River") ;
+
+
+
+###############################################################################################################
+#                             Other Exploratory plots
+###############################################################################################################
+
+
 
 #### Select a time Range that it is interesting to explore
 
