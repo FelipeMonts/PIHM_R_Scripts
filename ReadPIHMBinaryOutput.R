@@ -108,7 +108,7 @@ setwd("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_R_Scripts/MM_PIHM_outputs") ;
 
 # Output.Project<-c("HansYoust.1711211109")  ;
 
-Output.Project<-c("Project.1804102016")  ;
+Output.Project<-c("Project.1804201605")  ;
 
 dir.create(paste0("./",Output.Project)) ;
 ####
@@ -118,6 +118,7 @@ dir.create(paste0("./",Output.Project)) ;
 #                         Call packages needed to process the data 
 #                             
 ###############################################################################################################
+
 
 library(foreign) ;
 library(dplyr) ;
@@ -140,6 +141,51 @@ library(tmap) ;
 library(dplyr)  ;
 
 library(tidyr)  ;
+
+library(gridExtra)
+
+###############################################################################################################
+#                         Read the Meteoroligal data  to plot the precipitation with the data output
+###############################################################################################################
+
+
+Meteo.data.names<-read.table(paste0('./',Output.Project,'/', 'Project.meteo'), header = F, skip=1, nrows=1, as.is =T);
+
+Meteo.data<-read.table(paste0('./',Output.Project,'/', 'Project.meteo'), header = F, skip=3, as.is= T);
+
+str(Meteo.data)
+names(Meteo.data)[1]<-c('Date')
+
+names(Meteo.data)[seq(2,length(names(Meteo.data)))]<- unname(Meteo.data.names[1,]);
+
+
+Meteo.data$Time<-as.POSIXct(paste0(Meteo.data$Date," " , Meteo.data$TIME), origin="1970-01-01", tz="UTC") ;
+
+Meteo.data$PRCP_NoZero<-Meteo.data$PRCP +1e-10
+
+Meteo.data$Log_PRCP<-log10(Meteo.data$PRCP_NoZero)
+
+seq.POSIXt(ISOdate(1980,1,1,0,0,0),ISOdate(1980,1,5,0,0,0),"hour")
+
+
+ggplot(data=Meteo.data, aes(x= Time, y= Log_PRCP, colour=PRCP)) +
+  geom_point()
+
+seq.POSIXt(ISOdate(1980,1,1,0,0,0),ISOdate(1980,1,5,0,0,0),"hour")
+
+head(Meteo.data,10)
+
+
+Meteo.data.plot<-Meteo.data[Meteo.data$Time %in% seq.POSIXt(ISOdate(1980,1,1),ISOdate(1980,1,5),"hour"),c('Time','Log_PRCP')]
+
+head(Meteo.data.plot)
+
+M_Log_PRCP<-ggplot(data=Meteo.data.plot, aes(x= Time, y= -Log_PRCP, colour=Log_PRCP)) +
+  geom_point()
+
+
+
+
 
 
 ###############################################################################################################
@@ -216,7 +262,7 @@ xyplot()
 list.files(paste0("./",Output.Project))   ;
 
 
-file_info<-file.info(paste0('./',Output.Project,'/', 'Project.gw.dat'))   ; # information about the binary file
+file_info<-file.info(paste0('./',Output.Project,'/', 'Project.surf.dat'))   ; # information about the binary file
 
 word.size=8 ;  # eight bytes per word
 
@@ -227,14 +273,42 @@ No.Rows<-file_info$size/word.size/(Triangle.no+1) ; # number of rows obtained by
 
 Read_data<-readBin(paste0('./',Output.Project,'/', 'Project.gw.dat') , "numeric" , size=word.size, n=file_info$size/word.size) ; # read the binary file
 
-gw<-as.data.frame(matrix(data=Read_data, ncol=Triangle.no+1, byrow=T)); # create a matrix with the binary file
+surf.dat<-as.data.frame(matrix(data=Read_data, ncol=Triangle.no+1, byrow=T)); # create a matrix with the binary file
 # and then transforme it into a dataframe.
 
 
-gw$Time<-as.POSIXct(Recharge[,1], origin="1970-01-01", tz="UTC") ;
-str(gw)
+#######  Plot the data with the prepipitation data as a reference
 
-plot(gw$Time,gw[,3])
+#head(surf.dat[,1])
+
+
+surf.dat$Time<-as.POSIXct(surf.dat[,1], origin="1970-01-01", tz="UTC") ;
+
+M_Log_PRCP
+
+for (i in seq(2,(round(Triangle.no/50,0)-1)*50,by=50)){
+  
+  surf.dat.gather<-surf.dat[,-1] %>% gather(key='Triangle', 'Surface_Water', seq(i,i+50))  
+  
+  Surface.water<-ggplot(data=surf.dat.gather, aes(x=Time, y= Surface_Water, color=Triangle))+
+    geom_path()
+  grid.arrange( M_Log_PRCP ,  Surface.water , layout_matrix= matrix(c( 1, rep(2,5) ), nrow=6, ncol=1) )
+}
+
+
+M_Log_PRCP
+
+
+surf.dat.gather<-surf.dat[,-1] %>% gather(key='Triangle', 'Surface_Water', seq(101,100))
+
+#head(surf.dat.gather)
+
+Surface.water<-ggplot(data=surf.dat.gather, aes(x=Time, y= Surface_Water, color=Triangle))+
+  geom_path()
+
+#head(surf.dat.gather)
+
+grid.arrange( M_Log_PRCP ,  Surface.water , layout_matrix= matrix(c( 1, rep(2,5) ), nrow=6, ncol=1) )
 
 
 
