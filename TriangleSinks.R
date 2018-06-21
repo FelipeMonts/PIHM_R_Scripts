@@ -236,7 +236,7 @@ Triangles.B3$Triangle_River<-Triangles.B3$INDEX %in% Triangle.Border_River ;
 
 
 
-###### Filter triancles that are not river borders ######
+###### Filter triangles that are not river borders ######
 
 Triangles.Island[!Triangles.Island$INDEX %in% Triangle.Border_River, ] ;
 
@@ -278,7 +278,7 @@ plot(Triangle.mesh) ;
 
 str(Triangle.mesh@data) 
 
-############ Add information to the data in the shape file and do eploratory plots
+############ Add information to the data in the shape file and do exploratory plots
 
 head(Triangles.B3)
 str(Triangles.B3)

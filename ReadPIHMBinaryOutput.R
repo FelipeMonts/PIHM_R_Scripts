@@ -167,6 +167,9 @@ Meteo.data$Log_PRCP<-log10(Meteo.data$PRCP_NoZero)
 
 seq.POSIXt(ISOdate(1980,1,1,0,0,0),ISOdate(1980,1,5,0,0,0),"hour")
 
+ggplot(data=Meteo.data, aes(x= Time, y= PRCP_NoZero, colour=PRCP)) +
+  geom_point() +
+  ylim(c(0,0.005))
 
 ggplot(data=Meteo.data, aes(x= Time, y= Log_PRCP, colour=PRCP)) +
   geom_point()
@@ -244,6 +247,7 @@ Read_data<-readBin(paste0('./',Output.Project,'/', 'Project.rivflx0.dat') , "num
 rivflx0<-as.data.frame(matrix(data=Read_data, ncol=NUMRIV+1, byrow=T)); # create a matrix with the binary file
 # and then transforme it into a dataframe.
 
+head(rivflx0)
 
 rivflx0$Time<-as.POSIXct(rivflx0[,1], origin="1970-01-01", tz="UTC") ;
 str(rivflx0)
@@ -255,8 +259,57 @@ xyplot()
 
 
 
+
 ###############################################################################################################
-#                      Read binary files from triangles
+#                      Read Read River  Stage
+###############################################################################################################
+
+
+list.files(paste0("./",Output.Project))   ;
+
+file_info<-file.info(paste0('./',Output.Project,'/', 'Project.stage.dat'))   ; # information about the binary file
+
+word.size=8 ;  # eight bytes per word
+
+NUMRIV=241 ; # number of river elements in the output simulation
+
+No.Rows<-file_info$size/word.size/(NUMRIV+1) ; # number of rows obtained by dividing the file size in bytes
+# by wordsize*(Tiangle.no +1 (time stamp))  
+
+Read_data<-readBin(paste0('./',Output.Project,'/', 'Project.rivflx0.dat') , "numeric" , size=word.size, n=file_info$size/word.size) ; # read the binary file
+
+stage<-as.data.frame(matrix(data=Read_data, ncol=NUMRIV+1, byrow=T)); # create a matrix with the binary file
+# and then transforme it into a dataframe.
+
+head(stage)
+
+stage$Time<-as.POSIXct(stage[,1], origin="1970-01-01", tz="UTC") ;
+
+
+
+for (i in seq(2,(round(NUMRIV/50,0)-1)*50,by=50)){
+  
+  # stage.gather<-stage[,-1] %>% gather(key='River_Segment', 'Stage', seq(2,2+50));
+  # #head(stage.gather)
+  
+  stage.gather<-stage[,-1] %>% gather(key='River_Segment', 'Stage', seq(i,i+50));
+  
+  River.stage<-ggplot(data=stage.gather, aes(x=Time, y= Stage, color= River_Segment))+
+  geom_path()
+  
+  grid.arrange( M_Log_PRCP ,  River.stage , layout_matrix= matrix(c( 1, rep(2,5) ), nrow=6, ncol=1) )
+}
+
+str(stage)
+
+
+
+unique(which(stage[,2:241]<=-5, arr.ind = T)[,2])
+
+
+
+###############################################################################################################
+#                      Read binary  from triangles
 ###############################################################################################################
 
 list.files(paste0("./",Output.Project))   ;
@@ -286,6 +339,8 @@ surf.dat$Time<-as.POSIXct(surf.dat[,1], origin="1970-01-01", tz="UTC") ;
 
 M_Log_PRCP
 
+
+
 for (i in seq(2,(round(Triangle.no/50,0)-1)*50,by=50)){
   
   surf.dat.gather<-surf.dat[,-1] %>% gather(key='Triangle', 'Surface_Water', seq(i,i+50))  
@@ -309,6 +364,11 @@ Surface.water<-ggplot(data=surf.dat.gather, aes(x=Time, y= Surface_Water, color=
 #head(surf.dat.gather)
 
 grid.arrange( M_Log_PRCP ,  Surface.water , layout_matrix= matrix(c( 1, rep(2,5) ), nrow=6, ncol=1) )
+
+######### Inquire about the trinagles that accumulate surface water continuosly ##############################
+
+dim(surf.dat)
+which(surf.dat[570, ] >=2.5     )
 
 
 
