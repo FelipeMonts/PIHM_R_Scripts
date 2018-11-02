@@ -47,7 +47,7 @@ DataModel.dir<-"4DataModelLoader" ;
 #Store  the name of the project :
 
 
-Project<-"MergeVectorLayer000_q25_a100000"
+Project<-"MergeVectorLayer000_q30"  ;
 
 #Project<-"DataModel"  ;
 
@@ -72,9 +72,10 @@ PIHMMasterFiles<-c(".ATT" , ".CALIB" , ".FORC" , ".GEOL" , ".IBC" , ".INIT" , ".
 
 #   Because the Messh file has in the first line the number of elements (NumEle) and the number of nodes (NumNode), we can use that information to read the table more efficiently
 
-mesh.NumEle.NumNode<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,nrows=1,skip=0, col.names=c("NumEle","NumNode"));
+mesh.NumEle.NumNode<-read.table(paste0(inputfile.name, ".mesh"),as.is=T,nrows=1,skip=0, col.names=c("NumEle","NumNode"));
 
 NumEle<-mesh.NumEle.NumNode$NumEle;
+
 NumNode<-mesh.NumEle.NumNode$NumNode;
 
 # The mesh file has the following structure: first it lists the Elements and then it lists the nodes.
@@ -83,12 +84,12 @@ NumNode<-mesh.NumEle.NumNode$NumNode;
 # Zmax is the surface elevation of the node and Zmin is the bed elevation of the node
 # see the PIHM2x_input_file_format.pdf file
 
-mesh.Elements<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,skip=1, nrows=NumEle,col.names=c('Index', 'Node.0', 'Node.1', 'Node.2', 'Nabr.0', 'Nabr.1', 'Nabr.2'));
+mesh.Elements<-read.table(paste0(inputfile.name, ".mesh"),as.is=T,skip=1, nrows=NumEle,col.names=c('Index', 'Node.0', 'Node.1', 'Node.2', 'Nabr.0', 'Nabr.1', 'Nabr.2'));
+head(mesh.Elements)
 
 
-mesh.Nodes<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,skip=NumEle+1, nrows=NumNode, col.names=c('Index','X','Y','Zmin','Zmax'));
-
-
+mesh.Nodes<-read.table(paste0(inputfile.name, ".mesh"),as.is=T,skip=NumEle+1, nrows=NumNode, col.names=c('Index','X','Y','Zmin','Zmax'));
+head(mesh.Nodes)
 
 
 
@@ -126,7 +127,7 @@ mesh.Nodes<-read.table(paste0(inputfile.name, ".MESH0"),as.is=T,skip=NumEle+1, n
 # mP Integer Macropore present or not 1:Yes/ 0: No
 
 
-att<-read.table(paste0(inputfile.name, ".ATT"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
+att<-read.table(paste0(inputfile.name, ".att"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
 
 
 head(att)
@@ -266,10 +267,10 @@ HT_Geology<-read.table(file = "../GSSURGO/HansYoust_Geology.txt", as.is=T, heade
 # Res Integer Reservoir ID
 
 
-NumRiv<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,nrows=1)[1,1];
+NumRiv<-read.table(paste0(inputfile.name, ".riv"),as.is=T,nrows=1)[1,1];
 
 
-riv.elements<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1,nrows=NumRiv,col.names=c('Index', 'FromNode', 'ToNode', 'Down', 'LeftEle', 'RightEle', 'Shape', 'Material', 'IC', 'BC', 'Res'));
+riv.elements<-read.table(paste0(inputfile.name, ".riv"),as.is=T,skip=1,nrows=NumRiv,col.names=c('Index', 'FromNode', 'ToNode', 'Down', 'LeftEle', 'RightEle', 'Shape', 'Material', 'IC', 'BC', 'Res'));
 
 # the the files continues with a block containing shape attributes. The block starts with a row with two coulms "Shape" and "NumShape"
 # Then it is followed by a list of attributes regarding the shape: Index Depth InterpOrd WidCoeff
@@ -281,11 +282,11 @@ riv.elements<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1,nrows=Num
 # WidCoeff Double Width Coefficient * width if a rectangular
 # * Interpolation Order (b) and Widht Coefficient (a) are parameters defining relation between Width and Depth of a river segment as: [D = a x (W/2)b].
 
-shape<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv,nrows=1);
+shape<-read.table(paste0(inputfile.name, ".riv"),as.is=T,skip=1+NumRiv,nrows=1);
 
 NumShape<-shape[1,2];
 
-riv.shape<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv+1,nrows=NumShape,col.names=c('Index', 'Depth', 'InterpOrd', 'WidCoeff'));
+riv.shape<-read.table(paste0(inputfile.name, ".riv"),as.is=T,skip=1+NumRiv+1,nrows=NumShape,col.names=c('Index', 'Depth', 'InterpOrd', 'WidCoeff'));
 
 
 # Afterwards the file continues with the Material information for the river shapes. The block starts with a row with two coulms "Material" and NumMat
@@ -302,7 +303,7 @@ riv.shape<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv+1,nro
 
 
 
-Material<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv+1+NumShape,nrows=1);
+Material<-read.table(paste0(inputfile.name, ".riv"),as.is=T,skip=1+NumRiv+1+NumShape,nrows=1);
 
 NumMat<-Material[1,2];
 
@@ -319,18 +320,18 @@ riv.material<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv+1+
 # Index Integer Initial Condition ID Beginning with 1
 # Value Double Intial Condition Water Table
 
-IC<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv+1+NumShape+1+NumMat,nrows=1);
+IC<-read.table(paste0(inputfile.name, ".riv"),as.is=T,skip=1+NumRiv+1+NumShape+1+NumMat,nrows=1);
 
 NumIC<-IC[1,2]; 
 
-riv.IC<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=NumRiv+1+NumShape+1+1+NumMat+1,nrows=NumIC,col.names=c('Index', 'Value'));
+riv.IC<-read.table(paste0(inputfile.name, ".riv"),as.is=T,skip=NumRiv+1+NumShape+1+1+NumMat+1,nrows=NumIC,col.names=c('Index', 'Value'));
 
 
 # Finaly the river file contains the boundary condition information
 # It starts with a row with two coulms "BC" and NumBC. NumBC indicates the number of boundary conditions time series. In this example the NumBC=0, therefore there is no information about the boundary conditions. 
 # see the PIHM2x_input_file_format.pdf file
 
-BC<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv+1+NumShape+1+NumMat+1+NumIC,nrows=1);
+BC<-read.table(paste0(inputfile.name, ".riv"),as.is=T,skip=1+NumRiv+1+NumShape+1+NumMat+1+NumIC,nrows=1);
 
 NumBC<-BC[1,2];
 
@@ -340,7 +341,7 @@ NumBC<-BC[1,2];
 
 
 
-Res<-read.table(paste0(inputfile.name, ".RIV"),as.is=T,skip=1+NumRiv+1+NumShape+1+NumMat+1+NumIC+max(c(NumBC,1)),nrows=1);
+Res<-read.table(paste0(inputfile.name, ".riv"),as.is=T,skip=1+NumRiv+1+NumShape+1+NumMat+1+NumIC+max(c(NumBC,1)),nrows=1);
 
 
 # *****************************************************READ THE FORCING FILE .forc ********************************************
@@ -727,7 +728,9 @@ names(calib.list[[9]])<-c("rivDepth", "rivWidCoeff");
 
 ######## Create the directory where the objects created in the file PIHMInputsR.RData are to be saved
 
-dir.create(paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project));
+#dir.create(paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project));
 
-save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\PIHMInputsR.RData'));
+dir.create(paste0(Project.Directory,'\\MM_PHIM_INPUTS'))  ;
+
+save.image(file=paste0(Project.Directory,'\\MM_PHIM_INPUTS\\','PIHMInputsR.RData'));
 

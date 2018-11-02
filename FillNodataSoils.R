@@ -25,7 +25,12 @@
 
 #  Set Working directory
 
-setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')   
+RevisedOutputs.dir<-paste0(Project.Directory,'\\MM_PHIM_INPUTS') ;
+
+
+setwd(RevisedOutputs.dir)   ;
+
+#setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')   
 
 #  Windows.Directory<-gsub("\\\\", "/", readClipboard())
 #  C:\Felipe\PIHM-CYCLES\PIHM\PIHM_Felipe\CNS\Manhantango\HydroTerreFullManhantango\HansYostDeepCreek\Aug2920171550
@@ -35,13 +40,13 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')
 
 ####### Store the name of the project to read and write files more easily #############
 
-Project<-"MergeVectorLayer000_q25_a100000"
+Project<-"MergeVectorLayer000_q30"  ;
 
 #Project<-"DataModel" ;
 
 
 
-load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
+load('SoilsSurgoPIHM.RData');
 
 
 
@@ -51,14 +56,14 @@ load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
 #dir.create(Project);
 
 
-RevisedOutputs.dir<-paste0('./',Project,'/') ;
+#RevisedOutputs.dir<-paste0('./',Project,'/') ;
 
 
 
 
 # Create the path to read the input files by pasting RevisedOutputs.dir and the Project name together with the file ".name" ie ".mesh"
 
-inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
+#inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
 
 
 
@@ -260,11 +265,11 @@ NUMSOIL<-data.frame(c('NUMSOIL'), dim(Project_Soil.Rev)[1]) ;
 NUMGEOL<-data.frame(c('NUMGEOL'), dim(Project_Geology.Rev)[1]) ;
 
 
-write.table(NUMSOIL,file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", col.names=F) ;
+write.table(NUMSOIL,file=paste0(RevisedOutputs.dir, '/Soil.txt'), row.names=F , quote=F, sep = "\t", col.names=F) ;
 
 # write.table(HansYoust_Soil[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
-write.table(Project_Soil.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
+write.table(Project_Soil.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(RevisedOutputs.dir, '/Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
 ####################  Add DINF , KMACV_RO  and KMACH_RO  at the end of the soil file ################
 # DINF (type: double, unit: m) A virtual top soil layer thickness across which infiltration is calculated.
@@ -275,7 +280,7 @@ write.table(Project_Soil.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KS
 
 DINF_etc<-data.frame(c('DINF' , 'KMACV_RO', 'KMACH_RO'), c( 0.10, 100.0 , 1000.0 )) ;
 
-write.table(DINF_etc,file=paste0(inputfile.name, '_Soil.txt'), row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
+write.table(DINF_etc,file=paste0(RevisedOutputs.dir, '/Soil.txt'), row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
 
 
 # NUMGEOL<-data.frame(c('NUMGEOL'), dim(HansYoust_Geology)[1]) ;
@@ -285,16 +290,16 @@ NUMGEOL<-data.frame(c('NUMGEOL'), dim(Project_Geology.Rev)[1]) ;
 
 # write.table(HansYoust_Geology[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
-write.table(Project_Geology.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
+write.table(Project_Geology.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(RevisedOutputs.dir, '/Geology.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
 
-write.table(DINF_etc, file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
+write.table(DINF_etc, file=paste0(RevisedOutputs.dir, '/Geology.txt'), row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
 
 
 
 
 
-save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\FillNoDataSoils.RData'));
+save.image(file=paste0(RevisedOutputs.dir, '/FillNoDataSoils.RData')) ;
 
 
 
