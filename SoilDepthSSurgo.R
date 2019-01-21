@@ -25,7 +25,13 @@
 
 #  Set Working directory
 
-setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')   
+#setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs') 
+
+RevisedOutputs.dir<-paste0(Project.Directory,'\\MM_PHIM_INPUTS') ;
+
+
+setwd(RevisedOutputs.dir)   ;
+
 
 #  Windows.Directory<-gsub("\\\\", "/", readClipboard())
 #  C:\Felipe\PIHM-CYCLES\PIHM\PIHM_Felipe\CNS\Manhantango\HydroTerreFullManhantango\HansYostDeepCreek\Aug2920171550
@@ -45,46 +51,46 @@ library(rgdal) ;
 
 ####### Store the name of the project to read and write files more easily #############
 
-Project<-"MergeVectorLayer000_q25_a100000" ;
+#Project<-"MergeVectorLayer000_q25_a100000" ;
 
 
 #Project<-"DataModel" ;
 
 
 
-load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
+load('SoilsSurgoPIHM.RData');
 
-load(paste0('./',Project,'/FillNoDataSoils.RData'));
+load('FillNoDataSoils.RData');
 
-load(paste0('./',Project,'/NetworksinR.RData')) ;
-
-
-
-######## Store the name of the directory whre the modified MM-PIHM inputs are to be stored
-
-RevisedOutputs.dir<-paste0('./',Project,'/') ;
+#load('NetworksinR.RData') ;
 
 
 
-
-# Create the path to read the input files by pasting RevisedOutputs.dir and the Project name together with the file ".name" ie ".mesh"
-
-inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
-
-# ###########################################################################################################################
+# ######## Store the name of the directory whre the modified MM-PIHM inputs are to be stored
 # 
-# ###     Prepare depth to bed rock data to be incorporated into the mesh file when a uniform soil profile depth
-# ###     is not what is desired 
+# RevisedOutputs.dir<-paste0('./',Project,'/') ;
 # 
-# ###########################################################################################################################
+# 
+# 
+# 
+# # Create the path to read the input files by pasting RevisedOutputs.dir and the Project name together with the file ".name" ie ".mesh"
+# 
+# inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
+# 
+# # ###########################################################################################################################
+# # 
+# # ###     Prepare depth to bed rock data to be incorporated into the mesh file when a uniform soil profile depth
+# # ###     is not what is desired 
+# # 
+# # ###########################################################################################################################
+# 
+# ##### Read the nodes and the corresponding Mukey from the TX file formed from the shape file that extracted the nodes of the mesh shape file in Qgis
 
-##### Read the nodes and the corresponding Mukey from the TX file formed from the shape file that extracted the nodes of the mesh shape file in Qgis
+
+Nodes.Mukeys.info<-ogrInfo('Nodes_MergeVectorLayer000_q30_Ssurgo.shp');
 
 
-Nodes.Mukeys.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000_Nodes_Geom_Duplicate_Mukey.shp");
-
-
-Nodes.Mukeys<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000_Nodes_Geom_Duplicate_Mukey.shp")  ;
+Nodes.Mukeys<-readOGR('Nodes_MergeVectorLayer000_q30_Ssurgo.shp')  ;
 
 str(Nodes.Mukeys, max.level = 3)  ;
 
@@ -95,7 +101,7 @@ str(Nodes.Mukeys@data)
 ####  bedrock information
 
 
-Nodes.Mukeys@data$Mukey.factor<-as.factor(Nodes.Mukeys@data$HansYoustGS) ;
+Nodes.Mukeys@data$Mukey.factor<-as.factor(Nodes.Mukeys@data$Ssurgo_maj) ;
 
 head(Nodes.Mukeys@data) 
 
@@ -326,11 +332,15 @@ Rev.mesh.Soil.Depth[which(is.na(Rev.mesh.Soil.Depth$soil.depth)),] ;
 Rev.mesh.Soil.Depth[which(is.na(Rev.mesh.Soil.Depth$soil.depth)),c('soil.depth')]<-0.555 ;
 
 head(Rev.mesh.Soil.Depth)
-#### calculate Zmin from Zmax and soil depth
 
-Rev.mesh.Soil.Depth$Zmin.SSURGO<-Rev.mesh.Soil.Depth$Zmax.Riv.Corr-Rev.mesh.Soil.Depth$soil.depth ;
 
-## check if there is any negative difference between Zmax-Zmin.SSURGO
+# #### calculate Zmin from Zmax and soil depth
+# 
+# Rev.mesh.Soil.Depth$Zmin.SSURGO<-Rev.mesh.Soil.Depth$Zmax.Riv.Corr-Rev.mesh.Soil.Depth$soil.depth ;  ### This code was added when the river points needed to be moved becausse of elevation mismatches. That is nor needed now.
+# 
+# ## check if there is any negative difference between Zmax-Zmin.SSURGO
+
+
 
 
 Rev.mesh.Soil.Depth$Diff.Z<-Rev.mesh.Soil.Depth$Zmax.Riv.Corr-Rev.mesh.Soil.Depth$Zmin.SSURGO ;
