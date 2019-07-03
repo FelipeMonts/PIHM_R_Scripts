@@ -30,7 +30,7 @@ library(raster)
 library(shapefiles)
 
 # Set working directory to your location
-setwd("C:/Users/dtarb/Scratch/Logan")
+setwd("C:/Users/frm10/Downloads") ;
 
 z=raster("logan.tif")
 plot(z)
