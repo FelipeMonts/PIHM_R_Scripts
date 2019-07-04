@@ -50,7 +50,7 @@ library(raster) ;
 ######################################################################################################################################
 # 
 # 
-#  Read the files resulting from the mesh generation using the Trianlge software
+#  Read the files resulting from the mesh generation using the Trianlge software and create the Mesh File
 # 
 # 
 # 
@@ -91,7 +91,7 @@ str(Watershed.1.ele)
 tail(Watershed.1.ele)
 
 
-########### Read the .1.ele file  ###########
+########### Read the .1.node file  ###########
 
 
 ### Description from https://www.cs.cmu.edu/~quake/triangle.node.html
@@ -117,7 +117,7 @@ str(Watershed.1.node)
 tail(Watershed.1.node)
 
 
-####### Create a pint shape file from the nodes coordinates to extract the ZMAX Values from the DEM
+####### Create a point shape file from the nodes coordinates to extract the ZMAX Values from the DEM
 
 
 Node.Points<-SpatialPointsDataFrame(coords=Watershed.1.node[,c("X", "Y")],  proj4string=CRS('+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'), data=Watershed.1.node, coords.nrs = c(2,3), match.ID = T);
@@ -134,11 +134,180 @@ FillPits<-raster("C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/1RasterProc
 ####### Extract the elevation data for each node
 
 
-
-
 Node.Points.ZMAX<-data.frame(coordinates(Node.Points),data=Node.Points, raster::extract(FillPits,Node.Points));
 
+names(Node.Points.ZMAX)
+
 str(Node.Points.ZMAX)
+
+
+
+
+###### Add the depth of the soil from the Soils file extracted from the GSURGO database.
+
+
+
+
+
+
+
+
+
+####### Read the 1.1 neigh file from triangle
+
+
+### description from https://www.cs.cmu.edu/~quake/triangle.neigh.html
+
+# .neigh files
+# 
+# First line: <# of triangles> <# of neighbors per triangle (always 3)>
+#   Following lines: <triangle #> <neighbor> <neighbor> <neighbor> 
+# 
+# Blank lines and comments prefixed by `#' may be placed anywhere. Triangles are numbered consecutively, starting from one or zero. Neighbors are indices into the corresponding .ele file. An index of -1 indicates no neighbor (because the triangle is on an exterior boundary). The first neighbor of triangle i is opposite the first corner of triangle i, and so on.
+# 
+# Triangle can produce .neigh files (use the -n switch), but cannot read them. 
+
+
+Watershed.1.neigh<-read.table('C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/Jun2420191944/3DomainDecomposition/MergeVectorLayer200.neigh', header=FALSE, sep= "", skip=1) ;
+
+names(Watershed.1.neigh)<-c("triangle", "neighbor1","neighbor2","neighbor3") ;
+
+str(Watershed.1.neigh)
+tail(Watershed.1.neigh)
+
+
+########## Create The Triangle section of the mesh file
+
+mesh.Part1<-merge(Watershed.1.ele,Watershed.1.neigh, by=c('triangle')) ;
+
+names(mesh.Part1)<-c('INDEX' , 'NODE1' , 'NODE2' , 'NODE3' , 'NABR1' , 'NABR2' , 'NABR3') ;
+
+
+
+########## Create The Node section of the mesh file
+
+mesh.Part2<-Node.Points.ZMAX[,c('data.INDEX', 'X', 'Y', 'raster..extract.FillPits..Node.Points.')] ;
+
+names(mesh.Part2)<-c('INDEX' , 'X' , 'Y' ,  'ZMAX') ; ### Add the ZMIN name when the information comes from Soils
+
+head(mesh.Part2)
+
+
+
+
+
+######################################################################################################################################
+# 
+# 
+#                                  Create the river File from the TauDEM aoutput and the Mesh files
+# 
+# 
+# 
+######################################################################################################################################
+
+
+########### Read River shape file (simplified and splited) information  ###########
+
+
+River.info<-ogrInfo("C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/2VectorProcessing/StreamPolyline200m_xln.shp" );
+
+River.shp<-readOGR("C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/2VectorProcessing/StreamPolyline200m_xln.shp", p4s='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' );
+
+River.shp@lines
+
+coordinates(River.shp)
+
+
+str(River.shp)
+
+plot(River.shp)
+
+
+# get the ID's of the line segments in the shape file read
+
+as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID")))  
+
+str(as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID"))) )
+
+#get the coordinates of the first line segment of the shape file read
+
+coordinates(River.shp)[[1]]
+
+
+# get the coordinates of all the line segments of the shape file read as an  array 
+
+River.SegID<-as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID")));
+
+
+River.FromPoint<-data.frame(t(sapply(coordinates(River.shp),function(x) x[[1]][1,]))) ;
+
+River.FromPoint$ID<-River.SegID ;
+
+River.ToPoint<-data.frame(t(sapply(coordinates(River.shp),function(x) x[[1]][2,]))) ;
+
+
+River.ToPoint$ID<-River.SegID ;
+
+
+###### match the coordinates of the river segments with the coordinates of the nodes of the trinagles
+
+River.FromNode<-merge(River.FromPoint, Watershed.1.node, by.x=c(1,2), by.y=c('X' , 'Y')) ;
+
+River.ToNode<-merge(River.ToPoint, Watershed.1.node, by.x=c(1,2), by.y=c('X' , 'Y')) ;
+
+
+River.FromTo<-merge(River.FromNode[,c('ID' , 'INDEX')] , River.ToNode[,c('ID' , 'INDEX')], by=c('ID')) ;
+
+
+
+
+
+
+
+
+
+
+
+
+# transform the array of line segments coordinates into a matrix format 
+
+matrix(data=sapply(coordinates(River.shp),function(x) x[[1]]), nrow = River.info$nrows, ncol = 4, byrow=T) ;
+
+
+# arrange the matrix of line segments coordinates into a coherent data frame with lines representd by two points consiting of a pari of x,y coordinates
+
+
+
+
+
+
+MergedRiver.coords.df<-data.frame(MergedRiver.coords.matrix[,c(1,3)],MergedRiver.coords.matrix[,c(2,4)]);
+
+names(MergedRiver.coords.df)<-c('P1.X', 'P1.Y', 'P2.X', 'P2.Y') ;
+
+#addd a line ID to the data frame to be able to differentiate line components 
+
+#Point.coords.df$Line<-sapply(slot(HYDC,"lines"), function(x) slot(x,"ID")) ;
+
+MergedRiver.coords.df$Line.ID<-as.character(seq(1:MergedRiver.info$nrows)) ;
+
+# stack the points of all the lines obtained in matrix from to remove repeated points ( there are many, all the lines that are contiguous share common points) and assign unique points a unique point ID
+
+MergedRiver.Stacked.Point.coords<-rbind(MergedRiver.coords.matrix[,c(1,3)],MergedRiver.coords.matrix[,c(2,4)])   ;
+
+head(MergedRiver.Stacked.Point.coords) ;
+
+str(MergedRiver.Stacked.Point.coords) ;
+
+
+
+
+
+
+
+
+
+
 
 
 
