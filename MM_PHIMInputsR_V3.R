@@ -34,7 +34,7 @@ setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') 
 # library(aqp) ;
 library(sp) ;
 library(rgdal) ;
-# library(raster) ;
+library(raster) ;
 # library(rgeos) ; 
 # library(lattice) ;
 # library(MASS) ;
@@ -85,8 +85,64 @@ Watershed.1.ele<-read.table('C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/
 
 names(Watershed.1.ele)<-c("triangle", "node1","node2","node3") ;
 
+Watershed.NUMELE<-read.table('C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/Jun2420191944/3DomainDecomposition/MergeVectorLayer200.ele', header=FALSE, sep= "", nrows= 1)[1,1] ;
+
 str(Watershed.1.ele)
 tail(Watershed.1.ele)
+
+
+########### Read the .1.ele file  ###########
+
+
+### Description from https://www.cs.cmu.edu/~quake/triangle.node.html
+
+# .node files
+# 
+# First line: <# of vertices> <dimension (must be 2)> <# of attributes> <# of boundary markers (0 or 1)>
+#   Remaining lines: <vertex #> <x> <y> [attributes] [boundary marker] 
+# 
+# Blank lines and comments prefixed by `#' may be placed anywhere. Vertices must be numbered consecutively, starting from one or zero.
+# 
+# The attributes, which are typically floating-point values of physical quantities (such as mass or conductivity) associated with the nodes of a finite element mesh, are copied unchanged to the output mesh. If -q, -a, -u, or -s is selected, each new Steiner point added to the mesh will have quantities assigned to it by linear interpolation.
+# 
+# If the fourth entry of the first line is `1', the last column of the remainder of the file is assumed to contain boundary markers. Boundary markers are used to identify boundary vertices and vertices resting on PSLG segments. The .node files produced by Triangle contain boundary markers in the last column unless they are suppressed by the -B switch. 
+
+Watershed.1.node<-read.table('C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/Jun2420191944/3DomainDecomposition/MergeVectorLayer200.node', header=FALSE, sep= "", skip=1) ;
+
+names(Watershed.1.node)<-c("INDEX" , "X" , "Y" , "BoundaryMarker") ;
+
+Watershed.NUMNODE<-read.table('C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/Jun2420191944/3DomainDecomposition/MergeVectorLayer200.node', header=FALSE, sep= "", nrows=1)[1,1] ;
+
+str(Watershed.1.node)
+tail(Watershed.1.node)
+
+
+####### Create a pint shape file from the nodes coordinates to extract the ZMAX Values from the DEM
+
+
+Node.Points<-SpatialPointsDataFrame(coords=Watershed.1.node[,c("X", "Y")],  proj4string=CRS('+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'), data=Watershed.1.node, coords.nrs = c(2,3), match.ID = T);
+
+
+####### Load the DEM from the fill pits file of the Reater processing directory
+
+
+FillPits<-raster("C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/1RasterProcessing/FillPitGrid.asc", crs='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs') 
+
+
+
+
+####### Extract the elevation data for each node
+
+
+
+
+Node.Points.ZMAX<-data.frame(coordinates(Node.Points),data=Node.Points, raster::extract(FillPits,Node.Points));
+
+str(Node.Points.ZMAX)
+
+
+
+
 
 
 
