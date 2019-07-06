@@ -35,6 +35,7 @@ setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') 
 library(sp) ;
 library(rgdal) ;
 library(raster) ;
+library(combinat)
 # library(rgeos) ; 
 # library(lattice) ;
 # library(MASS) ;
@@ -258,6 +259,38 @@ River.ToNode<-merge(River.ToPoint, Watershed.1.node, by.x=c(1,2), by.y=c('X' , '
 
 River.FromTo<-merge(River.FromNode[,c('ID' , 'INDEX')] , River.ToNode[,c('ID' , 'INDEX')], by=c('ID')) ;
 
+str(River.FromTo)
+tail(River.FromTo)
+
+
+
+##### create a list of two nodes combination corresponding to each river element 
+
+
+
+River.SegList<-as.list(as.data.frame(t(River.FromTo)[c(2,3),]))  ;
+
+
+names(River.SegList)<-River.FromTo$ID  ;
+
+
+head(River.SegList)
+
+
+##### create a list of two nodes combinations correponding to each trinagle side element
+
+
+
+
+Triangle.NodeList<-as.list(as.data.frame(t(Watershed.1.ele)[2:4,])) ;
+
+names(Triangle.NodeList)<-Watershed.1.ele[,c('triangle')] ;
+
+
+ 
+  
+  
+Triangle.EdgeList<-lapply(Triangle.NodeList, function(x) combn2(x)) ;
 
 
 
@@ -265,6 +298,34 @@ River.FromTo<-merge(River.FromNode[,c('ID' , 'INDEX')] , River.ToNode[,c('ID' , 
 
 
 
+
+
+
+
+
+head(Watershed.1.ele)
+
+Triangle.FirstEdge<-lapply(Triangle.EdgeList, function(x) x[1,] ) ;
+
+
+Triangle.FirstEdge[1] %in% River.SegList
+
+River.SegList[1] %in% Triangle.FirstEdge
+
+
+apply(Triangle.FirstEdge, River.SegList, function(x,y) x %in% y)
+
+
+names(River.SegList)<-River.FromTo$ID  ;
+
+lapply(seq_len(ncol()))
+
+as.list(as.data.frame(mapply(c,River.FromTo[,2],River.FromTo[,3])))
+
+c(River.FromTo[,2],River.FromTo[,3])
+
+
+lapply(River.FromTo[,2],River.FromTo[,3], c)
 
 
 
