@@ -35,7 +35,8 @@ setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') 
 library(sp) ;
 library(rgdal) ;
 library(raster) ;
-library(combinat)
+library(combinat) ;
+library(sets) ;
 # library(rgeos) ; 
 # library(lattice) ;
 # library(MASS) ;
@@ -226,9 +227,8 @@ plot(River.shp)
 
 # get the ID's of the line segments in the shape file read
 
-as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID")))  
+River.SegID<-as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID")));
 
-str(as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID"))) )
 
 #get the coordinates of the first line segment of the shape file read
 
@@ -236,8 +236,6 @@ coordinates(River.shp)[[1]]
 
 
 # get the coordinates of all the line segments of the shape file read as an  array 
-
-River.SegID<-as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID")));
 
 
 River.FromPoint<-data.frame(t(sapply(coordinates(River.shp),function(x) x[[1]][1,]))) ;
@@ -250,11 +248,13 @@ River.ToPoint<-data.frame(t(sapply(coordinates(River.shp),function(x) x[[1]][2,]
 River.ToPoint$ID<-River.SegID ;
 
 
-###### match the coordinates of the river segments with the coordinates of the nodes of the trinagles
 
-River.FromNode<-merge(River.FromPoint, Watershed.1.node, by.x=c(1,2), by.y=c('X' , 'Y')) ;
 
-River.ToNode<-merge(River.ToPoint, Watershed.1.node, by.x=c(1,2), by.y=c('X' , 'Y')) ;
+###### match the coordinates of the river segments with the coordinates of the nodes of the triangles
+
+River.FromNode<-merge(River.FromPoint, Watershed.1.node, by.x=c("X1", "X2"), by.y=c('X' , 'Y')) ;
+
+River.ToNode<-merge(River.ToPoint, Watershed.1.node, by.x=c("X1", "X2"), by.y=c('X' , 'Y')) ;
 
 
 River.FromTo<-merge(River.FromNode[,c('ID' , 'INDEX')] , River.ToNode[,c('ID' , 'INDEX')], by=c('ID')) ;
@@ -287,12 +287,62 @@ Triangle.NodeList<-as.list(as.data.frame(t(Watershed.1.ele)[2:4,])) ;
 names(Triangle.NodeList)<-Watershed.1.ele[,c('triangle')] ;
 
 
- 
+##### take a permutation (combn2) of two at time on each triangle node set to represent all the edges of the triangle
   
   
 Triangle.EdgeList<-lapply(Triangle.NodeList, function(x) combn2(x)) ;
 
 
+head(River.SegList)
+
+
+##### convert the trinagle edges nodes and the river segments into point sets and compare them to determine whic trinagles have edges on the river
+
+
+str(River.SegList[[1]])   # Are different classes int and num. River.SegList needs tobe converted to integer before set comparison
+
+str(Triangle.EdgeList[[1]][1,]) 
+
+str(as.integer(River.SegList[[1]]))
+
+####  compare the river segmenst witth each traingles edge set using set comparison 
+
+
+
+set(as.integer(River.SegList[[1]]))
+
+set(Triangle.EdgeList[[1]][1,], Triangle.EdgeList[[1]][2,] ,Triangle.EdgeList[[1]][3,])
+
+
+#### initialize a dataframe for the trinagle elements number
+
+
+
+
+
+RiverTriangles<-data.frame(triangle = integer(), node1 = integer(), node2 = integer(), node3 = integer(), River.Seg = integer()  ) ;
+
+Row.counter = 0 ;
+
+for (j in seq(1, length(River.SegList))) { 
+  for (i in seq(1,length(Triangle.EdgeList))) {
+    if (set(as.integer(River.SegList[[j]][1]),as.integer(River.SegList[[j]][2])) %e% set(set(Triangle.EdgeList[[i]][1,1],Triangle.EdgeList[[i]][1,2]),set(Triangle.EdgeList[[i]][2,1],Triangle.EdgeList[[i]][2,2]),set(Triangle.EdgeList[[i]][3,1],Triangle.EdgeList[[i]][3,2]))) {
+      
+      Row.counter = Row.counter +1 
+      
+      RiverTriangles[Row.counter, c("triangle", "node1" , "node2" , "node3")]<-Watershed.1.ele[i,] 
+      RiverTriangles[Row.counter, c("River.Seg")]<-as.integer(names(River.SegList)[j])
+      
+      
+    }
+    
+  }
+}
+
+RiverTriangles[duplicated(RiverTriangles$triangle),]
+
+
+RiverTriangles[RiverTriangles$triangle == 220,]
 
 
 
@@ -303,39 +353,6 @@ Triangle.EdgeList<-lapply(Triangle.NodeList, function(x) combn2(x)) ;
 
 
 
-head(Watershed.1.ele)
-
-Triangle.FirstEdge<-lapply(Triangle.EdgeList, function(x) x[1,] ) ;
-
-
-Triangle.FirstEdge[1] %in% River.SegList
-
-River.SegList[1] %in% Triangle.FirstEdge
-
-
-apply(Triangle.FirstEdge, River.SegList, function(x,y) x %in% y)
-
-
-names(River.SegList)<-River.FromTo$ID  ;
-
-lapply(seq_len(ncol()))
-
-as.list(as.data.frame(mapply(c,River.FromTo[,2],River.FromTo[,3])))
-
-c(River.FromTo[,2],River.FromTo[,3])
-
-
-lapply(River.FromTo[,2],River.FromTo[,3], c)
-
-
-
-
-# transform the array of line segments coordinates into a matrix format 
-
-matrix(data=sapply(coordinates(River.shp),function(x) x[[1]]), nrow = River.info$nrows, ncol = 4, byrow=T) ;
-
-
-# arrange the matrix of line segments coordinates into a coherent data frame with lines representd by two points consiting of a pari of x,y coordinates
 
 
 
