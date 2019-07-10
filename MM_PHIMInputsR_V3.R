@@ -20,7 +20,7 @@
 
 
 
-setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') ;
+setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') ;   #  setwd(RevisedOutputs.dir)   ;
 
 
 ###  load the libraries that are neded -- need to filter some of these  ---  
@@ -65,6 +65,8 @@ Watershed.TIN.info<-ogrInfo("C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/
 Watershed.TIN<-readOGR("C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/Jun2420191944/3DomainDecomposition/MergeVectorLayer200_q25_250_3.shp", layer='MergeVectorLayer200_q25_250_3', p4s='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' );
 
 print(Watershed.TIN)
+
+plot(Watershed.TIN)
 
 
 ########### Read the .1.ele file  ###########
@@ -345,11 +347,10 @@ RiverTriangles[duplicated(RiverTriangles$triangle),]
 RiverTriangles[RiverTriangles$triangle == 220,]
 
 
+River.neigh<-merge(RiverTriangles,Watershed.1.neigh, by='triangle',all.x=T)[order(River.neigh$River.Seg),]
 
 
-
-
-
+head(River.FromTo)
 
 
 
@@ -395,9 +396,10 @@ str(MergedRiver.Stacked.Point.coords) ;
 
 Project<-"MergeVectorLayer000_q25_a100000" ;
 
+
 load(paste0('./',Project,'/PIHMInputsR.RData'));
 
-load(paste0('./',Project,'/SoilsSurgoPIHM.RData'));
+load('SoilsSurgoPIHM.RData');
 
 
 load(paste0('./',Project,'/FillNoDataSoils.RData'));

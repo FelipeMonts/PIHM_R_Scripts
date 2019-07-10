@@ -25,10 +25,10 @@
 
 #  Set Working directory
 
-RevisedOutputs.dir<-paste0(Project.Directory,'\\MM_PHIM_INPUTS') ;
+# RevisedOutputs.dir<-paste0(Project.Directory,'\\MM_PHIM_INPUTS') ;
 
 
-setwd(RevisedOutputs.dir)   ;
+setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') ;  #  setwd(RevisedOutputs.dir)   ;
 
 #setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')   
 
@@ -40,13 +40,13 @@ setwd(RevisedOutputs.dir)   ;
 
 ####### Store the name of the project to read and write files more easily #############
 
-Project<-"MergeVectorLayer000_q30"  ;
-
-#Project<-"DataModel" ;
-
-
-
-load('SoilsSurgoPIHM.RData');
+# Project<-"MergeVectorLayer000_q30"  ;
+# 
+# #Project<-"DataModel" ;
+# 
+# 
+# 
+ load('SoilsSurgoPIHM.RData');
 
 
 
@@ -91,7 +91,7 @@ Mukey_Gaps_indx<-MUKEYS.map.1[MUKEYS.map.1$MUKEYS.mode %in% Mukey_Gaps, ]    ;
 ###### Find the neighboring triangles of the Triangles with the Mukey_Gaps 
 
 
-Mukey_Gaps_indx_neighbors<-mesh.Elements[mesh.Elements$Index %in% Mukey_Gaps_indx$Ele_ID, c('Index' , 'Nabr.0' , 'Nabr.1' , 'Nabr.2')]   ;
+Mukey_Gaps_indx_neighbors<-Watershed.1.neigh[Watershed.1.neigh$triangle %in% Mukey_Gaps_indx$Ele_ID, ] ; #c( "triangle" , "neighbor1" , "neighbor2" , "neighbor3")]   ;
 
 ###### retrieve the representative mukeys of the neighboring triangles for the Soil and Geology parameters
 
@@ -114,24 +114,24 @@ Mukey_Gaps_indx_neighbors.para<-merge(merge(Neighbor_Mukeys,Neighbor_Mukeys_para
 
 #######  Put together the representative MUKEYS parameters for Neighbouring triangles
 
-Mukey_Gaps_Nabr.0<-merge(Mukey_Gaps_indx_neighbors[,c('Index', 'Nabr.0')],Mukey_Gaps_indx_neighbors.para, by.x='Nabr.0', by.y='Ele_ID', all.x=T, sort=F ) ;
+Mukey_Gaps_Nabr.0<-merge(Mukey_Gaps_indx_neighbors[,c("triangle" , "neighbor1")],Mukey_Gaps_indx_neighbors.para, by.x="neighbor1", by.y='Ele_ID', all.x=T, sort=F ) ;
 
 names(Mukey_Gaps_Nabr.0)<-c(names(Mukey_Gaps_Nabr.0)[1:4], paste0('Nabr.0.',names(Mukey_Gaps_indx_neighbors.para)[4:11]))
 
 
-Mukey_Gaps_Nabr.1<-merge(Mukey_Gaps_indx_neighbors[,c('Index', 'Nabr.1')],Mukey_Gaps_indx_neighbors.para, by.x='Nabr.1', by.y='Ele_ID', all.x=T , sort=F )  ;
+Mukey_Gaps_Nabr.1<-merge(Mukey_Gaps_indx_neighbors[,c("triangle" , "neighbor2")],Mukey_Gaps_indx_neighbors.para, by.x="neighbor2", by.y='Ele_ID', all.x=T , sort=F )  ;
 
-names(Mukey_Gaps_Nabr.1)<-c(names(Mukey_Gaps_Nabr.1)[1:4], paste0('Nabr.1.',names(Mukey_Gaps_indx_neighbors.para)[4:11]))
+names(Mukey_Gaps_Nabr.1)<-c(names(Mukey_Gaps_Nabr.1)[1:4], paste0("Nabr.1.",names(Mukey_Gaps_indx_neighbors.para)[4:11]))
 
 
-Mukey_Gaps_Nabr.2<-merge(Mukey_Gaps_indx_neighbors[,c('Index', 'Nabr.2')],Mukey_Gaps_indx_neighbors.para, by.x='Nabr.2', by.y='Ele_ID' , all.x=T , sort=F )  ;
+Mukey_Gaps_Nabr.2<-merge(Mukey_Gaps_indx_neighbors[,c("triangle", "neighbor3")],Mukey_Gaps_indx_neighbors.para, by.x="neighbor3", by.y='Ele_ID' , all.x=T , sort=F )  ;
 
-names(Mukey_Gaps_Nabr.2)<-c(names(Mukey_Gaps_Nabr.2)[1:4], paste0('Nabr.2.',names(Mukey_Gaps_indx_neighbors.para)[4:11]))
+names(Mukey_Gaps_Nabr.2)<-c(names(Mukey_Gaps_Nabr.2)[1:4], paste0("Nabr.2.",names(Mukey_Gaps_indx_neighbors.para)[4:11]))
 
 ####  Gathering all the data of neighbors together to be ready to take the mean of the neighbor triangles 
 
-Mukey_Gaps_All.Nabr<-merge(merge(Mukey_Gaps_Nabr.0,Mukey_Gaps_Nabr.1,by='Index'),Mukey_Gaps_Nabr.2,by='Index')  ;
-
+Mukey_Gaps_All.Nabr<-merge(merge(Mukey_Gaps_Nabr.0,Mukey_Gaps_Nabr.1,by="triangle"),Mukey_Gaps_Nabr.2,by="triangle")  ;
+names(Mukey_Gaps_All.Nabr)
 
 
 ######## Average the representative Mukeys properties  of the neighboring triangles for Soils
@@ -265,11 +265,11 @@ NUMSOIL<-data.frame(c('NUMSOIL'), dim(Project_Soil.Rev)[1]) ;
 NUMGEOL<-data.frame(c('NUMGEOL'), dim(Project_Geology.Rev)[1]) ;
 
 
-write.table(NUMSOIL,file=paste0(RevisedOutputs.dir, '/Soil.txt'), row.names=F , quote=F, sep = "\t", col.names=F) ;
+write.table(NUMSOIL,file='Soil.txt', row.names=F , quote=F, sep = "\t", col.names=F) ;
 
 # write.table(HansYoust_Soil[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
-write.table(Project_Soil.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(RevisedOutputs.dir, '/Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
+write.table(Project_Soil.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Soil.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
 ####################  Add DINF , KMACV_RO  and KMACH_RO  at the end of the soil file ################
 # DINF (type: double, unit: m) A virtual top soil layer thickness across which infiltration is calculated.
@@ -280,7 +280,7 @@ write.table(Project_Soil.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KS
 
 DINF_etc<-data.frame(c('DINF' , 'KMACV_RO', 'KMACH_RO'), c( 0.10, 100.0 , 1000.0 )) ;
 
-write.table(DINF_etc,file=paste0(RevisedOutputs.dir, '/Soil.txt'), row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
+write.table(DINF_etc,file='Soil.txt', row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
 
 
 # NUMGEOL<-data.frame(c('NUMGEOL'), dim(HansYoust_Geology)[1]) ;
@@ -290,16 +290,16 @@ NUMGEOL<-data.frame(c('NUMGEOL'), dim(Project_Geology.Rev)[1]) ;
 
 # write.table(HansYoust_Geology[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
-write.table(Project_Geology.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(RevisedOutputs.dir, '/Geology.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
+write.table(Project_Geology.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Geology.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
 
-write.table(DINF_etc, file=paste0(RevisedOutputs.dir, '/Geology.txt'), row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
+write.table(DINF_etc, file='Geology.txt', row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
 
 
 
 
 
-save.image(file=paste0(RevisedOutputs.dir, '/FillNoDataSoils.RData')) ;
+save.image(file='FillNoDataSoils.RData') ;
 
 
 
