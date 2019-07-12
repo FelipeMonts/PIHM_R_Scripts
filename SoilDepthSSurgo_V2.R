@@ -84,241 +84,83 @@ load('FillNoDataSoils.RData');
 # # 
 # # ###########################################################################################################################
 # 
-# ##### Read the nodes and the corresponding Mukey from the TX file formed from the shape file that extracted the nodes of the mesh shape file in Qgis
+# 
 
+###### Get the soil depth from the SoilSurgoPIHM.R file  for each triangle  #####
 
-Nodes.Mukeys.info<-ogrInfo('Nodes_MergeVectorLayer000_q30_Ssurgo.shp');
+head(MUKEYS.map.1)  #from the SoilSurgoPIHM.R file 
 
+str(MUKEYS.map.1)
 
-Nodes.Mukeys<-readOGR('Nodes_MergeVectorLayer000_q30_Ssurgo.shp')  ;
+head(Mukey.Pedon)   #from the SoilSurgoPIHM.R file 
 
-str(Nodes.Mukeys, max.level = 3)  ;
+str(Mukey.Pedon)
 
-str(Nodes.Mukeys@data)
+str(Mukey.Pedon@horizons)
 
-#### Extract the Mukeys corresponding to each Node
-####  Convert the Mukeys into a factor and extract the levels of the factor to get the Mukeys from which we need soil 
-####  bedrock information
+str(Mukey.Pedon@site)
 
+##### convert MUKEYS.map.1$MUKEYS.mode from factor to integer ###
 
-Nodes.Mukeys@data$Mukey.factor<-as.factor(Nodes.Mukeys@data$Ssurgo_maj) ;
+MUKEYS.map.1$mukey<-as.integer(as.character(MUKEYS.map.1$MUKEYS.mode)) ;
 
-head(Nodes.Mukeys@data) 
 
-levels(Nodes.Mukeys@data$Mukey.factor)
+Element.soil.depth<-merge(MUKEYS.map.1, Mukey.Pedon@site[,c('mukey_ID', 'soil.depth')], by.x='mukey', by.y='mukey_ID') ;
 
-####  Convert the Mukeys into a factor and extract the levels of the factor to get the Mukeys from which we need soil 
-####  bedrock information
+head(Element.soil.depth)
 
-Mukeys_Nodes<-levels(Nodes.Mukeys@data$Mukey.factor)  ;
+str(Element.soil.depth)
 
 
+####  Get the information related to the nodes for each triangle 
 
 
+head(Watershed.1.ele)  #MM_PHIMInputsR 
 
-################################ Query the Soil Data access database with SQL through R #################
+str(Watershed.1.ele)
 
+Nodes.soil.depth<-merge(Watershed.1.ele, Element.soil.depth, by.x='triangle', by.y='Ele_ID' ) ;
 
-# from https://sdmdataaccess.sc.egov.usda.gov/queryhelp.aspx
-# and https://sdmdataaccess.sc.egov.usda.gov/documents/ReturningSoilTextureRelatedAttributes.pdf
 
+head(Nodes.soil.depth)
 
-# --Sample query begins.
-# --Note that a pair of dashes denotes the beginning of a comment. 
-# SELECT
-# saversion, saverest, -- attributes from table "sacatalog"
-# l.areasymbol, l.areaname, l.lkey, -- attributes from table "legend"
-# musym, muname, museq, mu.mukey, -- attributes from table "mapunit"
-# comppct_r, compname, localphase, slope_r, c.cokey, -- attributes from table "component"
-# hzdept_r, hzdepb_r, ch.chkey, -- attributes from table "chorizon"
-# sandtotal_r, silttotal_r, claytotal_r, --total sand, silt and clay fractions from table "chorizon"
-# sandvc_r, sandco_r, sandmed_r, sandfine_r, sandvf_r,--sand sub-fractions from table "chorizon"
-# texdesc, texture, stratextsflag, chtgrp.rvindicator, -- attributes from table "chtexturegrp"
-# texcl, lieutex, -- attributes from table "chtexture"
-# texmod -- attributes from table "chtexturemod"
-# FROM sacatalog sac
-# INNER JOIN legend l ON l.areasymbol = sac.areasymbol AND l.areatypename = 'Non-MLRA Soil Survey Area'
-# INNER JOIN mapunit mu ON mu.lkey = l.lkey
-# AND mu.mukey IN
-# ('107559','107646','107674','107682','107707','107794','107853','107854','107865','107867','107869','107870','107871')
-# LEFT OUTER JOIN component c ON c.mukey = mu.mukey
-# LEFT OUTER JOIN chorizon ch ON ch.cokey = c.cokey
-# LEFT OUTER JOIN chtexturegrp chtgrp ON chtgrp.chkey = ch.chkey
-# LEFT OUTER JOIN chtexture cht ON cht.chtgkey = chtgrp.chtgkey
-# LEFT OUTER JOIN chtexturemod chtmod ON chtmod.chtkey = cht.chtkey
-# --WHERE.
-# --ORDER BY l.areaname, museq, comppct_r DESC, compname, hzdept_r -- standard soil report ordering
-# --Sample query ends. 
+str(Nodes.soil.depth)
 
-# extract the map unit keys from the RAT, and format for use in an SQL IN-statement
-#in.statement2 <- format_SQL_in_statement(MUKEYS$ID); 
+#### get all the nodes and it soil depth together 
 
-in.statement2 <- format_SQL_in_statement(Mukeys_Nodes); 
+Node1.soil.depth<-Nodes.soil.depth[,c('node1','soil.depth')] ;
+names(Node1.soil.depth)[1]<-"node"
 
+Node2.soil.depth<-Nodes.soil.depth[,c('node2','soil.depth')] ;
+names(Node2.soil.depth)[1]<-"node"
 
-# format query in SQL- raw data are returned
+Node3.soil.depth<-Nodes.soil.depth[,c('node3','soil.depth')] ;
+names(Node3.soil.depth)[1]<-"node"
 
-Pedon.query.Nodes<- paste0("SELECT component.mukey, component.cokey, compname, comppct_r, majcompflag, slope_r, hzdept_r, hzdepb_r,hzthk_r, hzname, awc_r, sandtotal_r, silttotal_r, claytotal_r, om_r,dbtenthbar_r, dbthirdbar_r, dbfifteenbar_r, fraggt10_r, frag3to10_r, sieveno10_r, sieveno40_r, sieveno200_r, ksat_r  FROM component JOIN chorizon ON component.cokey = chorizon.cokey AND mukey IN ", in.statement2," ORDER BY mukey, comppct_r DESC, hzdept_r ASC") ;
 
-# now get component and horizon-level data for these map unit keys
-Pedon.info.Nodes<- SDA_query(Pedon.query.Nodes);
-head(Pedon.info.Nodes) ;
-str(Pedon.info.Nodes)  ;
 
-########################################## IMPORTANT ###########################################################
+Nodes.all.soil.depth<-rbind(Node1.soil.depth, Node2.soil.depth, Node3.soil.depth) ;
 
-### Map Unit No. 539762 is a water body and is not available to query from the SDA_query function
+str(Nodes.all.soil.depth) 
 
-### Map Unit No. 539759 are urban land Urban land-Udults complex
+Nodes.soil.depth.avg<-aggregate(soil.depth ~ node.Factor, data=Nodes.all.soil.depth, FUN='mean') ;
 
-###############################################################################################################
+str(Nodes.soil.depth.avg) 
 
-# filter components that are the major components of each unit map with the Flag majcompflag=='Yes'
+### convert Nodes.soil.depth.avg$node.Factor from a factor to an integer to merge with the Watershed.1.node
 
-Pedon.info.Nodes.MajorC<-Pedon.info.Nodes[which(Pedon.info.Nodes$majcompflag == 'Yes'),]  ;
-head(Pedon.info.Nodes.MajorC) ; 
-str(Pedon.info.Nodes.MajorC)  ;
 
 
-# check if there are mukeys with more than one dominant component
+Nodes.soil.depth.avg$node<-as.integer(Nodes.soil.depth.avg$node.Factor);
 
-Pedon.info.Nodes.MajorC$mukey.factor<-as.factor(Pedon.info.Nodes.MajorC$mukey) ;
+head(Nodes.soil.depth.avg)
 
-str(Pedon.info.Nodes.MajorC$mukey.factor)
+str(Nodes.soil.depth.avg)
 
-
-Pedon.info.Nodes.MajorC$mukey_comppct_r<-paste(Pedon.info.Nodes.MajorC$mukey.factor,Pedon.info.Nodes.MajorC$comppct_r, sep = "_") ;
-
-# Select major component mukeys that have also the highest component percent comppct_r
-
-head(Pedon.info.Nodes.MajorC)  ;
-
-Dominant.Nodes<- aggregate(comppct_r ~ mukey.factor, data=Pedon.info.Nodes.MajorC, FUN="max" , drop=T, simplify=T) ;
-
-head(Dominant.Nodes)  ;
-
-str(Dominant.Nodes) ;
-
-Dominant.Nodes$mukey_comppct_r<-paste(Dominant.Nodes$mukey.factor,Dominant.Nodes$comppct_r, sep ="_");
-
-
-Mukey.Pedon.Nodes<-Pedon.info.Nodes.MajorC[Pedon.info.Nodes.MajorC$mukey_comppct_r %in% Dominant.Nodes$mukey_comppct_r,]  ;
-
-str(Mukey.Pedon.Nodes) ;
-
-
-# Creating Mukey ID for each dominant component
-
-
-Mukey.Pedon.Nodes$mukey_ID<-as.character(Mukey.Pedon.Nodes$mukey) ;
-
-
-#  str(Mukey.Pedon);
-
-
-#  Transform the Pedon.info query in to the right format to be converted into a SoilProfileCollection object
-#   https://ncss-tech.github.io/AQP/aqp/aqp-intro.html
-
-
-#Pedon.info$id<-Pedon.info$mukey ;
-# Pedon.info$top<-Pedon.info$hzdept_r ;
-# Pedon.info$bottom<-Pedon.info$hzdept_r ;
-#Pedon.info$name<-Pedon.info$hzname ;
-
-depths(Mukey.Pedon.Nodes)<-mukey_ID ~ hzdept_r + hzdepb_r  ;
-str(Mukey.Pedon.Nodes) ;
-
-
-plot(Mukey.Pedon.Nodes, name='hzname',color='claytotal_r')  ;
-
-
-# Add soil profile depth  soil.depth in meters (cm/100) .
-
-
-
-Mukey.Pedon.Nodes$soil.depth<-profileApply(Mukey.Pedon.Nodes, FUN=max)/100 ; 
-
-plot(Mukey.Pedon.Nodes@site$mukey_ID,Mukey.Pedon.Nodes@site$soil.depth)
-with(Mukey.Pedon.Nodes@site, text(Mukey.Pedon.Nodes@site$mukey_ID,Mukey.Pedon.Nodes@site$soil.depth, labels=Mukey.Pedon.Nodes@site$mukey_ID, cex=1, srt=90, pos=4) )
-
-str(Mukey.Pedon.Nodes) ;
-
-Mukey.Pedon.Nodes@site
-
-#### Match the soil depth with the nodes in the mesh file
-
-##get the coordinates of the nodes from the shape file
-
-head(Nodes.Mukeys@data)
-str(Nodes.Mukeys@data)
-str(unique.data.frame(Nodes.Mukeys@data))
-
-head(Nodes.Mukeys@coords)
-str(unique(Nodes.Mukeys@coords))
-rownames(Nodes.Mukeys@data)
-
-
-
-Nodes.Mukeys.Coords<-data.frame(Nodes.Mukeys@coords,Nodes.Mukeys@data)  ;
-
-head(Nodes.Mukeys.Coords)
-
-#### Each point in node in the triangle is repeated a number of times equal to the number of trianlges that share that node
-
-duplicated(Nodes.Mukeys@coords) ;
-
-head(Nodes.Mukeys.Coords[order(Nodes.Mukeys.Coords$coords.x1),])
-
-Unique.Nodes.Mukeys.Coords<-unique(Nodes.Mukeys.Coords)
-head(Unique.Nodes.Mukeys.Coords,20)
-str(Unique.Nodes.Mukeys.Coords)
-
-
-
-## Merge the nodes data with the soil depth of the GSSURGO extracted data
-
-head(Mukey.Pedon.Nodes@site)
-str(Mukey.Pedon.Nodes@site)
-
-Mukey.Pedon.Nodes@site$Mukey.factor<-as.factor(Mukey.Pedon.Nodes@site$mukey_ID);
-
-levels(Mukey.Pedon.Nodes@site$Mukey.factor);
-levels(Unique.Nodes.Mukeys.Coords$Mukey.factor);
-
-
-Nodes.Mukeys.Soil.Depth<-merge(Unique.Nodes.Mukeys.Coords, Mukey.Pedon.Nodes@site, by='Mukey.factor') ;
- 
-head(Nodes.Mukeys.Soil.Depth)
-str(Nodes.Mukeys.Soil.Depth)
-
-#### Check if there are nodes wihout soil depth ###
-
-
-anyNA(Nodes.Mukeys.Soil.Depth$soil.depth)
-
-range(Nodes.Mukeys.Soil.Depth$soil.depth)
-
-plot(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys.Soil.Depth$soil.depth)
-with(Nodes.Mukeys.Soil.Depth, text(Nodes.Mukeys.Soil.Depth$mukey_ID,Nodes.Mukeys.Soil.Depth$soil.depth, labels=Nodes.Mukeys.Soil.Depth$mukey_ID, cex=1, srt=90, pos=4) )
-
-############    Merge with the mesh file from the PIHMInputsR.R ##########################################
-
-
-
-head(mesh.Nodes)
-str(mesh.Nodes)
-
-Rev.mesh.Soil.Depth<-merge(mesh.Nodes,Nodes.Mukeys.Soil.Depth, by.x=c('X','Y'), by.y=c('coords.x1' , 'coords.x2'), all.x=T, sort=F) ;
-
-head(Rev.mesh.Soil.Depth)
-
-str(Rev.mesh.Soil.Depth)
 
 #### Check if there are any rows with NA in the soil depth column
 
-anyNA(Rev.mesh.Soil.Depth$soil.depth)
-
-Rev.mesh.Soil.Depth[which(is.na(Rev.mesh.Soil.Depth$soil.depth)),] ;
+anyNA(Nodes.soil.depth.avg)
 
 ###  The missing points are water bodies with mukey 539762  and would need to be corrected
 
@@ -329,38 +171,17 @@ Rev.mesh.Soil.Depth[which(is.na(Rev.mesh.Soil.Depth$soil.depth)),] ;
 
 ### Fill the rows with NA in the soil depth column with soil depth equal to 0.555
 
-Rev.mesh.Soil.Depth[which(is.na(Rev.mesh.Soil.Depth$soil.depth)),c('soil.depth')]<-0.555 ;
+Nodes.soil.depth.avg[which(is.na(Nodes.soil.depth.avg$soil.depth)),c('soil.depth')]<-0.555 ;
 
-head(Rev.mesh.Soil.Depth)
+head(Nodes.soil.depth.avg)
 
 
-# #### calculate Zmin from Zmax and soil depth
-# 
-# Rev.mesh.Soil.Depth$Zmin.SSURGO<-Rev.mesh.Soil.Depth$Zmax.Riv.Corr-Rev.mesh.Soil.Depth$soil.depth ;  ### This code was added when the river points needed to be moved becausse of elevation mismatches. That is nor needed now.
-# 
-# ## check if there is any negative difference between Zmax-Zmin.SSURGO
+
+############    Merge with the Node.Points  file from the MM_PIHMInputsR_V3.R ##########################################
 
 
 
 
-Rev.mesh.Soil.Depth$Diff.Z<-Rev.mesh.Soil.Depth$Zmax.Riv.Corr-Rev.mesh.Soil.Depth$Zmin.SSURGO ;
+save.image(file='SoilDepthSSurgo.RData');
 
-Rev.mesh.Soil.Depth[which(Rev.mesh.Soil.Depth$Diff.Z <= 0),] ;
-
-plot(Rev.mesh.Soil.Depth$Index, Rev.mesh.Soil.Depth$Diff.Z)  ;
-
-Rev.mesh.Soil.Depth[which(Rev.mesh.Soil.Depth$Diff.Z <= 0.20),]  ;
-
-#### put together the columns needed for the mesh file
-
-Rev.mesh.Nodes.SSURGO<-Rev.mesh.Soil.Depth[order(Rev.mesh.Soil.Depth$Index),c('Index', 'X' , 'Y' , 'Zmin' ,'Zmin.SSURGO','Zmax' , 'Zmax.Riv.Corr' )] ;
-
-head(Rev.mesh.Nodes.SSURGO)
-str(Rev.mesh.Nodes.SSURGO)
-
-plot(Rev.mesh.Nodes.SSURGO$Index, (Rev.mesh.Nodes.SSURGO$Zmax-Rev.mesh.Nodes.SSURGO$Zmin.SSURGO))   ;
-
-
-
-save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\SoilDepthSSurgo.RData'));
 

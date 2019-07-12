@@ -144,16 +144,41 @@ names(Node.Points.ZMAX)
 
 str(Node.Points.ZMAX)
 
+head(Node.Points.ZMAX)
+
+
+###### Add the depth of the soil from the Soils file extracted from the GSURGO database adn calculated using the SoilDepthSSurgo_V2.R.
+
+head(Nodes.soil.depth.avg)
+
+str(Nodes.soil.depth.avg)
+
+
+#### change Nodes.soil.depth.avg$node.Factor from factor class  to integer
+
+
+Nodes.soil.depth.avg$node<-as.integer(as.character(Nodes.soil.depth.avg$node.Factor)) ;
+
+head(Nodes.soil.depth.avg)
+
+str(Nodes.soil.depth.avg)
+
+
+##### calculate Zmin from Zmax and soil depth and check if there is any negative difference between Zmax-Zmin.SSURGO 
 
 
 
-###### Add the depth of the soil from the Soils file extracted from the GSURGO database.
+Node.Points.ZMAX_ZMIN<-merge(Node.Points.ZMAX,Nodes.soil.depth.avg, by.x='data.INDEX', by.y='node') ;
 
+####  Soil depth is in cm and ZMAX is in meters above sea level    
 
+Node.Points.ZMAX_ZMIN$Diff.Z<-Node.Points.ZMAX_ZMIN$raster..extract.FillPits..Node.Points. - (Node.Points.ZMAX_ZMIN$soil.depth / 100 ); # meters - cm/100 
 
+Node.Points.ZMAX_ZMIN[which(Node.Points.ZMAX_ZMIN$Diff.Z <= 0),] ;
 
+plot(Node.Points.ZMAX_ZMIN$data.INDEX, Node.Points.ZMAX_ZMIN$Diff.Z )  ;
 
-
+Node.Points.ZMAX_ZMIN[which(Node.Points.ZMAX_ZMIN$Diff.Z <= 0.20),]  ;
 
 
 
@@ -180,21 +205,89 @@ str(Watershed.1.neigh)
 tail(Watershed.1.neigh)
 
 
-########## Create The Triangle section of the mesh file
 
-mesh.Part1<-merge(Watershed.1.ele,Watershed.1.neigh, by=c('triangle')) ;
+################## Write out the appropiate formated "Mesh" File for the MM-PIHM input format ##################################
 
-names(mesh.Part1)<-c('INDEX' , 'NODE1' , 'NODE2' , 'NODE3' , 'NABR1' , 'NABR2' , 'NABR3') ;
+
+Watershed.name<-"Halfmoon200_250_694"  ;
+
+
+####  write the first lines of the new MM-PIHM mesh file
+str(data.frame('NUMELE', Watershed.NUMELE,stringsAsFactors=F))
+
+
+write.table(data.frame('NUMELE', Watershed.NUMELE,stringsAsFactors=F), file=paste0(Watershed.name, ".mesh"), row.names=F ,col.names=F, quote=F, sep ="\t") ;
+
+
+#### create the triangle mesh elements section
+
+head(Watershed.1.ele)
+str(Watershed.1.ele)
+
+head(Watershed.1.neigh)
+str(Watershed.1.neigh)
+
+
+
+#### Merge the .ele and .neigh information
+
+ele_and_neigh<-merge(Watershed.1.ele, Watershed.1.neigh, by='triangle')
+
+names(ele_and_neigh)<-c('INDEX','NODE1', 'NODE2' , 'NODE3', 'NABR1' , 'NABR2' ,'NABR3') ;
+
+head(ele_and_neigh)
+str(ele_and_neigh)
+
+
+
+#### Change the boundaly elements neighbors from -1 to 0
+
+
+
+write.table(ele_and_neigh, file=paste0(Watershed.name, ".MESH"), row.names=F , col.names=T, quote=F, sep ="\t", append = T) ;
+
 
 
 
 ########## Create The Node section of the mesh file
 
-mesh.Part2<-Node.Points.ZMAX[,c('data.INDEX', 'X', 'Y', 'raster..extract.FillPits..Node.Points.')] ;
 
-names(mesh.Part2)<-c('INDEX' , 'X' , 'Y' ,  'ZMAX') ; ### Add the ZMIN name when the information comes from Soils
+
+head(Watershed.1.node)
+str(Watershed.1.node)
+
+
+head(Node.Points.ZMAX_ZMIN)
+str(Node.Points.ZMAX_ZMIN)
+
+
+Node_and_ZMAX_ZMIN <-merge(Watershed.1.node,Node.Points.ZMAX_ZMIN, by.x='INDEX'  , by.y='data.INDEX' ) ;
+
+head(Node_and_ZMAX_ZMIN)
+str(Node_and_ZMAX_ZMIN)
+
+
+
+mesh.Part2<-Node_and_ZMAX_ZMIN[,c('INDEX', 'X.x', 'Y.x', 'Diff.Z', 'raster..extract.FillPits..Node.Points.')] ;
+
+names(mesh.Part2)<-c('INDEX' , 'X' , 'Y' , 'ZMIN',  'ZMAX') ;
 
 head(mesh.Part2)
+str(mesh.Part2)
+
+
+######## Printe the NUMMODE line
+
+Watershed.NUMNODE
+
+write.table(data.frame('NUMNODE', Watershed.NUMNODE , stringsAsFactors=F), file=paste0(Watershed.name, ".mesh"), row.names=F ,col.names=F, quote=F, sep ="\t", append = T) ;
+
+
+
+####   write the The Node section of the mesh file
+
+write.table(mesh.Part2, file=paste0(Watershed.name, ".mesh"), row.names=F ,col.names=T, quote=F, sep ="\t", append = T) ;
+
 
 
 
@@ -358,92 +451,6 @@ head(River.FromTo)
 
 
 
-
-
-MergedRiver.coords.df<-data.frame(MergedRiver.coords.matrix[,c(1,3)],MergedRiver.coords.matrix[,c(2,4)]);
-
-names(MergedRiver.coords.df)<-c('P1.X', 'P1.Y', 'P2.X', 'P2.Y') ;
-
-#addd a line ID to the data frame to be able to differentiate line components 
-
-#Point.coords.df$Line<-sapply(slot(HYDC,"lines"), function(x) slot(x,"ID")) ;
-
-MergedRiver.coords.df$Line.ID<-as.character(seq(1:MergedRiver.info$nrows)) ;
-
-# stack the points of all the lines obtained in matrix from to remove repeated points ( there are many, all the lines that are contiguous share common points) and assign unique points a unique point ID
-
-MergedRiver.Stacked.Point.coords<-rbind(MergedRiver.coords.matrix[,c(1,3)],MergedRiver.coords.matrix[,c(2,4)])   ;
-
-head(MergedRiver.Stacked.Point.coords) ;
-
-str(MergedRiver.Stacked.Point.coords) ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Project<-"MergeVectorLayer000_q25_a100000" ;
-
-
-load(paste0('./',Project,'/PIHMInputsR.RData'));
-
-load('SoilsSurgoPIHM.RData');
-
-
-load(paste0('./',Project,'/FillNoDataSoils.RData'));
-
-#load(paste0('./',Project,'/NetworksinR.RData'));
-
-load(paste0('./',Project,'/SoilDepthSSurgo.RData'));
-
-## attach('./PIHMInputsR.RData', ); Adds the database with the objects created to the path R searches for objects. It is safer than load, but one needs to remember the name of the variables when programming. 
-
-
-####### Store the name of the project to read and write files more easily #############
-
-# Project<-"MergeVectorLayer000_q25_a100000"   ;
-
-#Project<-"DataModel" ;
-
-###
-
-
-
-
-######## Store the name of the directory whre the modified MM-PIHM inputs are to be stored
-
-
-#dir.create(Project);
-
-
-RevisedOutputs.dir<-paste0('./',Project,'/') ;
-
-
-
-
-# Create the path to read the input files by pasting RevisedOutputs.dir and the Project name together with the file ".name" ie ".mesh"
-
-inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
-
-################## Write out the appropiate formated "Mesh" File for the MM-PIHM input format ##################################
-##       First, create the mesh element part
-
-head(mesh.Elements)
-
-MESH.1<-data.frame(c('NUMELE'),NumEle);
-
 ## write the first lines of the new MM-PIHM mesh file
 
 write.table(MESH.1, file=paste0(inputfile.name, ".MESH"), row.names=F ,col.names=F, quote=F, sep ="\t") ;
@@ -488,6 +495,8 @@ Rev.mesh.Nodes<-Rev.mesh.Nodes[order(Rev.mesh.Nodes$Index),c('Index' , 'X' , 'Y'
 #New.mesh.Nodes[401:600,]
 head(Rev.mesh.Nodes)
 
+
+
 ######## Write the mesh file ###########################################################################################
 
 NODES.1<-data.frame(c('NUMNODE'),NumNode )   ;
@@ -504,20 +513,27 @@ write.table(Rev.mesh.Nodes[,c('Index' , 'X' , 'Y', 'Zmin.SSURGO' , 'Zmax.Riv.Cor
 
 ###################   Write the appropiate formated "Attributes" File for the MM-PIHM input format  #################################
 
+
+
+
+
 #### import the shape files from QGIS with the LC mode from each triangle ####
+
+
 
 ########### Read infromation about the shape files ###########
 
+
 # HansYoust.LC.info<-ogrInfo("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp");
 
-Project.LC.info<-ogrInfo("C:/Aun Trabajo en Proceso/HansYostDeepCreek/DomainDecomposition2.shp");
+Project.LC.info<-ogrInfo("MergeVectorLayer200_q25_250_3_Landcover.shp");
 
 
 #### read the shape file that has been created in QGIS using the zonal statistics
 
 # HansYoust.LC<-readOGR("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp")  ;
 
-Project.LC<-readOGR("C:/Aun Trabajo en Proceso/HansYostDeepCreek/Mar0820181045/3DomainDecomposition/MergeVectorLayer000_q25_a100000.shp");
+Project.LC<-readOGR("MergeVectorLayer200_q25_250_3_Landcover.shp");
 
 str(Project.LC, max.level = 2) ;
 
@@ -533,20 +549,11 @@ str(Project.LC@data) ;
 
 # HansYoust.LC@data$Lc_mode<-as.factor(HansYoust.LC@data$Lc_mode) ;
 
-Project.LC@data$LC_majorit<-as.factor(Project.LC@data$HY_LC_majo) ;
+Project.LC@data$LandCover.factor<-as.factor(Project.LC@data$LandCover_)
 
-# LC.indexs<-as.integer(levels(HansYoust.LC@data$Lc_mode))  ;
+head(Project.LC@data)
 
-LC.indexs<-as.integer(levels(Project.LC@data$LC_majorit))  ;
-
-str(LC.indexs)
-
-# HansYoust.LC@data$LC.index<-HansYoust.LC@data$Lc_mode ;
-
-Project.LC@data$LC.index<-Project.LC@data$LC_majorit
-
-
-head(Project.LC@data$LC.index)
+str(Project.LC@data)
 
 
 ########################################################################################################################## 
@@ -559,68 +566,76 @@ head(Project.LC@data$LC.index)
 
 
 
+levels(Project.LC@data$LandCover.factor) 
+
+
 #Change Project.LC@data$LC.index that have index 11 to index 95
 
 #inspect the levels of Project.LC@data$LC.index 
 
-levels(Project.LC@data$LC.index)<-c(levels(Project.LC@data$LC_majorit),"95")
+levels(Project.LC@data$LandCover.factor) <-c(levels(Project.LC@data$LandCover.factor) ,"95") ;
 head(Project.LC@data)
 
-Project.LC@data$LC.index[which(Project.LC@data$LC.index == "11")]<-c("95")   ;
+Project.LC@data$LandCover.factor[which(Project.LC@data$LandCover.factor == "11")]<-c("95")   ;
 
-Project.LC@data$LC.index[which(Project.LC@data$LC.index == "95")] ;
-
-######  Merge the LC index with the rest of the attribute table
-
-######### Load the attribute file to change the LC codes from PIHM GIS to the mode from spatial statistics in QGIS
-
-att<-read.table(paste0(Project.Directory,"\\",DataModel.dir,"\\",Project,".att"),as.is=T,col.names=c('Index', 'Soil', 'Geol','LC','IS_IC', 'Snw_IC', 'Srf_IC', 'Ust_IC', 'St_IC', 'Ppt', 'Tmp', 'RH', 'Wnd', 'Rn', 'G', 'VP', 'S', 'mF', 'BC.0', 'BC.1', 'BC.2', 'mP'));
-
-names(att) ;
+Project.LC@data$LandCover.factor[which(Project.LC@data$LandCover.factor == "95")] ;
 
 
-###### and Alternative to bypass the creation of the att table is to create it here by loading the soils and geology indicess and start the att table from there
 
-att<-Project.GSSURGO@data[,c("Ele_ID" ,"MUKEYS.index","MUKEYS.index")]
-names(att)<-c('Index', 'Soil', 'Geol')
-str(att)
+### Change Project.LC@data$LandCover.factor from factor class to integer class
+
+LC.index<-as.integer(as.character(levels(Project.LC@data$LandCover.factor)))  ;
+
+str(LC.index)
 
 
-att.expanded.1<-merge(att,Project.LC@data, by.x='Index' , by.y='Ele_ID') ;
+uFactor<-Project.LC@data$LandCover.factor
 
-head(att.expanded.1)
-str(att.expanded.1)
+str(uFactor)
+
+
+
+
 
 ############# Load the vegetation parameter table and the convertion parameters for PIHM - MM ################
 
-NUMLC<-read.table("./vegprmt.tbl", skip=0, as.is=T, nrows=1) ;
+NUMLC<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=0, as.is=T, nrows=1) ;
 
 
-vegprmt.tbl<-read.table("./vegprmt.tbl", skip=1, sep="", as.is=T, header=T, nrows=NUMLC[1,2]) ;
+vegprmt.tbl<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=1, sep="", as.is=T, header=T, nrows=NUMLC[1,2]) ;
 
-Description<-read.table("./vegprmt.tbl", skip=1, sep="\t", as.is=T, header=T, nrows=NUMLC[1,2], comment.char="") ;
+Description<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=1, sep="\t", as.is=T, header=T, nrows=NUMLC[1,2], comment.char="") ;
 
 vegprmt.tbl$Description<-sapply(strsplit(Description[,1], "#"), "[" , 2) ;
 
-Otherprmt.tbl<-read.table("./vegprmt.tbl", skip=NUMLC[1,2]+2, sep="", as.is=T, header=F, nrows=5) ;
+Otherprmt.tbl<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=NUMLC[1,2]+2, sep="", as.is=T, header=F, nrows=5) ;
+
+
+############# convert NLCD land cover class mapping to PIHM land cover type ############################          
 
 
 
-############# Load the vegetation parameter map from the NLCD to the MM-PIHM Land Cover type 
-############# "NLCD land cover class mapping to PIHM land cover type ############################          
 
-
-NLCD_PIHM.lc<-read.table("./vegprmt.tbl", skip=NUMLC[1,2]+10, sep= ">" , as.is=T, header=F,comment.char="") ;
+NLCD_PIHM.lc<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=NUMLC[1,2]+2+6, sep= ">" , as.is=T, header=F,comment.char="") ;
 
 NLCD.lc<-NLCD_PIHM.lc[,2];
+str(NLCD_PIHM.lc[,2])
 
 PIHM.lc<-as.integer(sapply(strsplit(NLCD_PIHM.lc[,1], split = " "), "[" , 2)) ;
+
+str(PIHM.lc)
+
+str(vegprmt.tbl)
+
 
 PIHM_to_NLCD<-merge(data.frame(NLCD.lc, PIHM.lc), vegprmt.tbl, by.x= "NLCD.lc", by.y= "INDEX", all=T) ;
 
 head(PIHM_to_NLCD)
+str(PIHM_to_NLCD)
 
 PIHM_to_NLCD[!is.na(PIHM_to_NLCD$PIHM.lc), ]
+
+
 
 
 
@@ -882,7 +897,7 @@ write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".RIV"), row
 
 
 
-save.image(file=paste0('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs\\',Project,'\\MM_PHIMInputsR_V2.RData'));
+save.image(file='MM_PHIMInputsR_V3.RData');
 
 
 
