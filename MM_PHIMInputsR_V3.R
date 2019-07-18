@@ -147,7 +147,9 @@ str(Node.Points.ZMAX)
 head(Node.Points.ZMAX)
 
 
-###### Add the depth of the soil from the Soils file extracted from the GSURGO database adn calculated using the SoilDepthSSurgo_V2.R.
+###### Add the depth of the soil from the Soils file extracted from the GSURGO database adn calculated using the SoilDepthSSurgo_V2.R. 
+
+load('SoilDepthSSurgo_V2.RData') ;
 
 head(Nodes.soil.depth.avg)
 
@@ -239,12 +241,19 @@ head(ele_and_neigh)
 str(ele_and_neigh)
 
 
+#### Change the boundary elements neighbors from -1 to 0
 
-#### Change the boundaly elements neighbors from -1 to 0
+ele_and_neigh$NABR1[which(ele_and_neigh$NABR1 == -1)]<-0
+
+ele_and_neigh$NABR2[which(ele_and_neigh$NABR2 == -1)]<-0
+
+ele_and_neigh$NABR3[which(ele_and_neigh$NABR3 == -1)]<-0
+
+which(ele_and_neigh[,] == -1)
 
 
 
-write.table(ele_and_neigh, file=paste0(Watershed.name, ".MESH"), row.names=F , col.names=T, quote=F, sep ="\t", append = T) ;
+write.table(ele_and_neigh, file=paste0(Watershed.name, ".mesh"), row.names=F , col.names=T, quote=F, sep ="\t", append = T) ;
 
 
 
@@ -451,67 +460,15 @@ head(River.FromTo)
 
 
 
-## write the first lines of the new MM-PIHM mesh file
 
-write.table(MESH.1, file=paste0(inputfile.name, ".MESH"), row.names=F ,col.names=F, quote=F, sep ="\t") ;
-
-
-MESH.2<-data.frame(c('INDEX') ,c('NODE1') , c('NODE2') , c('NODE3'), c('NABR1') , c('NABR2') ,c('NABR3')) ;
-
-write.table(MESH.2[1,], file=paste0(inputfile.name, ".MESH"), row.names=F , col.names=F, quote=F, sep ="\t", append = T) ;
-
-## write the mesh data into the new MM-PIHM mesh file
-
-write.table(mesh.Elements, file=paste0(inputfile.name, ".MESH"), row.names=F , col.names=F, quote=F, sep ="\t", append = T) ;
-
-
-head(mesh.Elements)
-
-
-##       Second Create the node elements part 
-### write the first lines of the node elements
-
-head(mesh.Nodes)
-str(mesh.Nodes)
-
-NumEle
-NumNode
-
-head(mesh.Nodes)
-str(mesh.Nodes)
-
-head(Rev.mesh.Nodes.SSURGO)
-str(Rev.mesh.Nodes.SSURGO)
-
-
-Rev.mesh.Nodes<-merge(x=mesh.Nodes,y=Rev.mesh.Nodes.SSURGO, by=c( 'X', 'Y' , 'Index' , 'Zmin'), all.x=T, all.y=F, sort=F ) ;
-
-head(Rev.mesh.Nodes)
-str(Rev.mesh.Nodes)
-
-Rev.mesh.Nodes<-Rev.mesh.Nodes[order(Rev.mesh.Nodes$Index),c('Index' , 'X' , 'Y', 'Zmin.SSURGO' , 'Zmax.Riv.Corr.x')] ;
-
-
-#New.mesh.Nodes[401:600,]
-head(Rev.mesh.Nodes)
-
-
-
-######## Write the mesh file ###########################################################################################
-
-NODES.1<-data.frame(c('NUMNODE'),NumNode )   ;
-write.table(NODES.1 , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=F, quote=F, sep ="\t") ;
-
-
-header.mesh.Nodes<-c('INDEX' , 'X' , 'Y' , 'ZMIN' , 'ZMAX');
-
-#write.table(New.mesh.Nodes , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
-
-
-write.table(Rev.mesh.Nodes[,c('Index' , 'X' , 'Y', 'Zmin.SSURGO' , 'Zmax.Riv.Corr.x')] , file=paste0(inputfile.name, ".MESH") , append=T , row.names=F ,col.names=header.mesh.Nodes, quote=F, sep ="\t") ;
-
-
-###################   Write the appropiate formated "Attributes" File for the MM-PIHM input format  #################################
+######################################################################################################################################
+# 
+# 
+#                                  Create the attribute File 
+# 
+# 
+# 
+######################################################################################################################################
 
 
 
@@ -524,14 +481,13 @@ write.table(Rev.mesh.Nodes[,c('Index' , 'X' , 'Y', 'Zmin.SSURGO' , 'Zmax.Riv.Cor
 ########### Read infromation about the shape files ###########
 
 
-# HansYoust.LC.info<-ogrInfo("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp");
 
 Project.LC.info<-ogrInfo("MergeVectorLayer200_q25_250_3_Landcover.shp");
 
 
 #### read the shape file that has been created in QGIS using the zonal statistics
 
-# HansYoust.LC<-readOGR("C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/Manhantango/HydroTerreFullManhantango/HansYostDeepCreek/Landcover/LC_Stat.shp")  ;
+
 
 Project.LC<-readOGR("MergeVectorLayer200_q25_250_3_Landcover.shp");
 
@@ -589,13 +545,6 @@ LC.index<-as.integer(as.character(levels(Project.LC@data$LandCover.factor)))  ;
 str(LC.index)
 
 
-uFactor<-Project.LC@data$LandCover.factor
-
-str(uFactor)
-
-
-
-
 
 ############# Load the vegetation parameter table and the convertion parameters for PIHM - MM ################
 
@@ -612,8 +561,6 @@ Otherprmt.tbl<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=NUMLC[1,2]+
 
 
 ############# convert NLCD land cover class mapping to PIHM land cover type ############################          
-
-
 
 
 NLCD_PIHM.lc<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=NUMLC[1,2]+2+6, sep= ">" , as.is=T, header=F,comment.char="") ;
@@ -636,200 +583,283 @@ str(PIHM_to_NLCD)
 PIHM_to_NLCD[!is.na(PIHM_to_NLCD$PIHM.lc), ]
 
 
+###### Get the soi and geology data #######################################
+
+
+load('SoilsSurgoPIHM.RData');
+
+load('FillNoDataSoils.RData') ;
+
+
+head(MUKEYS.map.1)  #from the SoilSurgoPIHM.R file 
+
+str(MUKEYS.map.1)
+
+MUKEYS.map.1$INDEX<-as.integer(as.character(MUKEYS.map.1$MUKEYS.index)) ;
 
 
 
-######### MErge with the NLCD_to_PIHM data to change the NLCD LC data to the MM-PIHM Land Cover
+
+#####   Get the land cover data   ##################################
+
+head(Project.LC@data)
+
+str(Project.LC@data)
 
 
-att.expanded.2<-merge(att.expanded.1,PIHM_to_NLCD, by.x="LC.index", by.y="PIHM.lc", all.x=T ) ;
-head(att.expanded.2)
+Project.LC@data$LandCover<-as.integer(as.character(Project.LC@data$LandCover.factor))
 
-###### change the name of the LC column that will be used in the revised attributes
 
-revised.names<-names(att)   ;
+head(PIHM_to_NLCD)
 
-revised.names[4]<- "LC" ;
+str(PIHM_to_NLCD)
+
+######### Merge with the NLCD_to_PIHM data to change the NLCD LC data to the MM-PIHM Land Cover
+
+LandCover.att<-merge(Project.LC@data,PIHM_to_NLCD, by.x= 'LandCover' ,by.y='PIHM.lc' ) ;
 
 
 ######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
 
-att.expanded.3<-merge(att.expanded.2,MUKEYS.map.1, by.x='Index', by.y='Ele_ID') ;
+Revised.att<-merge(MUKEYS.map.1,LandCover.att, by.x='Ele_ID' , by.y= 'Ele_ID' )[] ;
 
-
-Revised.att<-att.expanded.3[order(att.expanded.3$Index),] ;
 
 head(Revised.att)
+str(Revised.att)
+
+Watershed.att<-Revised.att[,c('Ele_ID', 'INDEX','INDEX', 'NLCD.lc')];
+
+names(Watershed.att)<-c('INDEX',  'SOIL' ,  'GEOL' , 'LC' )  ;
+
+head(Watershed.att)
+str(Watershed.att)
+
+Watershed.att$METEO<-1 ;
+
+Watershed.att$LAI<-Watershed.att$SS<-Watershed.att$BC1<-Watershed.att$BC2<-Watershed.att$BC3<-0 ;
+
+head(Watershed.att)
+str(Watershed.att)
 
 
+Watershed.att[,c('INDEX',  'SOIL' ,  'GEOL' , 'LC', 'METEO' , 'LAI' , 'SS' , 'BC1' , 'BC2' , 'BC3' )]
 
-Revised.att$METEO<-1 ;
-
-Revised.att$LAI<-Revised.att$SS<-Revised.att$BC0<-Revised.att$BC1<-Revised.att$BC2<-0 ;
-
-head(Revised.att)
 
 
 # #############################################################################################################################
 # 
-# #   Still need to correct the attribute tables with the correct soil index in the triangles that do have MUKEYs Gaps
+# #   Write the .att attribute file
 # 
 # ###########################################################################################################################
 
-Revised.att[, 'MUKEYS.index']<-as.numeric(Revised.att[, 'MUKEYS.index']) ;
 
-# Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [2,'MUKEYS.index']<-dim(HansYoust_Soil)[1]  ;
 
-Revised.att[Revised.att$Index %in% Mukey_Gaps_indx[,'Ele_ID'],] [, 'MUKEYS.index']<-seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]) ;
+write.table(Watershed.att[,c('INDEX',  'SOIL' ,  'GEOL' , 'LC', 'METEO' , 'LAI' , 'SS' , 'BC1' , 'BC2' , 'BC3' )], file=paste0(Watershed.name, ".att") , row.names=F, quote=F , sep = "\t" ) ;
 
 
 
-write.table(Revised.att[,c('Index', 'MUKEYS.index', 'MUKEYS.index', 'NLCD.lc','METEO', 'LAI','SS', 'BC0', 'BC1', 'BC2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
-#write.table(Revised.att[,c('Index' , 'Soil' , 'Geol', 'NLCD.lc', 'METEO',	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2')], file=paste0(inputfile.name, '.ATT') , row.names=F, col.names=c('INDEX' , 'SOIL' , 'GEOL' ,	'LC' ,	'METEO' ,	'LAI',	'SS' ,	'BC0' ,	'BC1' ,	'BC2'), quote=F , sep = "\t" ) ;
 
 
-###################   Write the appropiate formated "River" File for the MM-PIHM input format  #################################
-
-### Write the First line of the .Riv File
-
-write.table(data.frame(c('NUMRIV'),NumRiv ),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, sep= "\t" ) ;
-
-
-##   Add river elements
-names(riv.elements)<-c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'IC' ,	'BC' ,	'RES' )  ;
-
-###########################################################################################################################
-
-# Writing code to make sure all the river segments have positive slope
-
-
-###########################################################################################################################
-
-
-
-
-############  Check river elements for differences in height and flow patterns #####################
-
-#select the nodes that are both in the mesh and in the river segments
-#select first the unique nodes in the river
-
-River.Nodes<-unique(c(riv.elements$FromNode, riv.elements$ToNode))  ;
-
-head(River.Nodes)
-str(River.Nodes)
-
-# from the mesh file select the nodes that belong to the river
-
-# New.River.Nodes.Elevation<-River.Nodes.Elevation.Corrected[River.Nodes.Elevation.Corrected$Index %in% River.Nodes, ]
-River.Nodes.Elevation<-mesh.Nodes[mesh.Nodes$Index %in% River.Nodes, ] ;
-#River.Nodes.Elevation<-mesh.Nodes.corrected[mesh.Nodes.corrected$Index %in% River.Nodes, ] ;
-
-
-
-# head(New.River.Nodes.Elevation)
-# str(New.River.Nodes.Elevation)
-
-head(River.Nodes.Elevation)
-str(River.Nodes.Elevation)
-
-# connect the River nodes with the corresponding information in the mesh file
-
-# New.River.Nodes.Elevation.FROM<-merge(riv.elements,New.River.Nodes.Elevation, by.x='FromNode' , by.y='Index', all.x=T, sort=F) ;
-
-head(riv.elements)
-str(riv.elements) 
-
-River.Nodes.Elevation.FROM<-merge(riv.elements,Rev.mesh.Nodes.SSURGO, by.x='FROM' , by.y='Index', all.x=T, sort=F) ;
-
-
-# head(New.River.Nodes.Elevation.FROM,50)
-# str(New.River.Nodes.Elevation.FROM)
-
-
-head(River.Nodes.Elevation.FROM)
-str(River.Nodes.Elevation.FROM)
-
-
-# New.River.Nodes.Elevation.TO<-merge(riv.elements,New.River.Nodes.Elevation, by.x='ToNode' , by.y='Index', all.x=T,sort=F) ;
-
-River.Nodes.Elevation.TO<-merge(riv.elements,Rev.mesh.Nodes.SSURGO, by.x='FROM' , by.y='Index', all.x=T,sort=F) ;
-
-
-# head(New.River.Nodes.Elevation.TO,50)
-# str(New.River.Nodes.Elevation.TO)
-
-
-
-
-head(River.Nodes.Elevation.TO)
-str(River.Nodes.Elevation.TO)
-
-#calculate the difference in elevation between the FROM and TO river nodes. Zmax is the surface elevation, Zmin is the bed rock elevation
-
-# New.River.Nodes.Elevation.FROM_TO<-merge(New.River.Nodes.Elevation.FROM,New.River.Nodes.Elevation.TO,by='Index', sort=T) ;
-
-#head(New.River.Nodes.Elevation.FROM_TO)
-
-
-#New.River.Nodes.Elevation.FROM_TO$Max_Elev_Dif<-New.River.Nodes.Elevation.FROM_TO$Zmax.Correct.x - New.River.Nodes.Elevation.FROM_TO$Zmax.Correct.y
-
-#head(New.River.Nodes.Elevation.FROM_TO,50)
-
-River.Nodes.Max_Elev_Dif<-River.Nodes.Elevation.FROM$Zmax - River.Nodes.Elevation.TO$Zmax ;
-
-# head(New.River.Nodes.Max_Elev_Dif,100)
-# str(New.River.Nodes.Max_Elev_Dif)
-
-
-head(River.Nodes.Max_Elev_Dif)
-str(River.Nodes.Max_Elev_Dif)
-
-
-
-# Explore the River nodes and segments
-
-# plot(New.River.Nodes.Elevation.FROM[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="BLUE", ylim=c(-10,10)) ;
-# points(New.River.Nodes.Elevation.TO[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="RED" ) ;
-
-
-plot(River.Nodes.Elevation.FROM[,c('INDEX')],River.Nodes.Max_Elev_Dif, col="BLUE") ;
-points(River.Nodes.Elevation.TO[,c('INDEX')],River.Nodes.Max_Elev_Dif, col="RED" ) ;
-
-
-# New.River.Nodes.Elevation.FROM[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
+# ################################################################################################################################
 # 
-# New.River.Nodes.Elevation.TO[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
+# 
+#           The creating the river file  from the output of the trinagulation is not jet complete  therefore in th emean time
+#           the river file created from PIHM GIS is going to be used to get create the riv file
+#           
+#  
+# 
+#           
+# ################################################################################################################################
+
+PHIMGIS.RIV.NUMRIV<-read.table(file='MergeVectorLayer50_q25_50_3.riv', header=F , sep="", as.is=T, nrows=1 ) ;
+
+PHIMGIS.RIV.names<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=1, header=F , sep="", as.is=T, nrows=1 ) ;
+
+
+PHIMGIS.RIV.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.NUMRIV[1,2] ) ;
+
+
+PHIMGIS.RIV<-PHIMGIS.RIV.data[,-9] ;
+
+names(PHIMGIS.RIV)<-PHIMGIS.RIV.names[1,];
+
+PHIMGIS.RIV.Shape<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
+
+PHIMGIS.RIV.Shape.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.Shape[1,2] ) ;
+
+
+PHIMGIS.RIV.Material<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
+
+PHIMGIS.RIV.Material.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.Material[1,2] ) ;
+
+
+PHIMGIS.RIV.IC<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1+PHIMGIS.RIV.Shape[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
+
+
+PHIMGIS.RIV.IC.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1+PHIMGIS.RIV.Shape[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.IC[1,2] ) ;
+
+# Need to add:
+#    BC	0
+#    RES	0
 # 
 
 
-River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c('INDEX')] ;
-
-#River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), ] ;
-
-River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c('INDEX')]  ;
+# NUMRIV  101
+# INDEX   FROM    TO      DOWN    LEFT    RIGHT   SHAPE   MATL    BC      RES
 
 
 
-# New.River.Nodes.Elevation.FROM$Max_Elev_Dif<-New.River.Nodes.Max_Elev_Dif ;
+
+
+
+
+
+# 
+# ###################   Write the appropiate formated "River" File for the MM-PIHM input format  #################################
+# 
+# ### Write the First line of the .Riv File
+# 
+# write.table(data.frame(c('NUMRIV'),NumRiv ),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, sep= "\t" ) ;
 # 
 # 
-# plot(New.River.Nodes.Elevation.FROM$INDEX,New.River.Nodes.Elevation.FROM$Max_Elev_Dif)
+# ##   Add river elements
+# names(riv.elements)<-c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'IC' ,	'BC' ,	'RES' )  ;
 # 
-
-
-
-River.Nodes.Elevation.FROM$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif ;
-
-
-plot(River.Nodes.Elevation.FROM$INDEX,River.Nodes.Elevation.FROM$Max_Elev_Dif)
-
-
-head(River.Nodes.Elevation.FROM)
-str(River.Nodes.Elevation.FROM)
-
-head(riv.elements)
-
+# ###########################################################################################################################
+# 
+# # Writing code to make sure all the river segments have positive slope
+# 
+# 
+# ###########################################################################################################################
+# 
+# 
+# 
+# 
+# ############  Check river elements for differences in height and flow patterns #####################
+# 
+# #select the nodes that are both in the mesh and in the river segments
+# #select first the unique nodes in the river
+# 
+# River.Nodes<-unique(c(riv.elements$FromNode, riv.elements$ToNode))  ;
+# 
+# head(River.Nodes)
+# str(River.Nodes)
+# 
+# # from the mesh file select the nodes that belong to the river
+# 
+# # New.River.Nodes.Elevation<-River.Nodes.Elevation.Corrected[River.Nodes.Elevation.Corrected$Index %in% River.Nodes, ]
+# River.Nodes.Elevation<-mesh.Nodes[mesh.Nodes$Index %in% River.Nodes, ] ;
+# #River.Nodes.Elevation<-mesh.Nodes.corrected[mesh.Nodes.corrected$Index %in% River.Nodes, ] ;
+# 
+# 
+# 
+# # head(New.River.Nodes.Elevation)
+# # str(New.River.Nodes.Elevation)
+# 
+# head(River.Nodes.Elevation)
+# str(River.Nodes.Elevation)
+# 
+# # connect the River nodes with the corresponding information in the mesh file
+# 
+# # New.River.Nodes.Elevation.FROM<-merge(riv.elements,New.River.Nodes.Elevation, by.x='FromNode' , by.y='Index', all.x=T, sort=F) ;
+# 
+# head(riv.elements)
+# str(riv.elements) 
+# 
+# River.Nodes.Elevation.FROM<-merge(riv.elements,Rev.mesh.Nodes.SSURGO, by.x='FROM' , by.y='Index', all.x=T, sort=F) ;
+# 
+# 
+# # head(New.River.Nodes.Elevation.FROM,50)
+# # str(New.River.Nodes.Elevation.FROM)
+# 
+# 
+# head(River.Nodes.Elevation.FROM)
+# str(River.Nodes.Elevation.FROM)
+# 
+# 
+# # New.River.Nodes.Elevation.TO<-merge(riv.elements,New.River.Nodes.Elevation, by.x='ToNode' , by.y='Index', all.x=T,sort=F) ;
+# 
+# River.Nodes.Elevation.TO<-merge(riv.elements,Rev.mesh.Nodes.SSURGO, by.x='FROM' , by.y='Index', all.x=T,sort=F) ;
+# 
+# 
+# # head(New.River.Nodes.Elevation.TO,50)
+# # str(New.River.Nodes.Elevation.TO)
+# 
+# 
+# 
+# 
+# head(River.Nodes.Elevation.TO)
+# str(River.Nodes.Elevation.TO)
+# 
+# #calculate the difference in elevation between the FROM and TO river nodes. Zmax is the surface elevation, Zmin is the bed rock elevation
+# 
+# # New.River.Nodes.Elevation.FROM_TO<-merge(New.River.Nodes.Elevation.FROM,New.River.Nodes.Elevation.TO,by='Index', sort=T) ;
+# 
+# #head(New.River.Nodes.Elevation.FROM_TO)
+# 
+# 
+# #New.River.Nodes.Elevation.FROM_TO$Max_Elev_Dif<-New.River.Nodes.Elevation.FROM_TO$Zmax.Correct.x - New.River.Nodes.Elevation.FROM_TO$Zmax.Correct.y
+# 
+# #head(New.River.Nodes.Elevation.FROM_TO,50)
+# 
+# River.Nodes.Max_Elev_Dif<-River.Nodes.Elevation.FROM$Zmax - River.Nodes.Elevation.TO$Zmax ;
+# 
+# # head(New.River.Nodes.Max_Elev_Dif,100)
+# # str(New.River.Nodes.Max_Elev_Dif)
+# 
+# 
+# head(River.Nodes.Max_Elev_Dif)
+# str(River.Nodes.Max_Elev_Dif)
+# 
+# 
+# 
+# # Explore the River nodes and segments
+# 
+# # plot(New.River.Nodes.Elevation.FROM[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="BLUE", ylim=c(-10,10)) ;
+# # points(New.River.Nodes.Elevation.TO[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="RED" ) ;
+# 
+# 
+# plot(River.Nodes.Elevation.FROM[,c('INDEX')],River.Nodes.Max_Elev_Dif, col="BLUE") ;
+# points(River.Nodes.Elevation.TO[,c('INDEX')],River.Nodes.Max_Elev_Dif, col="RED" ) ;
+# 
+# 
+# # New.River.Nodes.Elevation.FROM[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
+# # 
+# # New.River.Nodes.Elevation.TO[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
+# # 
+# 
+# 
+# River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c('INDEX')] ;
+# 
+# #River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), ] ;
+# 
+# River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c('INDEX')]  ;
+# 
+# 
+# 
+# # New.River.Nodes.Elevation.FROM$Max_Elev_Dif<-New.River.Nodes.Max_Elev_Dif ;
+# # 
+# # 
+# # plot(New.River.Nodes.Elevation.FROM$INDEX,New.River.Nodes.Elevation.FROM$Max_Elev_Dif)
+# # 
+# 
+# 
+# 
+# River.Nodes.Elevation.FROM$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif ;
+# 
+# 
+# plot(River.Nodes.Elevation.FROM$INDEX,River.Nodes.Elevation.FROM$Max_Elev_Dif)
+# 
+# 
+# head(River.Nodes.Elevation.FROM)
+# str(River.Nodes.Elevation.FROM)
+# 
+# head(riv.elements)
+# 
+# 
+# 
+# 
 
 
 ############### Write the river elements file .riv in the right PIHM format #######################

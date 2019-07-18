@@ -141,6 +141,10 @@ names(Node3.soil.depth)[1]<-"node"
 
 Nodes.all.soil.depth<-rbind(Node1.soil.depth, Node2.soil.depth, Node3.soil.depth) ;
 
+Nodes.all.soil.depth$node.Factor<-as.factor(Nodes.all.soil.depth$node) ;
+
+head(Nodes.all.soil.depth) 
+
 str(Nodes.all.soil.depth) 
 
 Nodes.soil.depth.avg<-aggregate(soil.depth ~ node.Factor, data=Nodes.all.soil.depth, FUN='mean') ;
@@ -182,6 +186,6 @@ head(Nodes.soil.depth.avg)
 
 
 
-save.image(file='SoilDepthSSurgo.RData');
+save.image(file='SoilDepthSSurgo_V2.RData');
 
 
