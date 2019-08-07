@@ -305,7 +305,7 @@ write.table(mesh.Part2, file=paste0(Watershed.name, ".mesh"), row.names=F ,col.n
 ######################################################################################################################################
 # 
 # 
-#                                  Create the river File from the TauDEM aoutput and the Mesh files
+#                                  Create the river File from the TauDEM output and the Mesh files
 # 
 # 
 # 
@@ -664,7 +664,7 @@ write.table(Watershed.att[,c('INDEX',  'SOIL' ,  'GEOL' , 'LC', 'METEO' , 'LAI' 
 # ################################################################################################################################
 # 
 # 
-#           The creating the river file  from the output of the trinagulation is not jet complete  therefore in th emean time
+#           The creating the river file  from the output of the trinagulation is not jet complete  therefore in the mean time
 #           the river file created from PIHM GIS is going to be used to get create the riv file
 #           
 #  
@@ -684,20 +684,40 @@ PHIMGIS.RIV<-PHIMGIS.RIV.data[,-9] ;
 
 names(PHIMGIS.RIV)<-PHIMGIS.RIV.names[1,];
 
+
+head(PHIMGIS.RIV)
+
+
+PHIMGIS.RIV[duplicated(PHIMGIS.RIV$DOWN),]
+
+PHIMGIS.RIV[PHIMGIS.RIV$DOWN==1,]
+
+PHIMGIS.RIV[PHIMGIS.RIV$DOWN==59,]
+
+
+
+
 PHIMGIS.RIV.Shape<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
 
 PHIMGIS.RIV.Shape.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.Shape[1,2] ) ;
+
+names(PHIMGIS.RIV.Shape.data)<-c('INDEX', 'DPTH' ,  'OINT' ,	'CWID' );
 
 
 PHIMGIS.RIV.Material<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
 
 PHIMGIS.RIV.Material.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.Material[1,2] ) ;
 
+names(PHIMGIS.RIV.Material.data)<-c( 'INDEX' , 'rough' ,  'CWR' ,	'kh' ,	'kv' ,	'BEDTHCK');
+
 
 PHIMGIS.RIV.IC<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1+PHIMGIS.RIV.Shape[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
 
 
 PHIMGIS.RIV.IC.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1+PHIMGIS.RIV.Shape[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.IC[1,2] ) ;
+
+
+
 
 # Need to add:
 #    BC	0
@@ -710,152 +730,6 @@ PHIMGIS.RIV.IC.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PH
 
 
 
-
-
-
-
-
-# 
-# ###################   Write the appropiate formated "River" File for the MM-PIHM input format  #################################
-# 
-# ### Write the First line of the .Riv File
-# 
-# write.table(data.frame(c('NUMRIV'),NumRiv ),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, sep= "\t" ) ;
-# 
-# 
-# ##   Add river elements
-# names(riv.elements)<-c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'IC' ,	'BC' ,	'RES' )  ;
-# 
-# ###########################################################################################################################
-# 
-# # Writing code to make sure all the river segments have positive slope
-# 
-# 
-# ###########################################################################################################################
-# 
-# 
-# 
-# 
-# ############  Check river elements for differences in height and flow patterns #####################
-# 
-# #select the nodes that are both in the mesh and in the river segments
-# #select first the unique nodes in the river
-# 
-# River.Nodes<-unique(c(riv.elements$FromNode, riv.elements$ToNode))  ;
-# 
-# head(River.Nodes)
-# str(River.Nodes)
-# 
-# # from the mesh file select the nodes that belong to the river
-# 
-# # New.River.Nodes.Elevation<-River.Nodes.Elevation.Corrected[River.Nodes.Elevation.Corrected$Index %in% River.Nodes, ]
-# River.Nodes.Elevation<-mesh.Nodes[mesh.Nodes$Index %in% River.Nodes, ] ;
-# #River.Nodes.Elevation<-mesh.Nodes.corrected[mesh.Nodes.corrected$Index %in% River.Nodes, ] ;
-# 
-# 
-# 
-# # head(New.River.Nodes.Elevation)
-# # str(New.River.Nodes.Elevation)
-# 
-# head(River.Nodes.Elevation)
-# str(River.Nodes.Elevation)
-# 
-# # connect the River nodes with the corresponding information in the mesh file
-# 
-# # New.River.Nodes.Elevation.FROM<-merge(riv.elements,New.River.Nodes.Elevation, by.x='FromNode' , by.y='Index', all.x=T, sort=F) ;
-# 
-# head(riv.elements)
-# str(riv.elements) 
-# 
-# River.Nodes.Elevation.FROM<-merge(riv.elements,Rev.mesh.Nodes.SSURGO, by.x='FROM' , by.y='Index', all.x=T, sort=F) ;
-# 
-# 
-# # head(New.River.Nodes.Elevation.FROM,50)
-# # str(New.River.Nodes.Elevation.FROM)
-# 
-# 
-# head(River.Nodes.Elevation.FROM)
-# str(River.Nodes.Elevation.FROM)
-# 
-# 
-# # New.River.Nodes.Elevation.TO<-merge(riv.elements,New.River.Nodes.Elevation, by.x='ToNode' , by.y='Index', all.x=T,sort=F) ;
-# 
-# River.Nodes.Elevation.TO<-merge(riv.elements,Rev.mesh.Nodes.SSURGO, by.x='FROM' , by.y='Index', all.x=T,sort=F) ;
-# 
-# 
-# # head(New.River.Nodes.Elevation.TO,50)
-# # str(New.River.Nodes.Elevation.TO)
-# 
-# 
-# 
-# 
-# head(River.Nodes.Elevation.TO)
-# str(River.Nodes.Elevation.TO)
-# 
-# #calculate the difference in elevation between the FROM and TO river nodes. Zmax is the surface elevation, Zmin is the bed rock elevation
-# 
-# # New.River.Nodes.Elevation.FROM_TO<-merge(New.River.Nodes.Elevation.FROM,New.River.Nodes.Elevation.TO,by='Index', sort=T) ;
-# 
-# #head(New.River.Nodes.Elevation.FROM_TO)
-# 
-# 
-# #New.River.Nodes.Elevation.FROM_TO$Max_Elev_Dif<-New.River.Nodes.Elevation.FROM_TO$Zmax.Correct.x - New.River.Nodes.Elevation.FROM_TO$Zmax.Correct.y
-# 
-# #head(New.River.Nodes.Elevation.FROM_TO,50)
-# 
-# River.Nodes.Max_Elev_Dif<-River.Nodes.Elevation.FROM$Zmax - River.Nodes.Elevation.TO$Zmax ;
-# 
-# # head(New.River.Nodes.Max_Elev_Dif,100)
-# # str(New.River.Nodes.Max_Elev_Dif)
-# 
-# 
-# head(River.Nodes.Max_Elev_Dif)
-# str(River.Nodes.Max_Elev_Dif)
-# 
-# 
-# 
-# # Explore the River nodes and segments
-# 
-# # plot(New.River.Nodes.Elevation.FROM[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="BLUE", ylim=c(-10,10)) ;
-# # points(New.River.Nodes.Elevation.TO[,c("INDEX")],New.River.Nodes.Max_Elev_Dif, col="RED" ) ;
-# 
-# 
-# plot(River.Nodes.Elevation.FROM[,c('INDEX')],River.Nodes.Max_Elev_Dif, col="BLUE") ;
-# points(River.Nodes.Elevation.TO[,c('INDEX')],River.Nodes.Max_Elev_Dif, col="RED" ) ;
-# 
-# 
-# # New.River.Nodes.Elevation.FROM[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")] ;
-# # 
-# # New.River.Nodes.Elevation.TO[which(New.River.Nodes.Max_Elev_Dif < 0), c("INDEX")]  ;
-# # 
-# 
-# 
-# River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), c('INDEX')] ;
-# 
-# #River.Nodes.Elevation.FROM[which(River.Nodes.Max_Elev_Dif < 0), ] ;
-# 
-# River.Nodes.Elevation.TO[which(River.Nodes.Max_Elev_Dif < 0), c('INDEX')]  ;
-# 
-# 
-# 
-# # New.River.Nodes.Elevation.FROM$Max_Elev_Dif<-New.River.Nodes.Max_Elev_Dif ;
-# # 
-# # 
-# # plot(New.River.Nodes.Elevation.FROM$INDEX,New.River.Nodes.Elevation.FROM$Max_Elev_Dif)
-# # 
-# 
-# 
-# 
-# River.Nodes.Elevation.FROM$Max_Elev_Dif<-River.Nodes.Max_Elev_Dif ;
-# 
-# 
-# plot(River.Nodes.Elevation.FROM$INDEX,River.Nodes.Elevation.FROM$Max_Elev_Dif)
-# 
-# 
-# head(River.Nodes.Elevation.FROM)
-# str(River.Nodes.Elevation.FROM)
-# 
-# head(riv.elements)
 # 
 # 
 # 
@@ -864,9 +738,9 @@ PHIMGIS.RIV.IC.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PH
 
 ############### Write the river elements file .riv in the right PIHM format #######################
 
+write.table(PHIMGIS.RIV.NUMRIV[1,],file=paste0(Watershed.name, ".riv"), append=T, row.names=F , col.names=F, quote=F, sep= "\t" ) ;
 
-
-write.table(riv.elements[,c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGHT' , 	'SHAPE' ,	'MATL' ,	'BC' ,	'RES' )],file=paste0(inputfile.name, ".RIV"), append=T, row.names=F , quote=F, sep= "\t" ) ;
+write.table(PHIMGIS.RIV,file=paste0(Watershed.name, ".riv"), append=T, row.names=F ,col.names=T,  quote=F, sep= "\t" ) ;
 
 
 ##    Add river Shape
@@ -875,21 +749,15 @@ write.table(riv.elements[,c( 'INDEX', 'FROM' , 'TO' ,  'DOWN' , 	'LEFT' , 	'RIGH
 ## write the word Shape as title before writting the table with the data
 
 
-write.table(data.frame(c('SHAPE'),NumShape),file=paste0(inputfile.name, ".RIV") , row.names=F , col.names=F, quote=F, append=T , sep= "\t") ;
+write.table(data.frame(c('SHAPE'),PHIMGIS.RIV.Shape[1,2]), file=paste0(Watershed.name, ".riv") , row.names=F , col.names=F, quote=F, append=T , sep= "\t") ;
 
 
-header.riv.Shape<-c('INDEX', 'DPTH' ,  'OINT' ,	'CWID' );
 
-write.table(riv.shape,file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=header.riv.Shape, quote=F, append=T, sep = "\t") ;
+write.table(PHIMGIS.RIV.Shape.data, file=paste0(Watershed.name, ".riv") , row.names=F , col.names=T, quote=F, append=T , sep= "\t") ;
+
 
 
 ##   Add river Material
-
-
-
-write.table(data.frame(c('MATERIAL'),NumMat ),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
-
-
 
 
 ###############################################################################################################
@@ -903,27 +771,34 @@ write.table(data.frame(c('MATERIAL'),NumMat ),file=paste0(inputfile.name, ".RIV"
 ##  Convert units of Manning's roughness coefficient [day m-1/3] , River bank hydraulic conductivity (horizontal KH) and
 ##   River bed hydraulic conductivity (vertical KV) [m/day] into  [s m-1/3] and [m/s] 
 
-riv.material$ROUGH<-signif(riv.material$n * 86400, 2) ;
+PHIMGIS.RIV.Material.data$ROUGH<-signif(PHIMGIS.RIV.Material.data$rough * 86400, 2) ;
 
-riv.material$KH<-signif(riv.material$KsatH / 86400, 2)  ;
+PHIMGIS.RIV.Material.data$KH<-signif(PHIMGIS.RIV.Material.data$kh / 86400, 2)  ;
 
-riv.material$KV<-signif(riv.material$KsatV / 86400, 2)  ;
-
-
-header.riv.Material<-c( 'INDEX' , 'ROUGH' ,  'CWR' ,	'KH' ,	'KV' ,	'BEDTHCK');
+PHIMGIS.RIV.Material.data$KV<-signif(PHIMGIS.RIV.Material.data$kv  / 86400, 2)  ;
 
 
-write.table(riv.material[,c('Index','ROUGH' ,  'Cwr' ,	'KH' ,	'KV' ,	'Bed')],file=paste0(inputfile.name, ".RIV") , row.names=F , col.names=header.riv.Material, quote=F, append=T , sep = "\t") ;
+
+
+
+
+write.table(data.frame(c('MATERIAL'),PHIMGIS.RIV.Material[1,2]),file=paste0(Watershed.name, ".riv"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
+
+
+
+write.table(PHIMGIS.RIV.Material.data[,c('INDEX' , 'ROUGH' , 'CWR' , 'KH', 'KV', 'BEDTHCK')],file=paste0(Watershed.name, ".riv"), row.names=F , col.names=T, quote=F, append=T , sep = "\t") ;
+
 
 ##   Add boundary condition
 
 
-write.table(data.frame(c('BC'),BC[2]),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F ,quote=F, append=T, sep = "\t") ;
+write.table(data.frame(c('BC'),c(0)),file=paste0(Watershed.name, ".riv"), row.names=F , col.names=F ,quote=F, append=T, sep = "\t") ;
 
 
 ##   Add Reservoirs
 
-write.table(data.frame(c('RES'),Res[2]),file=paste0(inputfile.name, ".RIV"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
+write.table(data.frame(c('RES'),c(0)),file=paste0(Watershed.name, ".riv"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
+
 
 
 
