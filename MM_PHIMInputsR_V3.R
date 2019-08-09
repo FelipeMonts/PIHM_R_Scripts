@@ -789,16 +789,26 @@ write.table(data.frame(c('MATERIAL'),PHIMGIS.RIV.Material[1,2]),file=paste0(Wate
 write.table(PHIMGIS.RIV.Material.data[,c('INDEX' , 'ROUGH' , 'CWR' , 'KH', 'KV', 'BEDTHCK')],file=paste0(Watershed.name, ".riv"), row.names=F , col.names=T, quote=F, append=T , sep = "\t") ;
 
 
-##   Add boundary condition
+##   Add boundary condition and Reservoirs
 
 
-write.table(data.frame(c('BC'),c(0)),file=paste0(Watershed.name, ".riv"), row.names=F , col.names=F ,quote=F, append=T, sep = "\t") ;
+write.table(data.frame(c('BC', 'RES'),c(0,0)),file=paste0(Watershed.name, ".riv"), row.names=F , col.names=F ,quote=F, append=T, sep = "\t") ;
 
 
-##   Add Reservoirs
 
-write.table(data.frame(c('RES'),c(0)),file=paste0(Watershed.name, ".riv"), row.names=F , col.names=F, quote=F, append=T , sep = "\t") ;
+###############################################################################################################
+#
+#                         check the oulet segment "Down" column to be -3
+#                         
+###############################################################################################################
 
+head(PHIMGIS.RIV)
+
+head(Watershed.1.node)
+
+Boundary.nodes<-Watershed.1.node[Watershed.1.node$BoundaryMarker==1,c("INDEX")] ;
+
+PHIMGIS.RIV[PHIMGIS.RIV$TO %in% Boundary.nodes,c('DOWN')] == -3
 
 
 
