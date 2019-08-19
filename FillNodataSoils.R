@@ -116,17 +116,17 @@ Mukey_Gaps_indx_neighbors.para<-merge(merge(Neighbor_Mukeys,Neighbor_Mukeys_para
 
 Mukey_Gaps_Nabr.0<-merge(Mukey_Gaps_indx_neighbors[,c("triangle" , "neighbor1")],Mukey_Gaps_indx_neighbors.para, by.x="neighbor1", by.y='Ele_ID', all.x=T, sort=F ) ;
 
-names(Mukey_Gaps_Nabr.0)<-c(names(Mukey_Gaps_Nabr.0)[1:4], paste0('Nabr.0.',names(Mukey_Gaps_indx_neighbors.para)[4:11]))
+names(Mukey_Gaps_Nabr.0)<-c(names(Mukey_Gaps_Nabr.0)[1:4], paste0('Nabr.0.',names(Mukey_Gaps_indx_neighbors.para)[4:12]))
 
 
 Mukey_Gaps_Nabr.1<-merge(Mukey_Gaps_indx_neighbors[,c("triangle" , "neighbor2")],Mukey_Gaps_indx_neighbors.para, by.x="neighbor2", by.y='Ele_ID', all.x=T , sort=F )  ;
 
-names(Mukey_Gaps_Nabr.1)<-c(names(Mukey_Gaps_Nabr.1)[1:4], paste0("Nabr.1.",names(Mukey_Gaps_indx_neighbors.para)[4:11]))
+names(Mukey_Gaps_Nabr.1)<-c(names(Mukey_Gaps_Nabr.1)[1:4], paste0("Nabr.1.",names(Mukey_Gaps_indx_neighbors.para)[4:12]))
 
 
 Mukey_Gaps_Nabr.2<-merge(Mukey_Gaps_indx_neighbors[,c("triangle", "neighbor3")],Mukey_Gaps_indx_neighbors.para, by.x="neighbor3", by.y='Ele_ID' , all.x=T , sort=F )  ;
 
-names(Mukey_Gaps_Nabr.2)<-c(names(Mukey_Gaps_Nabr.2)[1:4], paste0("Nabr.2.",names(Mukey_Gaps_indx_neighbors.para)[4:11]))
+names(Mukey_Gaps_Nabr.2)<-c(names(Mukey_Gaps_Nabr.2)[1:4], paste0("Nabr.2.",names(Mukey_Gaps_indx_neighbors.para)[4:12]))
 
 ####  Gathering all the data of neighbors together to be ready to take the mean of the neighbor triangles 
 
@@ -134,7 +134,13 @@ Mukey_Gaps_All.Nabr<-merge(merge(Mukey_Gaps_Nabr.0,Mukey_Gaps_Nabr.1,by="triangl
 names(Mukey_Gaps_All.Nabr)
 
 
-######## Average the representative Mukeys properties  of the neighboring triangles for Soils
+######## Average the representative Mukeys properties  of the neighboring triangles for Soils, removing NA, NAN and 0 values 
+
+#change all zero values to NA
+
+Mukey_Gaps_All.Nabr[Mukey_Gaps_All.Nabr==0]<-NA ;
+
+#Calculate the means without accounting for NA values
 
 Mukey_Gaps_All.Nabr$Avg.SOIL.SILT<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.SOIL.SILT', 'Nabr.1.SOIL.SILT' , 'Nabr.2.SOIL.SILT')], MARGIN=1,FUN='mean', na.rm=T) ;
 
@@ -145,7 +151,8 @@ Mukey_Gaps_All.Nabr$Avg.SOIL.OM<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.SOIL.OM',
 Mukey_Gaps_All.Nabr$Avg.SOIL.BD<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.SOIL.BD', 'Nabr.1.SOIL.BD' , 'Nabr.2.SOIL.BD')], MARGIN=1,FUN='mean', na.rm=T) ;
 
 
-######## Average the representative Mukeys properties  of the neighboring triangles for Geology ##############
+######## Average the representative Mukeys properties  of the neighboring triangles for Geology, removing NA, NAN and 0 values  ##############
+
 
 Mukey_Gaps_All.Nabr$Avg.GEOL.SILT<-apply(Mukey_Gaps_All.Nabr[, c('Nabr.0.GEOL.SILT', 'Nabr.1.GEOL.SILT' , 'Nabr.2.GEOL.SILT')], MARGIN=1,FUN='mean', na.rm=T) ;
 
@@ -166,21 +173,21 @@ Mukey_Gaps_All.Nabr$New.MUKEY<--999  ;
 
 ######### in the Project_Soil data frame, find all the NA and NAN and replace them with silt=0.33, clay=0.33. OM=0.5, BD= 1.0
 
-#Find all the NAN and NA in the Project_Soil data frame
-
-Project_Soil.NA<-which(is.na.data.frame(Project_Soil)==T,arr.ind=T) ;
-
-#Select wich rows have NAN and NA
-
-Project_Soil.NA.Rows<-unique(Project_Soil.NA[,1])  ;
-
-# replace NA and NAN in silt, clay, OM, BD with the standarized arbitrary values  with silt=0.33, clay=0.33. OM=0.5, BD= 1.0
-
-StandardSoilValues<-data.frame(Silt=33.3, Clay=33.3, OM=0.5, BD=1.0)
-
-Project_Soil[Project_Soil.NA.Rows, c(2,3,4,5)]<-StandardSoilValues
-
-
+# #Find all the NAN and NA in the Project_Soil data frame
+# 
+# Project_Soil.NA<-which(is.na.data.frame(Project_Soil)==T,arr.ind=T) ;
+# 
+# #Select wich rows have NAN and NA
+# 
+# Project_Soil.NA.Rows<-unique(Project_Soil.NA[,1])  ;
+# 
+# # replace NA and NAN in silt, clay, OM, BD with the standarized arbitrary values  with silt=0.33, clay=0.33. OM=0.5, BD= 1.5
+# 
+# StandardSoilValues<-data.frame(Silt=33.3, Clay=33.3, OM=0.5, BD=1.5)
+# 
+# Project_Soil[Project_Soil.NA.Rows, c(2,3,4,5)]<-StandardSoilValues
+# 
+# 
 
 
 ######## Add new rows to the Soil. file to include the new created soil parameters from neighbors and create a revised soil parameter file
@@ -204,6 +211,38 @@ Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_
 
 Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Mukey_Gaps_All.Nabr)[1]),c('QTZ', 'DMAC', 'MACVF', 'MACHF', 'BETA', 'ALPHA', 'MINSMC', 'MAXSMC', 'KSATH', 'KSATV' ,'KINF')]<--999
 
+
+################################################################################################################################
+#
+#
+#                         make corrections for the soils that have deffective data or no data in the 
+#                         Soil Ssurgo database
+# 
+# 
+#####################################################################################################################################
+
+# soil 56 ,mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon',
+#some layers do not have data for bulk density',
+#The bulk density will be calulated from the average of the data available Avg(1.27, 1.42)=1.345 '
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY==542030,'BD']<-1.345 ;
+
+
+# soil 57 ,mukey 542033, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon',
+#some layers do not have data for bulk density',
+#The bulk density will be calulated from the average of the data available Avg(1.30, 1.30)=1.30 '
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY==542033,'BD']<-1.30 ;
+
+
+# soil 57 ,mukey 542034 is abandoned mine pitts, this have no data at all, The data will be replaced by the average of the data available for # the neighboring triangles in each case. Therefore triangles with soil index 57 (542034) will not be used and tringles with new indeces # created with the average values from neighbouring trinagles will be used. In order to not create warnings when procesing the soil file, soil indices with no data will be filled with Standard data. 
+#The standarized arbitrary values are silt=0.33, clay=0.33. OM=0.5, BD= 1.5
+# 
+
+
+StandardSoilValues<-data.frame(Silt=33.3, Clay=33.3, OM=0.5, BD=1.5) ;
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY==542034,c('SILT', 'CLAY' , 'OM' , 'BD')]<-StandardSoilValues ;
 
 
 ######## Add new rows to the Geology. file to include the new created Geology parameters from neighbors and create a revised Geology parameter file
@@ -241,19 +280,26 @@ Project_Geology.Rev.NA.Rows<-unique(Project_Geology.Rev.NA[,1])  ;
 
 # replace NA and NAN in silt, clay, OM, BD with the standarized arbitrary values  with silt=0.33, clay=0.33. OM=0.5, BD= 1.0
 
-
-Project_Geology.Rev[Project_Geology.Rev.NA.Rows, c(2,3,4,5)]<-StandardSoilValues
-
+Project_Geology.Rev[Project_Geology.Rev.NA.Rows, ]
 
 
-
+Project_Geology.Rev[Project_Geology.Rev.NA.Rows, c('SILT', 'CLAY' , 'OM' , 'BD')]<-StandardSoilValues
 
 
 
-#############################################################################################################################
+
+
+
+
+################################################################################################################################
 #
 #
-####################### Write the soil and geology data in the format approptiate for PIHM to take #############################
+#                         Write the soil and geology data in the format approptiate for PIHM to take  
+# 
+# 
+################################################################################################################################
+
+
 
 # NUMSOIL<-data.frame(c('NUMSOIL'), dim(HansYoust_Soil)[1]) ;
 
@@ -271,17 +317,52 @@ write.table(NUMSOIL,file='Soil.txt', row.names=F , quote=F, sep = "\t", col.name
 
 write.table(Project_Soil.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Soil.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
-####################  Add DINF , KMACV_RO  and KMACH_RO  at the end of the soil file ################
+
+
+
+####################  Add DINF , KMACV_RO  and KMACH_RO  at the end of the soil file ###########################################
+
+
 # DINF (type: double, unit: m) A virtual top soil layer thickness across which infiltration is calculated.
 # KMACV RO (type: double, unit: dimensionless) Ratio between vertical macropore hydraulic conduc-
 #   tivity and vertical saturated infiltration hydraulic conductivity.
-# KMACH RO (type: double, unit: dimensionless) Ratio between horizontal macropore hydraulic con-
-#   ductivity and horizontal saturated hydraulic conductivity.
+# KMACH RO (type: double, unit: dimensionless) Ratio between horizontal macropore hydraulic conductivity and 
+# horizontal saturated hydraulicconductivity.
+
+
+################################################################################################################################
+
+
 
 DINF_etc<-data.frame(c('DINF' , 'KMACV_RO', 'KMACH_RO'), c( 0.10, 100.0 , 1000.0 )) ;
 
 write.table(DINF_etc,file='Soil.txt', row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
 
+################################################################################################################################
+#
+#
+#                         Write notes on the corrections made for the soils that have deffective data or no data in the 
+#                         Soil Ssurgo database
+# 
+# 
+#####################################################################################################################################
+
+Soil.comments<-c('# mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon',
+                 '#some layers do not have data for bulk density',
+                 '#The bulk density will be calulated from the average of the data available Avg(1.27, 1.42)=1.345 ',
+                 '#soil 57 ,mukey 542033, is also a Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon',
+                 '#some layers do not have data for bulk density',
+                 '#The bulk density will be calulated from the average of the data available Avg(1.30, 1.30)=1.30',
+                 '#soil 57 ,mukey 542034 is abandoned mine pitts, this have no data at all', 
+                 '#The data will be replaced by the average of the data available for the neighboring triangles in each case',
+                 '#Therefore triangles with soil index 57 (542034) will not be used and tringles with new indeces',
+                 '#created with the average values from neighbouring trinagles will be used.',
+                 '#In order to not create warnings when procesing the soil file, soil indices with no data will be filled with Standard data.',
+                 '#The standarized arbitrary values are silt=0.33, clay=0.33. OM=0.5, BD= 1.5') 
+
+
+
+write(Soil.comments,file='Soil.txt', sep = "\t", append= T) ;
 
 # NUMGEOL<-data.frame(c('NUMGEOL'), dim(HansYoust_Geology)[1]) ;
 
@@ -297,7 +378,7 @@ write.table(DINF_etc, file='Geology.txt', row.names=F , quote=F, sep = "\t", col
 
 
 
-
+write(Soil.comments,file='Geology.txt', sep = "\t", append= T) ;
 
 save.image(file='FillNoDataSoils.RData') ;
 
