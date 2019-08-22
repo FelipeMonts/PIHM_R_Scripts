@@ -520,17 +520,21 @@ str(Project.LC@data)
 
 ##########################################################################################################################
 
-
+#inspect the levels of Project.LC@data$LC.index 
 
 levels(Project.LC@data$LandCover.factor) 
 
 
-#Change Project.LC@data$LC.index that have index 11 to index 95
 
-#inspect the levels of Project.LC@data$LC.index 
+# add level "95" to the list of levels for the factor LandCover.factor
 
 levels(Project.LC@data$LandCover.factor) <-c(levels(Project.LC@data$LandCover.factor) ,"95") ;
 head(Project.LC@data)
+
+
+#Change Project.LC@data$LC.index that have index 11 to index 95
+
+
 
 Project.LC@data$LandCover.factor[which(Project.LC@data$LandCover.factor == "11")]<-c("95")   ;
 
@@ -590,6 +594,20 @@ load('SoilsSurgoPIHM.RData');
 
 load('FillNoDataSoils.RData') ;
 
+###### Get the soils index that had no data and whose data was obtained from averaging the neighbor triangles (from FillNoDataSoils.RData)
+
+Mukey_Gaps_indx
+
+Mukey_Gaps_All.Nabr
+
+
+Project_Soil.Rev
+
+Project_Geology.Rev
+
+
+##### Revise the soils and geology map according to the soils that had no data and were filled with the average of the neighbor triangles
+
 
 head(MUKEYS.map.1)  #from the SoilSurgoPIHM.R file 
 
@@ -597,6 +615,8 @@ str(MUKEYS.map.1)
 
 MUKEYS.map.1$INDEX<-as.integer(as.character(MUKEYS.map.1$MUKEYS.index)) ;
 
+
+MUKEYS.map.1[MUKEYS.map.1$INDEX %in% Mukey_Gaps_indx$INDEX, 'INDEX'] <- Project_Soil.Rev[Project_Soil.Rev$MUKEY==-999,'INDEX']
 
 
 
@@ -622,6 +642,7 @@ LandCover.att<-merge(Project.LC@data,PIHM_to_NLCD, by.x= 'LandCover' ,by.y='PIHM
 ######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
 
 Revised.att<-merge(MUKEYS.map.1,LandCover.att, by.x='Ele_ID' , by.y= 'Ele_ID' )[] ;
+
 
 
 head(Revised.att)
