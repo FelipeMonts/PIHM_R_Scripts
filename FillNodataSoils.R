@@ -370,8 +370,15 @@ write.table(NUMSOIL,file='Soil.txt', row.names=F , quote=F, sep = "\t", col.name
 
 # write.table(HansYoust_Soil[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
-write.table(Project_Soil.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Soil.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
+###### Get 4 signifficant digits on the caluclated values for soils
+
+Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')])  ;
+
+names(Project_Soil.Final)[1]<-c('INDEX') ;
+
+
+write.table(Project_Soil.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Soil.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
 
 
@@ -440,7 +447,12 @@ write.table(NUMGEOL,file='Geology.txt', row.names=F , quote=F, sep = "\t", col.n
 
 # write.table(HansYoust_Geology[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
-write.table(Project_Geology.Rev[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Geology.txt', row.names=F , quote=F, sep = "\t", append= T) ;
+Project_Geology.Final<-data.frame(Project_Geology.Rev[,'INDEX'],signif(Project_Geology.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Geology.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')])  ;
+
+
+names(Project_Geology.Final)[1]<-c('INDEX') ;
+
+write.table(Project_Geology.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Geology.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
 
 write.table(DINF_etc, file='Geology.txt', row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;

@@ -596,17 +596,26 @@ load('FillNoDataSoils.RData') ;
 
 ###### Get the soils index that had no data and whose data was obtained from averaging the neighbor triangles (from FillNoDataSoils.RData)
 
-Mukey_Gaps_indx
+Mukey_Gaps_indx_Soil
 
-Mukey_Gaps_All.Nabr
+Mukey_Gaps_indx_neighbors_Soil
 
+Index_Neighbor_Mukeys_para.Soil
 
 Project_Soil.Rev
+
+
+Mukeys_Gaps_Geology_indx
+
+Mukey_Gaps_indx_neighbors_Geology
+
+Index_Neighbor_Mukeys_para.Geology
+
 
 Project_Geology.Rev
 
 
-##### Revise the soils and geology map according to the soils that had no data and were filled with the average of the neighbor triangles
+##### Revise the soils map according to the soils that had no data and were filled with the average of the neighbor triangles
 
 
 head(MUKEYS.map.1)  #from the SoilSurgoPIHM.R file 
@@ -615,8 +624,19 @@ str(MUKEYS.map.1)
 
 MUKEYS.map.1$INDEX<-as.integer(as.character(MUKEYS.map.1$MUKEYS.index)) ;
 
+MUKEYS.map.1_Soil<-MUKEYS.map.1   ;
 
-MUKEYS.map.1[MUKEYS.map.1$INDEX %in% Mukey_Gaps_indx$INDEX, 'INDEX'] <- Project_Soil.Rev[Project_Soil.Rev$MUKEY==-999,'INDEX']
+
+MUKEYS.map.1_Soil[MUKEYS.map.1_Soil$MUKEYS.index %in% Mukey_Gaps_indx_Soil$MUKEYS.index, 'INDEX'] <- Project_Soil.Rev[Project_Soil.Rev$MUKEY==-999,'INDEX']
+
+
+
+##### Revise the Geology map according to the geology that had no data and were filled with the average of the neighbor triangles
+
+MUKEYS.map.1_Geology<-MUKEYS.map.1   ;
+
+MUKEYS.map.1_Geology[MUKEYS.map.1_Geology$MUKEYS.index %in% Mukeys_Gaps_Geology_indx$MUKEYS.index, 'INDEX'] <- Project_Geology.Rev[Project_Geology.Rev$MUKEY==-999,'INDEX']
+
 
 
 
