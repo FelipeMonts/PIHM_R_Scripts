@@ -522,15 +522,14 @@ write.table(mesh.Part2, file=paste0(Watershed.name, ".mesh"), row.names=F ,col.n
 ########### Read infromation about the shape files ###########
 
 
-
-Project.LC.info<-ogrInfo("MergeVectorLayer200_q25_250_3_Landcover.shp");
+Project.LC.info<-ogrInfo("../Oct0920191330/DomainDecomposition/MergeFeatures_q30_a1000000_o.shp" );
 
 
 #### read the shape file that has been created in QGIS using the zonal statistics
 
 
 
-Project.LC<-readOGR("MergeVectorLayer200_q25_250_3_Landcover.shp");
+Project.LC<-readOGR("../Oct0920191330/DomainDecomposition/MergeFeatures_q30_a1000000_o.shp",  p4s='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' );
 
 str(Project.LC, max.level = 2) ;
 
@@ -546,7 +545,7 @@ str(Project.LC@data) ;
 
 # HansYoust.LC@data$Lc_mode<-as.factor(HansYoust.LC@data$Lc_mode) ;
 
-Project.LC@data$LandCover.factor<-as.factor(Project.LC@data$LandCover_)
+Project.LC@data$LandCover.factor<-as.factor(Project.LC@data$LC_Mode_ma) ;
 
 head(Project.LC@data)
 
@@ -593,22 +592,22 @@ str(LC.index)
 
 ############# Load the vegetation parameter table and the convertion parameters for PIHM - MM ################
 
-NUMLC<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=0, as.is=T, nrows=1) ;
+NUMLC<-read.table("vegprmt.tbl", skip=0, as.is=T, nrows=1) ;
 
 
-vegprmt.tbl<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=1, sep="", as.is=T, header=T, nrows=NUMLC[1,2]) ;
+vegprmt.tbl<-read.table("vegprmt.tbl", skip=1, sep="", as.is=T, header=T, nrows=NUMLC[1,2]) ;
 
-Description<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=1, sep="\t", as.is=T, header=T, nrows=NUMLC[1,2], comment.char="") ;
+Description<-read.table("vegprmt.tbl", skip=1, sep="\t", as.is=T, header=T, nrows=NUMLC[1,2], comment.char="") ;
 
 vegprmt.tbl$Description<-sapply(strsplit(Description[,1], "#"), "[" , 2) ;
 
-Otherprmt.tbl<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=NUMLC[1,2]+2, sep="", as.is=T, header=F, nrows=5) ;
+Otherprmt.tbl<-read.table("vegprmt.tbl", skip=NUMLC[1,2]+2, sep="", as.is=T, header=F, nrows=5) ;
 
 
 ############# convert NLCD land cover class mapping to PIHM land cover type ############################          
 
 
-NLCD_PIHM.lc<-read.table("./MM-PIHM-master/input/vegprmt.tbl", skip=NUMLC[1,2]+2+6, sep= ">" , as.is=T, header=F,comment.char="") ;
+NLCD_PIHM.lc<-read.table("vegprmt.tbl", skip=NUMLC[1,2]+2+6, sep= ">" , as.is=T, header=F,comment.char="") ;
 
 NLCD.lc<-NLCD_PIHM.lc[,2];
 str(NLCD_PIHM.lc[,2])
