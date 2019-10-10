@@ -252,7 +252,7 @@ tail(Watershed.1.neigh)
 ################## Write out the appropiate formated "Mesh" File for the MM-PIHM input format ##################################
 
 
-Watershed.name<-"Yahara"  ;
+Watershed.name<-"Yahara_"  ;
 
 
 ####  write the first lines of the new MM-PIHM mesh file
@@ -753,17 +753,19 @@ write.table(Watershed.att[,c('INDEX',  'SOIL' ,  'GEOL' , 'LC', 'METEO' , 'LAI' 
 #           
 # ################################################################################################################################
 
-PHIMGIS.RIV.NUMRIV<-read.table(file='MergeVectorLayer50_q25_50_3.riv', header=F , sep="", as.is=T, nrows=1 ) ;
+PHIMGIS.RIV.NUMRIV<-read.table(file='Yahara.riv', header=F , sep="", as.is=T, nrows=1 ) ;
 
-PHIMGIS.RIV.names<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=1, header=F , sep="", as.is=T, nrows=1 ) ;
+# PHIMGIS.RIV.names<-read.table(file='Yahara.riv',skip=1, header=F , sep="", as.is=T, nrows=1 ) ;
+
+PHIMGIS.RIV.names<-c( "INDEX",	"FROM" ,	"TO" ,	"DOWN" ,	"LEFT" ,	"RIGHT" ,	"SHAPE" ,	 "MATL" ,	"BC" ,	"RES" );
 
 
-PHIMGIS.RIV.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.NUMRIV[1,2] ) ;
+PHIMGIS.RIV.data<-read.table(file='Yahara.riv',skip=1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.NUMRIV[1,1] ) ;
 
 
 PHIMGIS.RIV<-PHIMGIS.RIV.data[,-9] ;
 
-names(PHIMGIS.RIV)<-PHIMGIS.RIV.names[1,];
+names(PHIMGIS.RIV)<-PHIMGIS.RIV.names;
 
 
 head(PHIMGIS.RIV)
@@ -778,24 +780,24 @@ PHIMGIS.RIV[PHIMGIS.RIV$DOWN==59,]
 
 
 
-PHIMGIS.RIV.Shape<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
+PHIMGIS.RIV.Shape<-read.table(file='Yahara.riv',skip=1+PHIMGIS.RIV.NUMRIV[1,1], header=F , sep="", as.is=T, nrows=1 ) ;
 
-PHIMGIS.RIV.Shape.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.Shape[1,2] ) ;
+PHIMGIS.RIV.Shape.data<-read.table(file='Yahara.riv',skip=1+PHIMGIS.RIV.NUMRIV[1,1]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.Shape[1,2] ) ;
 
 names(PHIMGIS.RIV.Shape.data)<-c('INDEX', 'DPTH' ,  'OINT' ,	'CWID' );
 
 
-PHIMGIS.RIV.Material<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
+PHIMGIS.RIV.Material<-read.table(file='Yahara.riv',skip=1+PHIMGIS.RIV.NUMRIV[1,1]+1 +PHIMGIS.RIV.Shape[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
 
-PHIMGIS.RIV.Material.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.Material[1,2] ) ;
+PHIMGIS.RIV.Material.data<-read.table(file='Yahara.riv',skip=1+PHIMGIS.RIV.NUMRIV[1,1]+1 +PHIMGIS.RIV.Shape[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.Material[1,2] ) ;
 
 names(PHIMGIS.RIV.Material.data)<-c( 'INDEX' , 'rough' ,  'CWR' ,	'kh' ,	'kv' ,	'BEDTHCK');
 
 
-PHIMGIS.RIV.IC<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1+PHIMGIS.RIV.Shape[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
+PHIMGIS.RIV.IC<-read.table(file='Yahara.riv', skip=1+PHIMGIS.RIV.NUMRIV[1,1]+1 +PHIMGIS.RIV.Shape[1,2]+1+PHIMGIS.RIV.Material[1,2], header=F , sep="", as.is=T, nrows=1 ) ;
 
 
-PHIMGIS.RIV.IC.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PHIMGIS.RIV.NUMRIV[1,2]+1 +PHIMGIS.RIV.Shape[1,2]+1+PHIMGIS.RIV.Shape[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.IC[1,2] ) ;
+PHIMGIS.RIV.IC.data<-read.table(file='Yahara.riv', skip=1+PHIMGIS.RIV.NUMRIV[1,1]+1 +PHIMGIS.RIV.Shape[1,2]+1+PHIMGIS.RIV.Material[1,2]+1, header=F , sep="", as.is=T, nrows=PHIMGIS.RIV.IC[1,2] ) ;
 
 
 
@@ -818,8 +820,9 @@ PHIMGIS.RIV.IC.data<-read.table(file='MergeVectorLayer50_q25_50_3.riv',skip=2+PH
 
 
 ############### Write the river elements file .riv in the right PIHM format #######################
+PHIMGIS.RIV.NUMRIV[1,2]<-c("NUMRIV") ;
 
-write.table(PHIMGIS.RIV.NUMRIV[1,],file=paste0(Watershed.name, ".riv"), append=T, row.names=F , col.names=F, quote=F, sep= "\t" ) ;
+write.table(PHIMGIS.RIV.NUMRIV[1,c(2,1)],file=paste0(Watershed.name, ".riv"), append=T, row.names=F , col.names=F, quote=F, sep= "\t" ) ;
 
 write.table(PHIMGIS.RIV,file=paste0(Watershed.name, ".riv"), append=T, row.names=F ,col.names=T,  quote=F, sep= "\t" ) ;
 

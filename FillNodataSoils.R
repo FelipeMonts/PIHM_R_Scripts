@@ -1,11 +1,16 @@
 ##############################################################################################################
 # 
 # 
-# Program to fill gaps in the soils data prepared for PHIM
+#       Program to fill gaps in the soils data prepared for PHIM
+#       
+#        Uses the following codes ; SoilsSurgoPIHM, PHIMInputs, MM_PHIMInputs, PIHM_Maps
 # 
-# Felipe Montes 2018 / 02 07
+#       
 # 
-# Uses the following codes ; SoilsSurgoPIHM, PHIMInputs, MM_PHIMInputs, PIHM_Maps
+# 
+#  Felipe Montes 2018 / 02 07
+#  
+# 
 # 
 # 
 ############################################################################################################### 
@@ -13,58 +18,70 @@
 
 
 ###############################################################################################################
-#                          Loading Packages and setting up working directory                        
+#                             Tell the program where the package libraries are stored                        
 ###############################################################################################################
-
 
 
 #  Tell the program where the package libraries are  #####################
 
-
 .libPaths("C:/Felipe/SotwareANDCoding/R_Library/library")  ;
 
-#  Set Working directory
 
-# RevisedOutputs.dir<-paste0(Project.Directory,'\\MM_PHIM_INPUTS') ;
-
-
-setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') ;  #  setwd(RevisedOutputs.dir)   ;
-
-#setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM_R_Scripts\\MM_PIHM_inputs')   
-
-#  Windows.Directory<-gsub("\\\\", "/", readClipboard())
-#  C:\Felipe\PIHM-CYCLES\PIHM\PIHM_Felipe\CNS\Manhantango\HydroTerreFullManhantango\HansYostDeepCreek\Aug2920171550
-
-#  C:/Felipe/PIHM-CYCLES/PIHM/PIHM_Felipe/CNS/WE-38/WE38_Files_PIHM_Cycles20170208/SWATPIHMRcode 
+###############################################################################################################
+#                             Setting up working directory                        
+###############################################################################################################
 
 
-####### Store the name of the project to read and write files more easily #############
+#      set the working directory
 
-# Project<-"MergeVectorLayer000_q30"  ;
-# 
-# #Project<-"DataModel" ;
-# 
-# 
-# 
+
+setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs') ;       #  setwd(RevisedOutputs.dir)   ;
+
+
+
+###############################################################################################################
+#                            Install the packages that are needed                       
+###############################################################################################################
+
+
+# Install the packages that are needed #
+
+# install.packages('ggplot2', dep=TRUE)
+# install.packages('base64enc' , dep=TRUE)
+# install.packages("raster", dep = TRUE)
+# install.packages('plyr', dep=TRUE)
+# install.packages('Hmisc', dep=TRUE)
+# install.packages('soilDB', dep=TRUE) # stable version from CRAN + dependencies
+# install.packages("soilDB", repos="http://R-Forge.R-project.org") # most recent copy from r-forge
+# install.packages("SSOAP", repos = "http://www.omegahat.org/R", type="source") # SSOAP and XMLSchema
+
+
+
+
+# install.packages("foreign")
+# install.packages("httr", dep=TRUE)
+# install.packages("rgdal", dep = TRUE)
+
+# install.packages("rgeos", dep = TRUE)
+# install.packages("RColorBrewer")
+# install.packages("latticeExtra")
+# install.packages("reshape")
+# install.packages("dplyr", dep=TRUE)
+# install.packages("aqp", dep=TRUE)
+
+
+
+
+
+###############################################################################################################
+#                           load the libraries that are neded   
+###############################################################################################################
+
+
+### Load the data obtained with the SoilsSurgoPIHM 
+
+
  load('SoilsSurgoPIHM.RData');
-
-
-
-######## Store the name of the directory whre the modified MM-PIHM inputs are to be stored
-
-
-#dir.create(Project);
-
-
-#RevisedOutputs.dir<-paste0('./',Project,'/') ;
-
-
-
-
-# Create the path to read the input files by pasting RevisedOutputs.dir and the Project name together with the file ".name" ie ".mesh"
-
-#inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
-
 
 
 ##########################################################################################################################
@@ -76,8 +93,6 @@ setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') 
 # Which soils have NA data
 
 Project_Soil_NA<-data.frame(which(is.na(Project_Soil), arr.ind=T)) ;
-
-
 
 
 # Which mukeys do not have data
@@ -114,17 +129,17 @@ Index_Neighbor_Mukeys_para.Soil<-merge(Neighbor_Mukeys_Soil,Neighbor_Mukeys_para
 
 Soil_Mukey_Gaps_Nabr.0<-merge(Mukey_Gaps_indx_neighbors_Soil[,c("triangle" , "neighbor1")],Index_Neighbor_Mukeys_para.Soil, by.x="neighbor1", by.y='Ele_ID', all.x=T, sort=F ) ;
 
-names(Soil_Mukey_Gaps_Nabr.0)<-c(names(Soil_Mukey_Gaps_Nabr.0)[1:4], paste0('Nabr.0.',names(Index_Neighbor_Mukeys_para.Soil)[4:8])) ;
+names(Soil_Mukey_Gaps_Nabr.0)<-c(names(Soil_Mukey_Gaps_Nabr.0)[1:4], paste0('Nabr.0.',names(Index_Neighbor_Mukeys_para.Soil)[4:7])) ;
 
 
 Soil_Mukey_Gaps_Nabr.1<-merge(Mukey_Gaps_indx_neighbors_Soil[,c("triangle" , "neighbor2")], Index_Neighbor_Mukeys_para.Soil, by.x="neighbor2", by.y='Ele_ID', all.x=T , sort=F )  ;
 
-names(Soil_Mukey_Gaps_Nabr.1)<-c(names(Soil_Mukey_Gaps_Nabr.1)[1:4], paste0("Nabr.1.",names(Index_Neighbor_Mukeys_para.Soil)[4:8])) ;
+names(Soil_Mukey_Gaps_Nabr.1)<-c(names(Soil_Mukey_Gaps_Nabr.1)[1:4], paste0("Nabr.1.",names(Index_Neighbor_Mukeys_para.Soil)[4:7])) ;
 
 
 Soil_Mukey_Gaps_Nabr.2<-merge(Mukey_Gaps_indx_neighbors_Soil[,c("triangle", "neighbor3")],Index_Neighbor_Mukeys_para.Soil, by.x="neighbor3", by.y='Ele_ID' , all.x=T , sort=F )  ;
 
-names(Soil_Mukey_Gaps_Nabr.2)<-c(names(Soil_Mukey_Gaps_Nabr.2)[1:4], paste0("Nabr.2.",names(Index_Neighbor_Mukeys_para.Soil)[4:8])) ;
+names(Soil_Mukey_Gaps_Nabr.2)<-c(names(Soil_Mukey_Gaps_Nabr.2)[1:4], paste0("Nabr.2.",names(Index_Neighbor_Mukeys_para.Soil)[4:7])) ;
 
 ####  Gathering all the data of neighbors together to be ready to take the mean of the neighbor triangles 
 
@@ -238,7 +253,7 @@ Mukeys_Gaps_Geology<-Project_Geology[unique(Project_Geology.NA$row),'MUKEY'] ;
 
 ##### Find the soil index  and the triangles that have Mukeys corresponding to the Mukeys_Geology_Gaps
 
-Mukeys_Gaps_Geology_indx<-MUKEYS.map.1[MUKEYS.map.1$MUKEYS.mode %in% Mukeys_Geology_Gaps, ]    ;
+Mukeys_Gaps_Geology_indx<-MUKEYS.map.1[MUKEYS.map.1$MUKEYS.mode %in% Mukeys_Gaps_Geology, ]    ;
 
 
 ###### Find the neighboring triangles of the Triangles with the Mukeys_Geology_Gaps
@@ -276,15 +291,15 @@ Project_Geology.Rev<-Project_Geology ;
 
 Geology_Mukey_Gaps_Nabr.0<-merge(Mukey_Gaps_indx_neighbors_Geology[,c("triangle" , "neighbor1")],Index_Neighbor_Mukeys_para.Geology, by.x="neighbor1", by.y='Ele_ID', all.x=T, sort=F ) ;
 
-names(Geology_Mukey_Gaps_Nabr.0)<-c(names(Geology_Mukey_Gaps_Nabr.0)[1:4], paste0('Nabr.0.',names(Index_Neighbor_Mukeys_para.Geology)[4:8])) ;
+names(Geology_Mukey_Gaps_Nabr.0)<-c(names(Geology_Mukey_Gaps_Nabr.0)[1:4], paste0('Nabr.0.',names(Index_Neighbor_Mukeys_para.Geology)[4:7])) ;
 
 Geology_Mukey_Gaps_Nabr.1<-merge(Mukey_Gaps_indx_neighbors_Geology[,c("triangle" , "neighbor2")], Index_Neighbor_Mukeys_para.Geology, by.x="neighbor2", by.y='Ele_ID', all.x=T , sort=F )  ;
 
-names(Geology_Mukey_Gaps_Nabr.1)<-c(names(Geology_Mukey_Gaps_Nabr.1)[1:4], paste0("Nabr.1.",names(Index_Neighbor_Mukeys_para.Geology)[4:8])) ;
+names(Geology_Mukey_Gaps_Nabr.1)<-c(names(Geology_Mukey_Gaps_Nabr.1)[1:4], paste0("Nabr.1.",names(Index_Neighbor_Mukeys_para.Geology)[4:7])) ;
 
 Geology_Mukey_Gaps_Nabr.2<-merge(Mukey_Gaps_indx_neighbors_Geology[,c("triangle", "neighbor3")],Index_Neighbor_Mukeys_para.Geology, by.x="neighbor3", by.y='Ele_ID' , all.x=T , sort=F )  ;
 
-names(Geology_Mukey_Gaps_Nabr.2)<-c(names(Geology_Mukey_Gaps_Nabr.2)[1:4], paste0("Nabr.2.",names(Index_Neighbor_Mukeys_para.Geology)[4:8])) ;
+names(Geology_Mukey_Gaps_Nabr.2)<-c(names(Geology_Mukey_Gaps_Nabr.2)[1:4], paste0("Nabr.2.",names(Index_Neighbor_Mukeys_para.Geology)[4:7])) ;
 
 
 
