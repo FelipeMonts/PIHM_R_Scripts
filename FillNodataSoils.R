@@ -95,10 +95,42 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs')
 Project_Soil_NA<-data.frame(which(is.na(Project_Soil), arr.ind=T)) ;
 
 
-# Which mukeys do not have data
+# Which mukeys do have NA data
 
 
-Mukey_Gaps_Soil<-Project_Soil[unique(Project_Soil_NA$row),'MUKEY'] ;
+Mukey_Gaps_Soil.1<-Project_Soil[unique(Project_Soil_NA$row),'MUKEY'] ;
+
+
+# Which soils have NAN data
+
+Project_Soil_NAN<-data.frame(which(is.nan(as.matrix(Project_Soil[,-c(1, 6)])),arr.ind=T)) ;
+
+
+# Which mukeys do have NAN data
+
+Mukey_Gaps_Soil.2<-Project_Soil[unique(Project_Soil_NAN$row),'MUKEY'] ;
+
+
+# Which soils have zero "0" data
+
+Project_Soil_Zero<-data.frame(which(as.matrix(Project_Soil[,-c(1, 6)])==0, arr.ind=T)) ;
+
+# Which mukeys do zero "0" data
+
+Mukey_Gaps_Soil.3<-Project_Soil[unique(Project_Soil_Zero$row),'MUKEY'] ;
+
+
+# All the mukeys that have defective data (Na, NAN , 0.000)
+
+Mukey_Gaps_Soil<-unique(c(Mukey_Gaps_Soil.1, Mukey_Gaps_Soil.2, Mukey_Gaps_Soil.3 )) ;
+
+
+
+# Complementary information about the soils that have defective data
+
+
+Mukey.Pedon@horizons[Mukey.Pedon@horizons$mukey %in% Mukey_Gaps_Soil,]
+
 
 ##### Find the soil index  and the triangles that have Mukeys corresponding to the Mukey_Gaps
 
