@@ -83,6 +83,10 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs')
 
  load('SoilsSurgoPIHM.RData');
 
+### ### Load the data obtained with the MM_PIHMInputsR_V3.R
+
+load('MM_PHIMInputsR_V3.RData');
+
 
 ##########################################################################################################################
 ##
@@ -134,7 +138,16 @@ Mukey.Pedon@horizons[Mukey.Pedon@horizons$mukey %in% Mukey_Gaps_Soil,]
 
 ##### Find the soil index  and the triangles that have Mukeys corresponding to the Mukey_Gaps
 
-Mukey_Gaps_indx_Soil<-MUKEYS.map.1[MUKEYS.map.1$MUKEYS.mode %in% Mukey_Gaps_Soil, ]    ;
+Mukey_Gaps_indx_Soil<-MUKEYS.MAP[MUKEYS.MAP$MUKEYS.mode %in% Mukey_Gaps_Soil, ]    ;
+
+
+
+#####  Only triangles with the Pits mukey  1588007 will be filled with data from adjacent triangles. Data for Traingles with mukeys 423299 Marsh and 753456 Alluvial land, wet will be filled with literature values.
+str(Mukey_Gaps_Soil)
+
+Mukey_Gaps_Pits<-1588007
+
+Mukey_Gaps_indx_Soil<-MUKEYS.MAP[MUKEYS.MAP$MUKEYS.mode %in% Mukey_Gaps_Pits, ] 
 
 
 ###### Find the neighboring triangles of the Triangles with the Mukey_Gaps 
@@ -144,7 +157,11 @@ Mukey_Gaps_indx_neighbors_Soil<-Watershed.1.neigh[Watershed.1.neigh$triangle %in
 
 ###### retrieve the representative mukeys of the neighboring triangles for the Soil  parameters
 
-Neighbor_Mukeys_Soil<-MUKEYS.map.1[MUKEYS.map.1$Ele_ID %in% unique(unlist(Mukey_Gaps_indx_neighbors_Soil, use.names = F)), ]  ;
+
+Neighbor_Mukeys_Soil<-MUKEYS.MAP[MUKEYS.MAP$Ele_ID %in% unique(unlist(Mukey_Gaps_indx_neighbors_Soil, use.names = F)), ]  ;
+
+###### The nieghbors trinagles of the trinagles with the pits mukey have mukeys corresponding to Map Unit No.753522 Houghton Muck Peatlands with no reliable data. Therefore there is no need to continue the soils fill procedure
+
 
 
 Neighbor_Mukeys_para.Soil<-Project_Soil[Project_Soil$MUKEY %in% Neighbor_Mukeys_Soil$MUKEYS.mode, c('MUKEY', 'SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
@@ -407,6 +424,10 @@ Project_Geology.Rev[Project_Soil.Rev$MUKEY==542034,c('SILT', 'CLAY' , 'OM' , 'BD
 
 
 
+##### When no changes are necesary to the data just equate the Project_Soil.Rev to the original fiel and that is it
+
+#Project_Soil.Rev<-Project_Soil[order(Project_Soil$INDEX ),] ;
+
 # NUMSOIL<-data.frame(c('NUMSOIL'), dim(HansYoust_Soil)[1]) ;
 
 NUMSOIL<-data.frame(c('NUMSOIL'), dim(Project_Soil.Rev)[1]) ;
@@ -420,12 +441,12 @@ write.table(NUMSOIL,file='Soil.txt', row.names=F , quote=F, sep = "\t", col.name
 
 ###### Get 4 signifficant digits on the caluclated values for soils
 
-Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')])  ;
+Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')], as.integer(Project_Soil.Rev[,'MUKEY']))  ;
 
 names(Project_Soil.Final)[1]<-c('INDEX') ;
+names(Project_Soil.Final)[dim(Project_Soil.Final)[2]]<-c('MUKEY') ;
 
-
-write.table(Project_Soil.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Soil.txt', row.names=F , quote=F, sep = "\t", append= T) ;
+write.table(Project_Soil.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ', 'MUKEY')],file='Soil.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
 
 
@@ -483,6 +504,9 @@ write(Soil.comments,file='Soil.txt', sep = "\t", append= T) ;
 ################################################################################################################################
 
 
+##### When no changes are necesary to the data just equate the Project_Soil.Rev to the original fiel and that is it
+##  Project_Geology.Rev<-Project_Geology[order(Project_Geology$INDEX ),] ;
+
 
 
 # NUMGEOL<-data.frame(c('NUMGEOL'), dim(HansYoust_Geology)[1]) ;
@@ -494,12 +518,14 @@ write.table(NUMGEOL,file='Geology.txt', row.names=F , quote=F, sep = "\t", col.n
 
 # write.table(HansYoust_Geology[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
-Project_Geology.Final<-data.frame(Project_Geology.Rev[,'INDEX'],signif(Project_Geology.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Geology.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')])  ;
+Project_Geology.Final<-data.frame(Project_Geology.Rev[,'INDEX'],signif(Project_Geology.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Geology.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],as.integer(Project_Geology.Rev[,'MUKEY']))  ;
 
 
 names(Project_Geology.Final)[1]<-c('INDEX') ;
 
-write.table(Project_Geology.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file='Geology.txt', row.names=F , quote=F, sep = "\t", append= T) ;
+names(Project_Geology.Final)[dim(Project_Geology.Final)[2]]<-c('MUKEY');
+
+write.table(Project_Geology.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ','MUKEY')],file='Geology.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
 
 write.table(DINF_etc, file='Geology.txt', row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
