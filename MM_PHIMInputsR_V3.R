@@ -1,24 +1,24 @@
 ##############################################################################################################
-# 
-# 
+#
+#
 #       Program  to generate suitable input format for MM-PIHM without any input from PIHMGIS, only based on R and QGIS
 #       An update from MM_PHIMInputsR_V2.R
-#    
-# 
+#
+#
 #       For MM_PHIM input format corresponding to  (Prerelease 0.6.0 Alpha git@github.com:PSUmodeling/MM-PIHM.git)
-# 
-# 
+#
+#
 #  Felipe Montes 2019 /07 /03
-# 
-# 
-# 
-# 
-############################################################################################################### 
+#
+#
+#
+#
+###############################################################################################################
 
 
 
 ###############################################################################################################
-#                             Tell the program where the package libraries are stored                        
+#                             Tell the program where the package libraries are stored
 ###############################################################################################################
 
 
@@ -28,7 +28,7 @@
 
 
 ###############################################################################################################
-#                             Setting up working directory  Loading Packages and Setting up working directory                        
+#                             Setting up working directory  Loading Packages and Setting up working directory
 ###############################################################################################################
 
 
@@ -40,7 +40,7 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs')
 
 
 ###############################################################################################################
-#                            Install the packages that are needed                       
+#                            Install the packages that are needed
 ###############################################################################################################
 
 
@@ -52,12 +52,12 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs')
 
 
 ###############################################################################################################
-#                           load the libraries that are neded   
+#                           load the libraries that are neded
 ###############################################################################################################
 
 
 
-###  load the libraries that are neded -- need to filter some of these  ---  
+###  load the libraries that are neded -- need to filter some of these  ---
 
 # load libraries
 # library(Hmisc) ;
@@ -71,7 +71,7 @@ library(rgdal) ;
 library(raster) ;
 library(combinat) ;
 library(sets) ;
-# library(rgeos) ; 
+# library(rgeos) ;
 # library(lattice) ;
 # library(MASS) ;
 # library(RColorBrewer) ;
@@ -80,115 +80,24 @@ library(sets) ;
 # library(tidyr)  ;
 # library(devtools) ;
 # library(stats)
-# 
+#
 
 
 
 
 ######################################################################################################################################
-# 
-# 
-#  Read the files resulting from the mesh generation using the Triangle software and create the Mesh File
-# 
-# 
-# 
+#
+#
+#  Read the files resulting from the mesh generation using the Triangle software and create the Mesh File from the PIHM_MeshFile.R
+#
+#
+#
 ######################################################################################################################################
 
-########### Read TIN shape file infromation  ###########
 
-Watershed.TIN.info<-ogrInfo("../Oct0920191330/DomainDecomposition/MergeFeatures_q30_a1000000_o.shp" );
+load('PIHMMeshFile.RData')
 
-
-
-Watershed.TIN<-readOGR("../Oct0920191330/DomainDecomposition/MergeFeatures_q30_a1000000_o.shp",  p4s='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' );
-
-print(Watershed.TIN)
-
-plot(Watershed.TIN)
-
-
-########### Read the .1.ele file  ###########
-
-### Description from https://www.cs.cmu.edu/~quake/triangle.ele.html
-
-# .ele files
-# 
-# First line: <# of triangles> <nodes per triangle> <# of attributes>
-#   Remaining lines: <triangle #> <node> <node> <node> ... [attributes] 
-# 
-# Blank lines and comments prefixed by `#' may be placed anywhere. Triangles must be numbered consecutively, starting from one or zero. Nodes are indices into the corresponding .node file. The first three nodes are the corner vertices, and are listed in counterclockwise order around each triangle. (The remaining nodes, if any, depend on the type of finite element used.)
-# 
-# As in .node files, the attributes are typically floating-point values of physical quantities (such as mass or conductivity) associated with the elements (triangles) of a finite element mesh. Because there is no simple mapping from input to output triangles, an attempt is made to interpolate attributes, which may result in a good deal of diffusion of attributes among nearby triangles as the triangulation is refined. Attributes do not diffuse across segments, so attributes used to identify segment-bounded regions remain intact.
-# 
-# In output .ele files, all triangles have three nodes each unless the -o2 switch is used, in which case subparametric quadratic elements with six nodes are generated. The fourth, fifth, and sixth nodes lie on the midpoints of the edges opposite the first, second, and third vertices. 
-
-
-Watershed.1.ele<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.ele", header=FALSE, sep= "", skip=1) ;
-
-names(Watershed.1.ele)<-c("triangle", "node1","node2","node3") ;
-
-Watershed.NUMELE<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.ele", header=FALSE, sep= "", nrows= 1)[1,1] ;
-
-str(Watershed.1.ele)
-tail(Watershed.1.ele)
-
-
-########### Read the .1.node file  ###########
-
-
-### Description from https://www.cs.cmu.edu/~quake/triangle.node.html
-
-# .node files
-# 
-# First line: <# of vertices> <dimension (must be 2)> <# of attributes> <# of boundary markers (0 or 1)>
-#   Remaining lines: <vertex #> <x> <y> [attributes] [boundary marker] 
-# 
-# Blank lines and comments prefixed by `#' may be placed anywhere. Vertices must be numbered consecutively, starting from one or zero.
-# 
-# The attributes, which are typically floating-point values of physical quantities (such as mass or conductivity) associated with the nodes of a finite element mesh, are copied unchanged to the output mesh. If -q, -a, -u, or -s is selected, each new Steiner point added to the mesh will have quantities assigned to it by linear interpolation.
-# 
-# If the fourth entry of the first line is `1', the last column of the remainder of the file is assumed to contain boundary markers. Boundary markers are used to identify boundary vertices and vertices resting on PSLG segments. The .node files produced by Triangle contain boundary markers in the last column unless they are suppressed by the -B switch. 
-
-Watershed.1.node<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.node", header=FALSE, sep= "", skip=1) ;
-
-names(Watershed.1.node)<-c("INDEX" , "X" , "Y" , "BoundaryMarker") ;
-
-Watershed.NUMNODE<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.node", header=FALSE, sep= "", nrows=1)[1,1] ;
-
-str(Watershed.1.node)
-tail(Watershed.1.node)
-
-
-####### Create a point shape file from the nodes coordinates to extract the ZMAX Values from the DEM
-
-
-Node.Points<-SpatialPointsDataFrame(coords=Watershed.1.node[,c("X", "Y")],  proj4string=CRS('+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'), data=Watershed.1.node, coords.nrs = c(2,3), match.ID = T);
-
-
-####### Load the DEM from the fill pits file of the Reater processing directory
-
-
-FillPits<-raster("../DEM_10m_NED/YaharaClipped2Conus.asc", crs='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs') 
-
-image(FillPits)
-
-plot(FillPits)
-
-####### Extract the elevation data for each node
-
-
-Node.Points.ZMAX<-data.frame(coordinates(Node.Points),data=Node.Points, raster::extract(FillPits,Node.Points));
-
-names(Node.Points.ZMAX)
-
-str(Node.Points.ZMAX)
-
-head(Node.Points.ZMAX)
-
-
-Node.Points.ZMAX[is.na(Node.Points.ZMAX$raster..extract.FillPits..Node.Points.), ] 
-
-###### Add the depth of the soil from the Soils file extracted from the GSURGO database adn calculated using the SoilDepthSSurgo_V2.R. 
+##### Add the depth of the soil from the Soils file extracted from the GSURGO database adn calculated using the SoilDepthSSurgo_V2.R.
 
 load('SoilDepthSSurgo_V2.RData') ;
 
@@ -207,15 +116,15 @@ head(Nodes.soil.depth.avg)
 str(Nodes.soil.depth.avg)
 
 
-##### calculate Zmin from Zmax and soil depth and check if there is any negative difference between Zmax-Zmin.SSURGO 
+##### calculate Zmin from Zmax and soil depth and check if there is any negative difference between Zmax-Zmin.SSURGO
 
 
 
 Node.Points.ZMAX_ZMIN<-merge(Node.Points.ZMAX,Nodes.soil.depth.avg, by.x='data.INDEX', by.y='node') ;
 
-####  Soil depth is in cm and ZMAX is in meters above sea level    
+####  Soil depth is in cm and ZMAX is in meters above sea level
 
-Node.Points.ZMAX_ZMIN$Diff.Z<-Node.Points.ZMAX_ZMIN$raster..extract.FillPits..Node.Points. - (Node.Points.ZMAX_ZMIN$soil.depth / 100 ); # meters - cm/100 
+Node.Points.ZMAX_ZMIN$Diff.Z<-Node.Points.ZMAX_ZMIN$raster..extract.FillPits..Node.Points. - (Node.Points.ZMAX_ZMIN$soil.depth / 100 ); # meters - cm/100
 
 Node.Points.ZMAX_ZMIN[which(Node.Points.ZMAX_ZMIN$Diff.Z <= 0),] ;
 
@@ -223,29 +132,6 @@ plot(Node.Points.ZMAX_ZMIN$data.INDEX, Node.Points.ZMAX_ZMIN$Diff.Z )  ;
 
 Node.Points.ZMAX_ZMIN[which(Node.Points.ZMAX_ZMIN$Diff.Z <= 0.20),]  ;
 
-
-
-####### Read the 1.1 neigh file from triangle
-
-
-### description from https://www.cs.cmu.edu/~quake/triangle.neigh.html
-
-# .neigh files
-# 
-# First line: <# of triangles> <# of neighbors per triangle (always 3)>
-#   Following lines: <triangle #> <neighbor> <neighbor> <neighbor> 
-# 
-# Blank lines and comments prefixed by `#' may be placed anywhere. Triangles are numbered consecutively, starting from one or zero. Neighbors are indices into the corresponding .ele file. An index of -1 indicates no neighbor (because the triangle is on an exterior boundary). The first neighbor of triangle i is opposite the first corner of triangle i, and so on.
-# 
-# Triangle can produce .neigh files (use the -n switch), but cannot read them. 
-
-
-Watershed.1.neigh<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.neigh", header=FALSE, sep= "", skip=1) ;
-
-names(Watershed.1.neigh)<-c("triangle", "neighbor1","neighbor2","neighbor3") ;
-
-str(Watershed.1.neigh)
-tail(Watershed.1.neigh)
 
 
 
@@ -342,162 +228,166 @@ write.table(mesh.Part2, file=paste0(Watershed.name, ".mesh"), row.names=F ,col.n
 
 
 
+load('PIHMMeshFile.RData');
+
+ 
+
 
 ######################################################################################################################################
-# 
-# 
+#
+#
 #                                  Create the river File from the TauDEM output and the Mesh files
-# 
-# 
-# 
+#
+#
+#
 ######################################################################################################################################
 
 
 # ########### Read River shape file (simplified and splited) information  ###########
-# 
-# 
+#
+#
 # River.info<-ogrInfo("C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/2VectorProcessing/StreamPolyline200m_xln.shp" );
-# 
+#
 # River.shp<-readOGR("C:/Felipe/Students Projects/Stephanie/HalfmoonPIHM/2VectorProcessing/StreamPolyline200m_xln.shp", p4s='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' );
-# 
+#
 # River.shp@lines
-# 
+#
 # coordinates(River.shp)
-# 
-# 
+#
+#
 # str(River.shp)
-# 
+#
 # plot(River.shp)
-# 
-# 
+#
+#
 # # get the ID's of the line segments in the shape file read
-# 
+#
 # River.SegID<-as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID")));
-# 
-# 
+#
+#
 # #get the coordinates of the first line segment of the shape file read
-# 
+#
 # coordinates(River.shp)[[1]]
-# 
-# 
-# # get the coordinates of all the line segments of the shape file read as an  array 
-# 
-# 
+#
+#
+# # get the coordinates of all the line segments of the shape file read as an  array
+#
+#
 # River.FromPoint<-data.frame(t(sapply(coordinates(River.shp),function(x) x[[1]][1,]))) ;
-# 
+#
 # River.FromPoint$ID<-River.SegID ;
-# 
+#
 # River.ToPoint<-data.frame(t(sapply(coordinates(River.shp),function(x) x[[1]][2,]))) ;
-# 
-# 
+#
+#
 # River.ToPoint$ID<-River.SegID ;
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # ###### match the coordinates of the river segments with the coordinates of the nodes of the triangles
-# 
+#
 # River.FromNode<-merge(River.FromPoint, Watershed.1.node, by.x=c("X1", "X2"), by.y=c('X' , 'Y')) ;
-# 
+#
 # River.ToNode<-merge(River.ToPoint, Watershed.1.node, by.x=c("X1", "X2"), by.y=c('X' , 'Y')) ;
-# 
-# 
+#
+#
 # River.FromTo<-merge(River.FromNode[,c('ID' , 'INDEX')] , River.ToNode[,c('ID' , 'INDEX')], by=c('ID')) ;
-# 
+#
 # str(River.FromTo)
 # tail(River.FromTo)
-# 
-# 
-# 
-# ##### create a list of two nodes combination corresponding to each river element 
-# 
-# 
-# 
+#
+#
+#
+# ##### create a list of two nodes combination corresponding to each river element
+#
+#
+#
 # River.SegList<-as.list(as.data.frame(t(River.FromTo)[c(2,3),]))  ;
-# 
-# 
+#
+#
 # names(River.SegList)<-River.FromTo$ID  ;
-# 
-# 
+#
+#
 # head(River.SegList)
-# 
-# 
+#
+#
 # ##### create a list of two nodes combinations correponding to each trinagle side element
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # Triangle.NodeList<-as.list(as.data.frame(t(Watershed.1.ele)[2:4,])) ;
-# 
+#
 # names(Triangle.NodeList)<-Watershed.1.ele[,c('triangle')] ;
-# 
-# 
+#
+#
 # ##### take a permutation (combn2) of two at time on each triangle node set to represent all the edges of the triangle
-#   
-#   
+#
+#
 # Triangle.EdgeList<-lapply(Triangle.NodeList, function(x) combn2(x)) ;
-# 
-# 
+#
+#
 # head(River.SegList)
-# 
-# 
+#
+#
 # ##### convert the trinagle edges nodes and the river segments into point sets and compare them to determine whic trinagles have edges on the river
-# 
-# 
+#
+#
 # str(River.SegList[[1]])   # Are different classes int and num. River.SegList needs tobe converted to integer before set comparison
-# 
-# str(Triangle.EdgeList[[1]][1,]) 
-# 
+#
+# str(Triangle.EdgeList[[1]][1,])
+#
 # str(as.integer(River.SegList[[1]]))
-# 
-# ####  compare the river segmenst witth each traingles edge set using set comparison 
-# 
-# 
-# 
+#
+# ####  compare the river segmenst witth each traingles edge set using set comparison
+#
+#
+#
 # set(as.integer(River.SegList[[1]]))
-# 
+#
 # set(Triangle.EdgeList[[1]][1,], Triangle.EdgeList[[1]][2,] ,Triangle.EdgeList[[1]][3,])
-# 
-# 
+#
+#
 # #### initialize a dataframe for the trinagle elements number
-# 
-# 
-# 
-# 
-# 
+#
+#
+#
+#
+#
 # RiverTriangles<-data.frame(triangle = integer(), node1 = integer(), node2 = integer(), node3 = integer(), River.Seg = integer()  ) ;
-# 
+#
 # Row.counter = 0 ;
-# 
-# for (j in seq(1, length(River.SegList))) { 
+#
+# for (j in seq(1, length(River.SegList))) {
 #   for (i in seq(1,length(Triangle.EdgeList))) {
 #     if (set(as.integer(River.SegList[[j]][1]),as.integer(River.SegList[[j]][2])) %e% set(set(Triangle.EdgeList[[i]][1,1],Triangle.EdgeList[[i]][1,2]),set(Triangle.EdgeList[[i]][2,1],Triangle.EdgeList[[i]][2,2]),set(Triangle.EdgeList[[i]][3,1],Triangle.EdgeList[[i]][3,2]))) {
-#       
-#       Row.counter = Row.counter +1 
-#       
-#       RiverTriangles[Row.counter, c("triangle", "node1" , "node2" , "node3")]<-Watershed.1.ele[i,] 
+#
+#       Row.counter = Row.counter +1
+#
+#       RiverTriangles[Row.counter, c("triangle", "node1" , "node2" , "node3")]<-Watershed.1.ele[i,]
 #       RiverTriangles[Row.counter, c("River.Seg")]<-as.integer(names(River.SegList)[j])
-#       
-#       
+#
+#
 #     }
-#     
+#
 #   }
 # }
-# 
+#
 # RiverTriangles[duplicated(RiverTriangles$triangle),]
-# 
-# 
+#
+#
 # RiverTriangles[RiverTriangles$triangle == 220,]
-# 
-# 
+#
+#
 # River.neigh<-merge(RiverTriangles,Watershed.1.neigh, by='triangle',all.x=T)[order(River.neigh$River.Seg),]
-# 
-# 
+#
+#
 # head(River.FromTo)
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 
 
 

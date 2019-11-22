@@ -30,8 +30,10 @@
 # RevisedOutputs.dir<-paste0(Project.Directory,'\\MM_PHIM_INPUTS') ;
 
 
-setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') ;   #  setwd(RevisedOutputs.dir)   ;
+#setwd('C:/Felipe/Students Projects/Stephanie/HalfmoonWatershed/MM_PHIM_inputs') ;   #  setwd(RevisedOutputs.dir)   ;
 
+
+setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs') 
 
 #  Windows.Directory<-gsub("\\\\", "/", readClipboard())
 #  C:\Felipe\PIHM-CYCLES\PIHM\PIHM_Felipe\CNS\Manhantango\HydroTerreFullManhantango\HansYostDeepCreek\Aug2920171550

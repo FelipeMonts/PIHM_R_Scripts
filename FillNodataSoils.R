@@ -81,12 +81,13 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs')
 ### Load the data obtained with the SoilsSurgoPIHM 
 
 
- load('SoilsSurgoPIHM.RData');
+load('SoilsSurgoPIHM.RData');
 
 ### ### Load the data obtained with the MM_PIHMInputsR_V3.R
 
-load('MM_PHIMInputsR_V3.RData');
+#load('MM_PHIMInputsR_V3.RData');
 
+load('PIHMMeshFile.RData');
 
 ##########################################################################################################################
 ##
@@ -440,8 +441,9 @@ write.table(NUMSOIL,file='Soil.txt', row.names=F , quote=F, sep = "\t", col.name
 
 
 ###### Get 4 signifficant digits on the caluclated values for soils
+str(Project_Soil.Rev)
 
-Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')], as.integer(Project_Soil.Rev[,'MUKEY']))  ;
+Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ'),Project_Soil.Rev[,c('compname' , 'taxorder', 'taxsuborder' , 'taxgrtgroup', 'taxsubgrp')] ], as.integer(Project_Soil.Rev[,'MUKEY']))  ;
 
 names(Project_Soil.Final)[1]<-c('INDEX') ;
 names(Project_Soil.Final)[dim(Project_Soil.Final)[2]]<-c('MUKEY') ;
