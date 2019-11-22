@@ -64,6 +64,8 @@ load('SoilsSurgoPIHM.RData');
 
 load('FillNoDataSoils.RData');
 
+load('PIHMMeshFile.RData') ;
+
 #load('NetworksinR.RData') ;
 
 
@@ -73,26 +75,29 @@ load('FillNoDataSoils.RData');
 # RevisedOutputs.dir<-paste0('./',Project,'/') ;
 # 
 # 
-# 
-# 
 # # Create the path to read the input files by pasting RevisedOutputs.dir and the Project name together with the file ".name" ie ".mesh"
 # 
 # inputfile.name<-paste0(RevisedOutputs.dir,Project) ;
-# 
-# # ###########################################################################################################################
-# # 
-# # ###     Prepare depth to bed rock data to be incorporated into the mesh file when a uniform soil profile depth
-# # ###     is not what is desired 
-# # 
-# # ###########################################################################################################################
-# 
-# 
+
+
+
+
+# ###########################################################################################################################
+#
+# ###     Prepare depth to bed rock data to be incorporated into the mesh file when a uniform soil profile depth
+# ###     is not what is desired
+#
+# ###########################################################################################################################
+
+
 
 ###### Get the soil depth from the SoilSurgoPIHM.R file  for each triangle  #####
 
-head(MUKEYS.map.1)  #from the SoilSurgoPIHM.R file 
+head(MUKEYS.INDX) ;  #from the SoilSurgoPIHM.R file 
+str(MUKEYS.INDX) ;
 
-str(MUKEYS.map.1)
+head(MUKEYS.MAP) ;  #from the SoilSurgoPIHM.R file 
+str(MUKEYS.MAP) ;
 
 head(Mukey.Pedon)   #from the SoilSurgoPIHM.R file 
 
@@ -104,10 +109,8 @@ str(Mukey.Pedon@site)
 
 ##### convert MUKEYS.map.1$MUKEYS.mode from factor to integer ###
 
-MUKEYS.map.1$mukey<-as.integer(as.character(MUKEYS.map.1$MUKEYS.mode)) ;
 
-
-Element.soil.depth<-merge(MUKEYS.map.1, Mukey.Pedon@site[,c('mukey_ID', 'soil.depth')], by.x='mukey', by.y='mukey_ID') ;
+Element.soil.depth<-merge(MUKEYS.MAP, Mukey.Pedon@site[,c('mukey_ID', 'soil.depth')], by='mukey_ID') ;
 
 head(Element.soil.depth)
 

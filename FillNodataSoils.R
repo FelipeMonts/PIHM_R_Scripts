@@ -330,11 +330,11 @@ Index_Neighbor_Mukeys_para.Geology<-merge(Neighbor_Mukeys_Geology,Neighbor_Mukey
 
 
 
-######## Add new rows to the Geology. file to include the new created Geology parameters from neighbors and create a revised Geology parameter file
-
-# Create a new revised Geology  data file
-
-Project_Geology.Rev<-Project_Geology ;
+# ######## Add new rows to the Geology. file to include the new created Geology parameters from neighbors and create a revised Geology parameter file
+# 
+# # Create a new revised Geology  data file
+# 
+# Project_Geology.Rev<-Project_Geology ;
 
 
 #######  Put together the representative MUKEYS parameters for Neighbouring triangles

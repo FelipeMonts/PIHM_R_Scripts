@@ -228,11 +228,6 @@ write.table(mesh.Part2, file=paste0(Watershed.name, ".mesh"), row.names=F ,col.n
 
 
 
-load('PIHMMeshFile.RData');
-
- 
-
-
 ######################################################################################################################################
 #
 #
@@ -548,13 +543,13 @@ Project_Geology.Rev
 ##### Revise the soils map according to the soils that had no data and were filled with the average of the neighbor triangles
 
 
-head(MUKEYS.map.1)  #from the SoilSurgoPIHM.R file 
+head(MUKEYS.MAP)  #from the SoilSurgoPIHM.R file 
 
-str(MUKEYS.map.1)
+str(MUKEYS.MAP)
 
-MUKEYS.map.1$INDEX<-as.integer(as.character(MUKEYS.map.1$MUKEYS.index)) ;
+MUKEYS.MAP$INDEX<-as.integer(as.character(MUKEYS.MAP$mukey_ID)) ;
 
-MUKEYS.map.1_Soil<-MUKEYS.map.1   ;
+MUKEYS.map.1_Soil<-MUKEYS.MAP   ;
 
 
 MUKEYS.map.1_Soil[MUKEYS.map.1_Soil$MUKEYS.index %in% Mukey_Gaps_indx_Soil$MUKEYS.index, 'INDEX'] <- Project_Soil.Rev[Project_Soil.Rev$MUKEY==-999,'INDEX']
@@ -563,7 +558,7 @@ MUKEYS.map.1_Soil[MUKEYS.map.1_Soil$MUKEYS.index %in% Mukey_Gaps_indx_Soil$MUKEY
 
 ##### Revise the Geology map according to the geology that had no data and were filled with the average of the neighbor triangles
 
-MUKEYS.map.1_Geology<-MUKEYS.map.1   ;
+MUKEYS.map.1_Geology<-MUKEYS.MAP   ;
 
 MUKEYS.map.1_Geology[MUKEYS.map.1_Geology$MUKEYS.index %in% Mukeys_Gaps_Geology_indx$MUKEYS.index, 'INDEX'] <- Project_Geology.Rev[Project_Geology.Rev$MUKEY==-999,'INDEX']
 
@@ -591,7 +586,7 @@ LandCover.att<-merge(Project.LC@data,PIHM_to_NLCD, by.x= 'LandCover' ,by.y='PIHM
 
 ######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
 
-Revised.att<-merge(MUKEYS.map.1,LandCover.att, by.x='Ele_ID' , by.y= 'Ele_ID' )[] ;
+Revised.att<-merge(MUKEYS.MAP,LandCover.att, by.x='Ele_ID' , by.y= 'Ele_ID' )[] ;
 
 
 
