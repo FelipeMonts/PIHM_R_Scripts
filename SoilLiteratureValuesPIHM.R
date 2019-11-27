@@ -53,7 +53,6 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs')
 #                           load the libraries that are neded   
 ###############################################################################################################
 
-library(readxl)
 
 library(openxlsx)
 
@@ -62,13 +61,24 @@ library(openxlsx)
 #                            Read .soil text file from the PIHM inputs                     
 ###############################################################################################################
 
-NUM<-read.table("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs\\Geology.txt", header=F, sep="", nrows=1 ) ; 
+NUM_Soil<-read.table("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs\\Soil.txt", header=F, sep="", nrows=1 , as.is=T) ; 
 
-str(NUM)
+str(NUM_Soil)
 
-Geology<-read.table("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs\\Geology.txt", header=T, sep="", skip=1,nrows=NUM[1,2] ) ;
+Soil<-read.table("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs\\Soil.txt", header=T, sep = '\t', skip=1, nrows=NUM_Soil[1,2], as.is=T ) ;# NUM[1,2]
 
-str(Geology)
+View(Soil)
+str(Soil)
+
+
+DINF_etc_Soil<-read.table("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs\\Soil.txt", header=F, sep = '\t', skip=NUM_Soil[1,2]+2,as.is=T) ;
+
+
+View(DINF_etc_Soil)
+str(DINF_etc_Soil)
+
+
+
 
 
 ###############################################################################################################
@@ -81,14 +91,103 @@ str(Lit.data)
 
 View(Lit.data)
 
-View(t(Lit.data))
-t(Lit.data[,1])
+names(Lit.data)
 
 ###############################################################################################################
 #                           Match the literature data with the colums of the .soil data
 ###############################################################################################################
 
-Geology[1,]
-t(Lit.data[,1])
+Soil_NA<-which(is.na(Soil[,seq(1,dim(Soil)[2]-1)]), arr.ind=T)[,1] ;
+
+Soil_0<-which(Soil==0, arr.ind=T)[,1] ;
+
+Soil_missing<-unique(c(Soil_NA,Soil_0)) ;
+
+Soil[Soil_missing,names(Lit.data)]<-Lit.data   ;
+
+View(Soil)
+
+################################################################################################################################
+#
+#
+#                         Write the soil data in the format approptiate for PIHM to take  
+# 
+# 
+################################################################################################################################
+
+
+write.table(NUM_Soil,file='Soil_Rev.txt', row.names=F , quote=F, sep = "\t", col.names=F) ;
+
+# write.table(HansYoust_Soil[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
+
+
+write.table(Soil,file='Soil_Rev.txt', row.names=F , quote=F, sep = "\t", append= T) ;
+
+
+
+write.table(DINF_etc_Soil,file='Soil_Rev.txt', row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
+
+
+
+
+
+###############################################################################################################
+#                            Read .Geology text file from the PIHM inputs                     
+###############################################################################################################
+
+NUM_Geology<-read.table("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs\\Geology.txt", header=F, sep="", nrows=1 , as.is=T) ; 
+
+str(NUM_Soil)
+
+Geology<-read.table("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs\\Geology.txt", header=T, sep = '\t', skip=1, nrows=NUM_Soil[1,2], as.is=T ) ;# NUM[1,2]
+
+View(Geology)
+str(Geology)
+
+
+DINF_etc_Geology<-read.table("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs\\Soil.txt", header=F, sep = '\t', skip=NUM_Soil[1,2]+2,as.is=T) ;
+
+
+View(DINF_etc_Geology)
+str(DINF_etc_Geology)
+
+
+
+###############################################################################################################
+#                           Match the literature data with the colums of the .GEology data
+###############################################################################################################
+
+Geology_NA<-which(is.na(Geology[,seq(1,dim(Geology)[2]-1)]), arr.ind=T)[,1] ;
+
+Geology_0<-which(Geology==0, arr.ind=T)[,1] ;
+
+Geology_missing<-unique(c(Geology_NA,Geology_0)) ;
+
+Geology[Geology_missing,names(Lit.data)]<-Lit.data   ;
+
+View(Geology)
+
+
+
+################################################################################################################################
+#
+#
+#                         Write the soil data in the format approptiate for PIHM to take  
+# 
+# 
+################################################################################################################################
+
+
+write.table(NUM_Geology,file='Geology_Rev.txt', row.names=F , quote=F, sep = "\t", col.names=F) ;
+
+# write.table(HansYoust_Soil[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
+
+
+write.table(Geology,file='Geology_Rev.txt', row.names=F , quote=F, sep = "\t", append= T) ;
+
+
+
+write.table(DINF_etc_Geology,file='Geology_Rev.txt', row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
+
 
 

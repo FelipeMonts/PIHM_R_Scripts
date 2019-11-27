@@ -257,35 +257,35 @@ View(Project_Soil.Rev)
 # 
 #####################################################################################################################################
 
-Project_Soil.Rev$comments<-c('#') ;
+Project_Soil.Rev$comments<-c('--------') ;
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542030, c('comments')]<-c('# mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542030, c('comments')]<-c('- mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542033, c('comments')]<-c('# mukey 542033, is also a Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
-
-
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542034, c('comments')]<-c('mukey 542034 is abandoned mine pitts, this have no data at all') ;
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542033, c('comments')]<-c('- mukey 542033, is also a Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
 
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 539762, c('comments')]<-c('# Map Unit No. 539762 is a water body and is not available to query from the SDA_query function');
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542034, c('comments')]<-c('- mukey 542034 is abandoned mine pitts, this have no data at all') ;
 
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 539759, c('comments')]<-c('# Map Unit No. 539759 are urban land Urban land-Udults complex') ;
-
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542043, c('comments')]<-c('# Map Unit No. 542034 Pits  https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=542034') ;
-
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753522, c('comments')]<-c('# Map Unit No.753522 Houghton Muck Peatlands with no reliable data') ;
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 539762, c('comments')]<-c('- Map Unit No. 539762 is a water body and is not available to query from the SDA_query function');
 
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 423299, c('comments')]<-c('# Map Unit No. 423299 Marsh Peatlands with no reliable data') ;
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 539759, c('comments')]<-c('- Map Unit No. 539759 are urban land Urban land-Udults complex') ;
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542043, c('comments')]<-c('- Map Unit No. 542034 Pits  https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=542034') ;
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753522, c('comments')]<-c('- Map Unit No.753522 Houghton Muck Peatlands with no reliable data') ;
 
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753456, c('comments')]<-c('# Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 423299, c('comments')]<-c('- Map Unit No. 423299 Marsh Peatlands with no reliable data') ;
 
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753597, c('comments')]<-c('# Map Unit No. 753597 is  Water');
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753456, c('comments')]<-c('- Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 700421, c('comments')]<-c('# Map Unit No. 700421is Water');
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753597, c('comments')]<-c('- Map Unit No. 753597 is  Water');
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 700421, c('comments')]<-c('- Map Unit No. 700421is Water');
 
 
 
@@ -475,18 +475,17 @@ Geology_Mukey_Gaps_All.Nabr$Avg.GEOL.BD<-apply(Geology_Mukey_Gaps_All.Nabr[, c('
 
 Geology_Mukey_Gaps_All.Nabr$New.MUKEY<--999  ;
 
-# Add the newly created data from neighbors to the soil data files 
-
-
-Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Geology_Mukey_Gaps_All.Nabr)[1]), c('INDEX')]<-seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Geology_Mukey_Gaps_All.Nabr)[1]) ;
-
-
-Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Geology_Mukey_Gaps_All.Nabr)[1]), c('MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD' )]<-Geology_Mukey_Gaps_All.Nabr[,c('New.MUKEY', 'Avg.GEOL.SILT', 'Avg.GEOL.CLAY' , 'Avg.GEOL.OM' , 'Avg.GEOL.BD')] ;
-
-
-Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Geology_Mukey_Gaps_All.Nabr)[1]),c('QTZ', 'DMAC', 'MACVF', 'MACHF', 'BETA', 'ALPHA', 'MINSMC', 'MAXSMC', 'KSATH', 'KSATV' ,'KINF')]<--999
-
-
+# # Add the newly created data from neighbors to the soil data files 
+# 
+# 
+# Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Geology_Mukey_Gaps_All.Nabr)[1]), c('INDEX')]<-seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Geology_Mukey_Gaps_All.Nabr)[1]) ;
+# 
+# 
+# Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Geology_Mukey_Gaps_All.Nabr)[1]), c('MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD' )]<-Geology_Mukey_Gaps_All.Nabr[,c('New.MUKEY', 'Avg.GEOL.SILT', 'Avg.GEOL.CLAY' , 'Avg.GEOL.OM' , 'Avg.GEOL.BD')] ;
+# 
+# 
+# Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Geology_Mukey_Gaps_All.Nabr)[1]),c('QTZ', 'DMAC', 'MACVF', 'MACHF', 'BETA', 'ALPHA', 'MINSMC', 'MAXSMC', 'KSATH', 'KSATV' ,'KINF')]<--999
+# 
 
 ################################################################################################################################
 #
@@ -497,34 +496,34 @@ Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Ge
 # 
 ##############################################################################################################################################
 
-Project_Geology.Rev$comments<-c('#') ;
+Project_Geology.Rev$comments<-c('-------') ;
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542030, c('comments')]<-c('# mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542030, c('comments')]<-c('- mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542033, c('comments')]<-c('# mukey 542033, is also a Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
-
-
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542034, c('comments')]<-c('mukey 542034 is abandoned mine pitts, this have no data at all') ;
-
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 539762, c('comments')]<-c('# Map Unit No. 539762 is a water body and is not available to query from the SDA_query function');
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542033, c('comments')]<-c('- mukey 542033, is also a Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
 
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 539759, c('comments')]<-c('# Map Unit No. 539759 are urban land Urban land-Udults complex') ;
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542034, c('comments')]<-c('- mukey 542034 is abandoned mine pitts, this have no data at all') ;
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542043, c('comments')]<-c('# Map Unit No. 542034 Pits  https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=542034') ;
-
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753522, c('comments')]<-c('# Map Unit No.753522 Houghton Muck Peatlands with no reliable data') ;
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 539762, c('comments')]<-c('- Map Unit No. 539762 is a water body and is not available to query from the SDA_query function');
 
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 423299, c('comments')]<-c('# Map Unit No. 423299 Marsh Peatlands with no reliable data') ;
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 539759, c('comments')]<-c('- Map Unit No. 539759 are urban land Urban land-Udults complex') ;
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542043, c('comments')]<-c('- Map Unit No. 542034 Pits  https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=542034') ;
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753522, c('comments')]<-c('- Map Unit No.753522 Houghton Muck Peatlands with no reliable data') ;
 
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753456, c('comments')]<-c('# Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 423299, c('comments')]<-c('- Map Unit No. 423299 Marsh Peatlands with no reliable data') ;
 
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753597, c('comments')]<-c('# Map Unit No. 753597 is  Water');
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753456, c('comments')]<-c('- Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 700421, c('comments')]<-c('# Map Unit No. 700421is Water');
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753597, c('comments')]<-c('- Map Unit No. 753597 is  Water');
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 700421, c('comments')]<-c('- Map Unit No. 700421is Water');
 
   
   
