@@ -246,37 +246,7 @@ View(Project_Soil.Rev)
 # Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]),c('QTZ', 'DMAC', 'MACVF', 'MACHF', 'BETA', 'ALPHA', 'MINSMC', 'MAXSMC', 'KSATH', 'KSATV' ,'KINF')]<--999
 # 
 # 
-################################################################################################################################
-#
-#
-#                         make corrections for the soils that have deffective data or no data in the 
-#                         Soil Ssurgo database
-# 
-# 
-#####################################################################################################################################
 
-# soil 56 ,mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon',
-#some layers do not have data for bulk density',
-#The bulk density will be calulated from the average of the data available Avg(1.27, 1.42)=1.345 '
-
-Project_Soil.Rev[Project_Soil.Rev$MUKEY==542030,'BD']<-1.345 ;
-
-
-# soil 57 ,mukey 542033, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon',
-#some layers do not have data for bulk density',
-#The bulk density will be calulated from the average of the data available Avg(1.30, 1.30)=1.30 '
-
-Project_Soil.Rev[Project_Soil.Rev$MUKEY==542033,'BD']<-1.30 ;
-
-
-# soil 57 ,mukey 542034 is abandoned mine pitts, this have no data at all, The data will be replaced by the average of the data available for # the neighboring triangles in each case. Therefore triangles with soil index 57 (542034) will not be used and tringles with new indeces # created with the average values from neighbouring trinagles will be used. In order to not create warnings when procesing the soil file, soil indices with no data will be filled with Standard data. 
-#The standarized arbitrary values are silt=0.33, clay=0.33. OM=0.5, BD= 1.5
-# 
-
-
-StandardSoilValues<-data.frame(Silt=33.3, Clay=33.3, OM=0.5, BD=1.5) ;
-
-Project_Soil.Rev[Project_Soil.Rev$MUKEY==542034,c('SILT', 'CLAY' , 'OM' , 'BD')]<-StandardSoilValues ;
 
 ################################################################################################################################
 #
@@ -310,7 +280,7 @@ Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753522, c('comments')]<-c('# Map Unit 
 Project_Soil.Rev[Project_Soil.Rev$MUKEY== 423299, c('comments')]<-c('# Map Unit No. 423299 Marsh Peatlands with no reliable data') ;
 
 
-Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753456, c('comments')]<-c('Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753456, c('comments')]<-c('# Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
 
 
 Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753597, c('comments')]<-c('# Map Unit No. 753597 is  Water');
@@ -318,14 +288,90 @@ Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753597, c('comments')]<-c('# Map Unit 
 Project_Soil.Rev[Project_Soil.Rev$MUKEY== 700421, c('comments')]<-c('# Map Unit No. 700421is Water');
 
 
+
+
+################################################################################################################################
+#
+#
+#                         Write the soil data in the format approptiate for PIHM to take  
+# 
+# 
+################################################################################################################################
+
+
+
+
+
+
+
+##### When no changes are necesary to the data just equate the Project_Soil.Rev to the original fiel and that is it
+
+#Project_Soil.Rev<-Project_Soil[order(Project_Soil$INDEX ),] ;
+
+# NUMSOIL<-data.frame(c('NUMSOIL'), dim(HansYoust_Soil)[1]) ;
+
+NUMSOIL<-data.frame(c('NUMSOIL'), dim(Project_Soil.Rev)[1]) ;
+
+
+
+write.table(NUMSOIL,file='Soil.txt', row.names=F , quote=F, sep = "\t", col.names=F) ;
+
+# write.table(HansYoust_Soil[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
+
+
+
+
+
+
+###### Get 4 signifficant digits on the caluclated values for soils
+str(Project_Soil.Rev)
+
+Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')], Project_Soil.Rev[,c('compname' , 'taxorder', 'taxsuborder' , 'taxgrtgroup', 'taxsubgrp')] , as.integer(Project_Soil.Rev[,'MUKEY']), Project_Soil.Rev['comments'])  ;
+
+names(Project_Soil.Final)[1]<-c('INDEX') ;
+names(Project_Soil.Final)[dim(Project_Soil.Final)[2]-1]<-c('MUKEY') ;
+
+
+View(Project_Soil.Final)
+
+write.table(Project_Soil.Final,file='Soil.txt', row.names=F , quote=F, sep = "\t", append= T) ;
+
+
+
+####################  Add DINF , KMACV_RO  and KMACH_RO  at the end of the soil file ###########################################
+
+
+# DINF (type: double, unit: m) A virtual top soil layer thickness across which infiltration is calculated.
+# KMACV RO (type: double, unit: dimensionless) Ratio between vertical macropore hydraulic conduc-
+#   tivity and vertical saturated infiltration hydraulic conductivity.
+# KMACH RO (type: double, unit: dimensionless) Ratio between horizontal macropore hydraulic conductivity and 
+# horizontal saturated hydraulicconductivity.
+
+
+################################################################################################################################
+
+
+
+DINF_etc<-data.frame(c('DINF' , 'KMACV_RO', 'KMACH_RO'), c( 0.10, 100.0 , 1000.0 )) ;
+
+write.table(DINF_etc,file='Soil.txt', row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
+
+
+
+
   
   
 
-##########################################################################################################################
-##
-## some of the dominant components Geology Mukeys do no have data available. The strategy to fill these gaps is to get the average of the Mukeys parameters of the neighboring Triangles. The same strategy can be used to complete the Soils data.
-##
-##########################################################################################################################
+#################################################################################################################################
+#
+#                   Some of the dominant components Geology Mukeys do no have data available. 
+#                   The strategy to fill these gaps is to get the average of the Mukeys parameters of the neighboring Triangles. 
+#                   The same strategy can be used to complete the Soils data.
+#
+#################################################################################################################################
+
+
+
 # Create a new revised Geology  data file
 
 Project_Geology.Rev<-Project_Geology ;
@@ -358,7 +404,7 @@ Mukey_Gaps_indx_neighbors_Geology<-Watershed.1.neigh[Watershed.1.neigh$triangle 
 
 ###### retrieve the representative mukeys of the neighboring triangles for the Geology parameters
 
-Neighbor_Mukeys_Geology<-MUKEYS.MAP[MUKEYS.MAP$Ele_ID %in% unique(unlist(Mukey_Gaps_indx_neighbors_Geology, use.names = F)), c('GSURGO_Mod','Ele') ]  ;
+Neighbor_Mukeys_Geology<-MUKEYS.MAP[MUKEYS.MAP$Ele_ID %in% unique(unlist(Mukey_Gaps_indx_neighbors_Geology, use.names = F)), c('GSURGO_Mod','Ele_ID') ]  ;
 
 
 str(Project_Geology)
@@ -473,7 +519,7 @@ Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753522, c('comments')]<-c('# Map
 Project_Geology.Rev[Project_Geology.Rev$MUKEY== 423299, c('comments')]<-c('# Map Unit No. 423299 Marsh Peatlands with no reliable data') ;
 
 
-Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753456, c('comments')]<-c('Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753456, c('comments')]<-c('# Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
 
 
 Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753597, c('comments')]<-c('# Map Unit No. 753597 is  Water');
@@ -482,74 +528,6 @@ Project_Geology.Rev[Project_Geology.Rev$MUKEY== 700421, c('comments')]<-c('# Map
 
   
   
-
-
-
-
-
-################################################################################################################################
-#
-#
-#                         Write the soil data in the format approptiate for PIHM to take  
-# 
-# 
-################################################################################################################################
-
-
-
-
-
-
-
-##### When no changes are necesary to the data just equate the Project_Soil.Rev to the original fiel and that is it
-
-#Project_Soil.Rev<-Project_Soil[order(Project_Soil$INDEX ),] ;
-
-# NUMSOIL<-data.frame(c('NUMSOIL'), dim(HansYoust_Soil)[1]) ;
-
-NUMSOIL<-data.frame(c('NUMSOIL'), dim(Project_Soil.Rev)[1]) ;
-
-
-
-write.table(NUMSOIL,file='Soil.txt', row.names=F , quote=F, sep = "\t", col.names=F) ;
-
-# write.table(HansYoust_Soil[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
-
-
-
-
-
-
-###### Get 4 signifficant digits on the caluclated values for soils
-str(Project_Soil.Rev)
-
-Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')], Project_Soil.Rev[,c('compname' , 'taxorder', 'taxsuborder' , 'taxgrtgroup', 'taxsubgrp')] , as.integer(Project_Soil.Rev[,'MUKEY']))  ;
-
-names(Project_Soil.Final)[1]<-c('INDEX') ;
-names(Project_Soil.Final)[dim(Project_Soil.Final)[2]]<-c('MUKEY') ;
-
-write.table(Project_Soil.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ', 'MUKEY')],file='Soil.txt', row.names=F , quote=F, sep = "\t", append= T) ;
-
-
-
-####################  Add DINF , KMACV_RO  and KMACH_RO  at the end of the soil file ###########################################
-
-
-# DINF (type: double, unit: m) A virtual top soil layer thickness across which infiltration is calculated.
-# KMACV RO (type: double, unit: dimensionless) Ratio between vertical macropore hydraulic conduc-
-#   tivity and vertical saturated infiltration hydraulic conductivity.
-# KMACH RO (type: double, unit: dimensionless) Ratio between horizontal macropore hydraulic conductivity and 
-# horizontal saturated hydraulicconductivity.
-
-
-################################################################################################################################
-
-
-
-DINF_etc<-data.frame(c('DINF' , 'KMACV_RO', 'KMACH_RO'), c( 0.10, 100.0 , 1000.0 )) ;
-
-write.table(DINF_etc,file='Soil.txt', row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
-
 
 
 ################################################################################################################################
@@ -575,14 +553,17 @@ write.table(NUMGEOL,file='Geology.txt', row.names=F , quote=F, sep = "\t", col.n
 
 # write.table(HansYoust_Geology[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Geology.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
-Project_Geology.Final<-data.frame(Project_Geology.Rev[,'INDEX'],signif(Project_Geology.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Geology.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],as.integer(Project_Geology.Rev[,'MUKEY']))  ;
+Project_Geology.Final<-data.frame(Project_Geology.Rev[,'INDEX'],signif(Project_Geology.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Geology.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')], Project_Geology.Rev[,c('compname' , 'taxorder', 'taxsuborder' , 'taxgrtgroup', 'taxsubgrp')] , as.integer(Project_Geology.Rev[,'MUKEY']), Project_Geology.Rev['comments'])   ;
+
 
 
 names(Project_Geology.Final)[1]<-c('INDEX') ;
 
-names(Project_Geology.Final)[dim(Project_Geology.Final)[2]]<-c('MUKEY');
+names(Project_Geology.Final)[dim(Project_Geology.Final)[2]-1]<-c('MUKEY');
 
-write.table(Project_Geology.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ','MUKEY')],file='Geology.txt', row.names=F , quote=F, sep = "\t", append= T) ;
+View(Project_Geology.Final)
+
+write.table(Project_Geology.Final,file='Geology.txt', row.names=F , quote=F, sep = "\t", append= T) ;
 
 
 write.table(DINF_etc, file='Geology.txt', row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
