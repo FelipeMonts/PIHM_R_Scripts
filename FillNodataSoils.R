@@ -146,6 +146,8 @@ Mukey_Gaps_indx_Soil<-MUKEYS.MAP[MUKEYS.MAP$MUKEYS.mode %in% Mukey_Gaps_Soil, ] 
 #####  Only triangles with the Pits mukey  1588007 will be filled with data from adjacent triangles. Data for Traingles with mukeys 423299 Marsh and 753456 Alluvial land, wet will be filled with literature values.
 str(Mukey_Gaps_Soil)
 
+
+
 Mukey_Gaps_Pits<-1588007
 
 Mukey_Gaps_indx_Soil<-MUKEYS.MAP[MUKEYS.MAP$MUKEYS.mode %in% Mukey_Gaps_Pits, ] 
@@ -228,20 +230,22 @@ Soil_Mukey_Gaps_All.Nabr$New.MUKEY<--999  ;
 
 Project_Soil.Rev<-Project_Soil ;
 
-# Add the newly created data from neighbors to the soil data files 
+View(Project_Soil.Rev)
 
-
-Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]), c('INDEX')]<-seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]) ;
-
-
-
-Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]), c('MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD' )]<-Soil_Mukey_Gaps_All.Nabr[,c('New.MUKEY', 'Avg.SOIL.SILT', 'Avg.SOIL.CLAY' , 'Avg.SOIL.OM' , 'Avg.SOIL.BD')] ;
-
-
-
-Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]),c('QTZ', 'DMAC', 'MACVF', 'MACHF', 'BETA', 'ALPHA', 'MINSMC', 'MAXSMC', 'KSATH', 'KSATV' ,'KINF')]<--999
-
-
+# # Add the newly created data from neighbors to the soil data files 
+# 
+# 
+# Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]), c('INDEX')]<-seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]) ;
+# 
+# 
+# 
+# Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]), c('MUKEY' ,'SILT' , 'CLAY' , 'OM' ,  'BD' )]<-Soil_Mukey_Gaps_All.Nabr[,c('New.MUKEY', 'Avg.SOIL.SILT', 'Avg.SOIL.CLAY' , 'Avg.SOIL.OM' , 'Avg.SOIL.BD')] ;
+# 
+# 
+# 
+# Project_Soil.Rev[seq(dim(Project_Soil)[1]+1,dim(Project_Soil)[1]+dim(Soil_Mukey_Gaps_All.Nabr)[1]),c('QTZ', 'DMAC', 'MACVF', 'MACHF', 'BETA', 'ALPHA', 'MINSMC', 'MAXSMC', 'KSATH', 'KSATV' ,'KINF')]<--999
+# 
+# 
 ################################################################################################################################
 #
 #
@@ -274,16 +278,52 @@ StandardSoilValues<-data.frame(Silt=33.3, Clay=33.3, OM=0.5, BD=1.5) ;
 
 Project_Soil.Rev[Project_Soil.Rev$MUKEY==542034,c('SILT', 'CLAY' , 'OM' , 'BD')]<-StandardSoilValues ;
 
+################################################################################################################################
+#
+#
+#                         Write notes on the corrections made for the soils that have deffective data or no data in the 
+#                         Soil Ssurgo database
+# 
+# 
+#####################################################################################################################################
+
+Project_Soil.Rev$comments<-c('#') ;
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542030, c('comments')]<-c('# mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542033, c('comments')]<-c('# mukey 542033, is also a Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
 
 
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542034, c('comments')]<-c('mukey 542034 is abandoned mine pitts, this have no data at all') ;
 
 
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 539762, c('comments')]<-c('# Map Unit No. 539762 is a water body and is not available to query from the SDA_query function');
 
 
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 539759, c('comments')]<-c('# Map Unit No. 539759 are urban land Urban land-Udults complex') ;
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 542043, c('comments')]<-c('# Map Unit No. 542034 Pits  https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=542034') ;
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753522, c('comments')]<-c('# Map Unit No.753522 Houghton Muck Peatlands with no reliable data') ;
+
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 423299, c('comments')]<-c('# Map Unit No. 423299 Marsh Peatlands with no reliable data') ;
+
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753456, c('comments')]<-c('Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
+
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 753597, c('comments')]<-c('# Map Unit No. 753597 is  Water');
+
+Project_Soil.Rev[Project_Soil.Rev$MUKEY== 700421, c('comments')]<-c('# Map Unit No. 700421is Water');
+
+
+  
+  
 
 ##########################################################################################################################
 ##
-## some of the dominant components Geology Mukeys do no have data available. The strategy to fill these gaps is to get the average of the Mukeys parameters of the neighboring Triangles. The same strategy can be used to complete the Geology data.
+## some of the dominant components Geology Mukeys do no have data available. The strategy to fill these gaps is to get the average of the Mukeys parameters of the neighboring Triangles. The same strategy can be used to complete the Soils data.
 ##
 ##########################################################################################################################
 # Create a new revised Geology  data file
@@ -300,10 +340,14 @@ Project_Geology.NA<-data.frame(which(is.na(Project_Geology), arr.ind=T)) ;
 
 Mukeys_Gaps_Geology<-Project_Geology[unique(Project_Geology.NA$row),'MUKEY'] ;
 
+str(Mukeys_Gaps_Geology)
 
 ##### Find the soil index  and the triangles that have Mukeys corresponding to the Mukeys_Geology_Gaps
 
-Mukeys_Gaps_Geology_indx<-MUKEYS.map.1[MUKEYS.map.1$MUKEYS.mode %in% Mukeys_Gaps_Geology, ]    ;
+str(MUKEYS.MAP)
+
+
+Mukeys_Gaps_Geology_indx<-MUKEYS.MAP[MUKEYS.MAP$MUKEYS.mode %in% as.numeric(Mukeys_Gaps_Geology), ]    ;
 
 
 ###### Find the neighboring triangles of the Triangles with the Mukeys_Geology_Gaps
@@ -314,16 +358,18 @@ Mukey_Gaps_indx_neighbors_Geology<-Watershed.1.neigh[Watershed.1.neigh$triangle 
 
 ###### retrieve the representative mukeys of the neighboring triangles for the Geology parameters
 
-Neighbor_Mukeys_Geology<-MUKEYS.map.1[MUKEYS.map.1$Ele_ID %in% unique(unlist(Mukey_Gaps_indx_neighbors_Geology, use.names = F)), ]  ;
+Neighbor_Mukeys_Geology<-MUKEYS.MAP[MUKEYS.MAP$Ele_ID %in% unique(unlist(Mukey_Gaps_indx_neighbors_Geology, use.names = F)), c('GSURGO_Mod','Ele') ]  ;
 
 
-Neighbor_Mukeys_para.Geology<-Project_Geology[Project_Geology$MUKEY %in% Neighbor_Mukeys_Geology$MUKEYS.mode, c('MUKEY', 'SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
+str(Project_Geology)
+
+Neighbor_Mukeys_para.Geology<-Project_Geology[Project_Geology$MUKEY %in% Neighbor_Mukeys_Geology, c('MUKEY', 'SILT' , 'CLAY' , 'OM' ,  'BD') ]  ;
 
 names(Neighbor_Mukeys_para.Geology)<-c('MUKEY', paste0('GEOL.', c('SILT' , 'CLAY' , 'OM' ,  'BD'))) ;
 
 
 
-Index_Neighbor_Mukeys_para.Geology<-merge(Neighbor_Mukeys_Geology,Neighbor_Mukeys_para.Geology, by.x='MUKEYS.mode', by.y='MUKEY', all.x=T)  ;
+Index_Neighbor_Mukeys_para.Geology<-merge(Mukeys_Gaps_Geology_indx,Neighbor_Mukeys_para.Geology, by.x='MUKEYS.mode', by.y='MUKEY', all.x=T)  ;
 
 
 
@@ -405,11 +451,37 @@ Project_Geology.Rev[seq(dim(Project_Geology)[1]+1,dim(Project_Geology)[1]+dim(Ge
 # 
 ##############################################################################################################################################
 
-# soil 57 ,mukey 542034 is abandoned mine pitts, this have no data at all, The data will be replaced by the average of the data available for # the neighboring triangles in each case. Therefore triangles with soil index 57 (542034) will not be used and tringles with new indeces # created with the average values from neighbouring trinagles will be used. In order to not create warnings when procesing the soil file, soil indices with no data will be filled with Standard data. 
-#The standarized arbitrary values are silt=0.33, clay=0.33. OM=0.5, BD= 1.5
-# 
+Project_Geology.Rev$comments<-c('#') ;
 
-Project_Geology.Rev[Project_Soil.Rev$MUKEY==542034,c('SILT', 'CLAY' , 'OM' , 'BD')]<-StandardSoilValues ;
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542030, c('comments')]<-c('# mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542033, c('comments')]<-c('# mukey 542033, is also a Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon') ;
+
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542034, c('comments')]<-c('mukey 542034 is abandoned mine pitts, this have no data at all') ;
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 539762, c('comments')]<-c('# Map Unit No. 539762 is a water body and is not available to query from the SDA_query function');
+
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 539759, c('comments')]<-c('# Map Unit No. 539759 are urban land Urban land-Udults complex') ;
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 542043, c('comments')]<-c('# Map Unit No. 542034 Pits  https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=542034') ;
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753522, c('comments')]<-c('# Map Unit No.753522 Houghton Muck Peatlands with no reliable data') ;
+
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 423299, c('comments')]<-c('# Map Unit No. 423299 Marsh Peatlands with no reliable data') ;
+
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753456, c('comments')]<-c('Map Unit No.753456 Alluvial Wet Peatlands with no reliable data') ;
+
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 753597, c('comments')]<-c('# Map Unit No. 753597 is  Water');
+
+Project_Geology.Rev[Project_Geology.Rev$MUKEY== 700421, c('comments')]<-c('# Map Unit No. 700421is Water');
+
+  
+  
 
 
 
@@ -422,6 +494,10 @@ Project_Geology.Rev[Project_Soil.Rev$MUKEY==542034,c('SILT', 'CLAY' , 'OM' , 'BD
 # 
 # 
 ################################################################################################################################
+
+
+
+
 
 
 
@@ -440,10 +516,14 @@ write.table(NUMSOIL,file='Soil.txt', row.names=F , quote=F, sep = "\t", col.name
 # write.table(HansYoust_Soil[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')],file=paste0(inputfile.name, '_Soil.txt'), row.names=F , quote=F, sep = "\t", append= T) ;
 
 
+
+
+
+
 ###### Get 4 signifficant digits on the caluclated values for soils
 str(Project_Soil.Rev)
 
-Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ'),Project_Soil.Rev[,c('compname' , 'taxorder', 'taxsuborder' , 'taxgrtgroup', 'taxsubgrp')] ], as.integer(Project_Soil.Rev[,'MUKEY']))  ;
+Project_Soil.Final<-data.frame(Project_Soil.Rev[,'INDEX'],signif(Project_Soil.Rev[,c('SILT',  'CLAY',	'OM','BD') ], 4), Project_Soil.Rev[, c('KINF', 'KSATV' , 'KSATH' , 'MAXSMC' , 'MINSMC' , 'ALPHA' , 'BETA' , 'MACHF' , 'MACVF' , 'DMAC', 'QTZ')], Project_Soil.Rev[,c('compname' , 'taxorder', 'taxsuborder' , 'taxgrtgroup', 'taxsubgrp')] , as.integer(Project_Soil.Rev[,'MUKEY']))  ;
 
 names(Project_Soil.Final)[1]<-c('INDEX') ;
 names(Project_Soil.Final)[dim(Project_Soil.Final)[2]]<-c('MUKEY') ;
@@ -469,31 +549,6 @@ write.table(Project_Soil.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF', '
 DINF_etc<-data.frame(c('DINF' , 'KMACV_RO', 'KMACH_RO'), c( 0.10, 100.0 , 1000.0 )) ;
 
 write.table(DINF_etc,file='Soil.txt', row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
-
-################################################################################################################################
-#
-#
-#                         Write notes on the corrections made for the soils that have deffective data or no data in the 
-#                         Soil Ssurgo database
-# 
-# 
-#####################################################################################################################################
-
-Soil.comments<-c('# mukey 542030, is Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon',
-                 '#some layers do not have data for bulk density',
-                 '#The bulk density will be calulated from the average of the data available Avg(1.27, 1.42)=1.345 ',
-                 '#soil 57 ,mukey 542033, is also a Opequon  https://casoilresource.lawr.ucdavis.edu/sde/?series=opequon',
-                 '#some layers do not have data for bulk density',
-                 '#The bulk density will be calulated from the average of the data available Avg(1.30, 1.30)=1.30',
-                 '#soil 57 ,mukey 542034 is abandoned mine pitts, this have no data at all', 
-                 '#The data will be replaced by the average of the data available for the neighboring triangles in each case',
-                 '#Therefore triangles with soil index 57 (542034) will not be used and tringles with new indeces',
-                 '#created with the average values from neighbouring trinagles will be used.',
-                 '#In order to not create warnings when procesing the soil file, soil indices with no data will be filled with Standard data.',
-                 '#The standarized arbitrary values are silt=0.33, clay=0.33. OM=0.5, BD= 1.5') 
-
-
-write(Soil.comments,file='Soil.txt', sep = "\t", append= T) ;
 
 
 
@@ -533,23 +588,7 @@ write.table(Project_Geology.Final[, c('INDEX','SILT',  'CLAY',	'OM','BD', 'KINF'
 write.table(DINF_etc, file='Geology.txt', row.names=F , quote=F, sep = "\t", col.names=F, append= T ) ;
 
 
-################################################################################################################################
-#
-#
-#                         Write notes on the corrections made for the geology that have deffective data or no data in the 
-#                         Soil Ssurgo database
-# 
-# 
-#####################################################################################################################################
 
-Geology.comments<-c('#soil 57 ,mukey 542034 is abandoned mine pitts, this have no data at all', 
-                 '#The data will be replaced by the average of the data available for the neighboring triangles in each case',
-                 '#Therefore triangles with soil index 57 (542034) will not be used and tringles with new indices',
-                 '#created with the average values from neighbouring trinagles will be used.',
-                 '#In order to not create warnings when procesing the soil file, soil indices with no data will be filled with Standard data.',
-                 '#The standarized arbitrary values are silt=0.33, clay=0.33. OM=0.5, BD= 1.5') 
-
-write(Geology.comments,file='Geology.txt', sep = "\t", append= T) ;
 
 
 
