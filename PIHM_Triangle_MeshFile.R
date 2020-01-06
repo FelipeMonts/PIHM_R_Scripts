@@ -131,6 +131,7 @@ Watershed.NUMELE<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures
 
 str(Watershed.1.ele)
 tail(Watershed.1.ele)
+View(Watershed.1.ele)
 
 
 ########### Read the .1.node file  ###########
@@ -157,7 +158,7 @@ Watershed.NUMNODE<-read.table("../Oct0920191330/DomainDecomposition/MergeFeature
 
 str(Watershed.1.node)
 tail(Watershed.1.node)
-
+View(Watershed.1.node)
 
 ####### Create a point shape file from the nodes coordinates to extract the ZMAX Values from the DEM
 
@@ -189,7 +190,7 @@ head(Node.Points.ZMAX)
 Node.Points.ZMAX[is.na(Node.Points.ZMAX$raster..extract.FillPits..Node.Points.), ] 
 
 
-####### Read the 1.1 neigh file from triangle
+####### Read the 1.neigh file from triangle
 
 
 ### description from https://www.cs.cmu.edu/~quake/triangle.neigh.html
@@ -212,6 +213,17 @@ str(Watershed.1.neigh)
 tail(Watershed.1.neigh)
 
 
-save.image(file='PIHMMeshFile.RData');
+####### Read the 1.poly file from triangle
+
+
+Watershed.1.poly.info<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.poly", header=FALSE, sep= "", skip=1, nrows=1) ;
+
+Watershed.1.poly<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.poly", header=FALSE, sep= "", skip=2, nrows=Watershed.1.poly.info$V1) ;
+
+View(Watershed.1.poly)
+
+
+
+save.image(file='PIHM_Triangle_MeshFile.RData');
 
 

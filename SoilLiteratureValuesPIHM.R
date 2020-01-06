@@ -172,7 +172,7 @@ View(Geology)
 ################################################################################################################################
 #
 #
-#                         Write the soil data in the format approptiate for PIHM to take  
+#                         Write the Geology data in the format approptiate for PIHM to take  
 # 
 # 
 ################################################################################################################################
@@ -189,5 +189,5 @@ write.table(Geology,file='Geology_Rev.txt', row.names=F , quote=F, sep = "\t", a
 
 write.table(DINF_etc_Geology,file='Geology_Rev.txt', row.names=F , col.names=F ,quote=F, sep = "\t", append= T) ;
 
-
+save.image(file='SoilLiteratureValuesPIHM.RData') ;
 

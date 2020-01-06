@@ -35,7 +35,7 @@
 #      set the working directory
 
 
-setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs') ;    ;   #  setwd(RevisedOutputs.dir)   ;
+setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs') ;       #  setwd(RevisedOutputs.dir)   ;
 
 
 
@@ -65,7 +65,7 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs')
 # library(dplyr)  ;
 # library(soilDB) ;
 # library(raster) ;
-# library(aqp) ;
+library(aqp) ;
 library(sp) ;
 library(rgdal) ;
 library(raster) ;
@@ -138,7 +138,7 @@ Node.Points.ZMAX_ZMIN[which(Node.Points.ZMAX_ZMIN$Diff.Z <= 0.20),]  ;
 ################## Write out the appropiate formated "Mesh" File for the MM-PIHM input format ##################################
 
 
-Watershed.name<-"Yahara_"  ;
+Watershed.name<-"Yahara"  ;
 
 
 ####  write the first lines of the new MM-PIHM mesh file
@@ -519,49 +519,50 @@ load('SoilsSurgoPIHM.RData');
 
 load('FillNoDataSoils.RData') ;
 
+load('SoilLiteratureValuesPIHM.RData');
+
+
+
 ###### Get the soils index that had no data and whose data was obtained from averaging the neighbor triangles (from FillNoDataSoils.RData)
 
-Mukey_Gaps_indx_Soil
-
-Mukey_Gaps_indx_neighbors_Soil
-
-Index_Neighbor_Mukeys_para.Soil
-
-Project_Soil.Rev
-
-
-Mukeys_Gaps_Geology_indx
-
-Mukey_Gaps_indx_neighbors_Geology
-
-Index_Neighbor_Mukeys_para.Geology
-
-
-Project_Geology.Rev
-
-
-##### Revise the soils map according to the soils that had no data and were filled with the average of the neighbor triangles
-
-
-head(MUKEYS.MAP)  #from the SoilSurgoPIHM.R file 
-
 str(MUKEYS.MAP)
-
-MUKEYS.MAP$INDEX<-as.integer(as.character(MUKEYS.MAP$mukey_ID)) ;
-
-MUKEYS.map.1_Soil<-MUKEYS.MAP   ;
+View(MUKEYS.MAP)
 
 
-MUKEYS.map.1_Soil[MUKEYS.map.1_Soil$MUKEYS.index %in% Mukey_Gaps_indx_Soil$MUKEYS.index, 'INDEX'] <- Project_Soil.Rev[Project_Soil.Rev$MUKEY==-999,'INDEX']
+str(Geology)
+View(Geology)
+
+
+str(Soil)
+View(Soil)
 
 
 
-##### Revise the Geology map according to the geology that had no data and were filled with the average of the neighbor triangles
 
-MUKEYS.map.1_Geology<-MUKEYS.MAP   ;
 
-MUKEYS.map.1_Geology[MUKEYS.map.1_Geology$MUKEYS.index %in% Mukeys_Gaps_Geology_indx$MUKEYS.index, 'INDEX'] <- Project_Geology.Rev[Project_Geology.Rev$MUKEY==-999,'INDEX']
 
+# ##### Revise the soils map according to the soils that had no data and were filled with the average of the neighbor triangles
+# 
+# 
+# head(MUKEYS.MAP)  #from the SoilSurgoPIHM.R file 
+# 
+# str(MUKEYS.MAP)
+# 
+# MUKEYS.MAP$INDEX<-as.integer(as.character(MUKEYS.MAP$mukey_ID)) ;
+# 
+# MUKEYS.map.1_Soil<-MUKEYS.MAP   ;
+# 
+# 
+# MUKEYS.map.1_Soil[MUKEYS.map.1_Soil$MUKEYS.index %in% Mukey_Gaps_indx_Soil$MUKEYS.index, 'INDEX'] <- Project_Soil.Rev[Project_Soil.Rev$MUKEY==-999,'INDEX']
+# 
+# 
+# 
+# ##### Revise the Geology map according to the geology that had no data and were filled with the average of the neighbor triangles
+# 
+# MUKEYS.map.1_Geology<-MUKEYS.MAP   ;
+# 
+# MUKEYS.map.1_Geology[MUKEYS.map.1_Geology$MUKEYS.index %in% Mukeys_Gaps_Geology_indx$MUKEYS.index, 'INDEX'] <- Project_Geology.Rev[Project_Geology.Rev$MUKEY==-999,'INDEX']
+# 
 
 
 
@@ -586,19 +587,41 @@ LandCover.att<-merge(Project.LC@data,PIHM_to_NLCD, by.x= 'LandCover' ,by.y='PIHM
 
 ######## Merge the att data frame  with the Mukey.map data frame to replace the PIHM Soil index by the index in the GSSURGO extracted data
 
-Revised.att<-merge(MUKEYS.MAP,LandCover.att, by.x='Ele_ID' , by.y= 'Ele_ID' )[] ;
+Revised.att<-merge(MUKEYS.MAP,LandCover.att, by.x='Ele_ID' , by.y= 'Ele_ID' ) ;
 
 
+# ###################################IMPORTANT##################################
+# #
+# # Because the soils for the Yahara watershed marked with MUKEYs 753597  and 700421 are water bodies, the query for that MUKEY in the SSURGO database is returned as empty. 
+# # The information for those soils needs to be obtained some how. Propoerties of soils corresponding to MUKEY 753597 and 700421 will be the same that were found i the literature for the muck, peat and histosols, MUKEYS 423299 and 753456
+# 
+# Revised.att[Revised.att$MUKEYS.mod==423299,]
+# Revised.att[Revised.att$MUKEYS.mod==753456,]
+# 
+# 
+# 
+# Revised.att[Revised.att$MUKEYS.mod==753597,'mukey_Index']<-5
+# Revised.att[Revised.att$MUKEYS.mod==700421,'mukey_Index']<-5
+# 
+# ################################### END IMPORTANT##################################
 
 head(Revised.att)
 str(Revised.att)
 
-Watershed.att<-Revised.att[,c('Ele_ID', 'INDEX','INDEX', 'NLCD.lc')];
+Watershed.att<-Revised.att[,c('Ele_ID', 'mukey_Index', 'mukey_Index', 'NLCD.lc')];
 
 names(Watershed.att)<-c('INDEX',  'SOIL' ,  'GEOL' , 'LC' )  ;
 
+
+##### check if there are NAs in the Watershed.att
+
+which(is.na(Watershed.att), arr.ind = T)
+
+
+
 head(Watershed.att)
 str(Watershed.att)
+View(Watershed.att)
 
 Watershed.att$METEO<-1 ;
 
@@ -609,7 +632,7 @@ str(Watershed.att)
 
 
 Watershed.att[,c('INDEX',  'SOIL' ,  'GEOL' , 'LC', 'METEO' , 'LAI' , 'SS' , 'BC1' , 'BC2' , 'BC3' )]
-
+View(Watershed.att)
 
 
 # #############################################################################################################################
