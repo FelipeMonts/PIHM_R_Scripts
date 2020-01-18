@@ -31,7 +31,7 @@
 #      set the working directory
 
 
-setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs') ;  
+setwd("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\Yahara20200110") ;  
 
 
 ###############################################################################################################
@@ -53,38 +53,116 @@ setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs')
 
 library(sp) ;
 library(rgdal) ;
+library(sets) ;
+library(utils);
 
 
-########### Load the results of the runing TRinagle in PIHM GIS from the R script PIHM_Triangle_MeshFile  ###########
+########### Load the results of the runing Triangle in PIHM GIS from the R script PIHM_Triangle_MeshFile  ###########
 
 
 load('PIHM_Triangle_MeshFile.RData')  ;
 
-
-
-
 #### Check the TIN file ####
 
-plot(Watershed.TIN, col='RED')  ;
+plot(Watershed.TIN)
+
+
+########### Load the river and merge  files rom PIHM_GIS ###################
+
+
+Merge<-readOGR(".\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.shp") ;
+
+plot(Merge, col="RED", add=T)
+
 
 ########### Read River shape file (simplified and splited) information  ###########
 
-River.info<-ogrInfo("../Oct0920191330/VectorProcessing/StreamHandMadeExploded_Decomp_Decomp.shp" );
- 
+River.shp<-readOGR(".\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110River.shp") ;
 
-River.shp<-readOGR("../Oct0920191330/VectorProcessing/StreamHandMadeExploded_Decomp_Decomp.shp");
-
-River.shp@lines
-
-coordinates(River.shp)
+River.shp@data
+plot(River.shp, col="BLUE",add=T)
 
 
-str(River.shp)
 
-plot(River.shp,add=T,col='BLUE',lwd=2)   ;
+###########  get the coordinates of the river vertex  ###########
 
+
+
+######## get the coordinates from the river shape file
+RivCords<-coordinates(River.shp)
+
+str(RivCords)
+
+River.shp@data$from.X<-sapply(sapply(RivCords,'[',1),'[',1,1) ;
+
+River.shp@data$from.Y<-sapply(sapply(RivCords,'[',1),'[',1,2) ;
+
+
+
+River.shp@data$to.X<-sapply(sapply(RivCords,'[',1),'[',2,1) ;
+
+River.shp@data$to.Y<-sapply(sapply(RivCords,'[',1),'[',2,2) ;
+
+####### match the river shape file vertex coordinates with the .node file from trinagle 
+
+
+River.data.1<-merge(River.shp@data, Watershed.1.node, by.x=c("from.X","from.Y"), by.y=c("X","Y"),all.x=T);
+
+River.data.2<-merge(River.shp@data, Watershed.1.node, by.x=c("to.X","to.Y"), by.y=c("X","Y"),all.x=T);
+
+River.data.3<-merge(River.data.1, River.data.2, by="ID") ;
+
+
+####### match the river edges with the edges from the trianglulation and tin mesh
+
+head(River.data.3)
+
+#River.data.3[,c("ID","from.X.x","from.Y.x", "to.X.x", "to.Y.x", "FID.x", "INDEX.x","S_Order.x", "BoundaryMarker.x" , "to.X.y",  "to.Y.y" ,"from.X.y" ,  "from.Y.y" , "FID.y", "INDEX.y" ,"S_Order.y", "BoundaryMarker.y")]
+
+River.data.3[,c("INDEX.x", "S_Order.x" , "BoundaryMarker.x", "INDEX.y" ,"S_Order.y", "BoundaryMarker.y")]
+
+
+###### creating a 'sets' object to be used with the "sets" package and perform set operations on the river segments and nodes and traingle elements and nodes
+### https://cran.r-project.org/web/packages/sets/index.html
+
+
+
+#### River shape file segments node set
+
+River.data.4<-as.list(as.data.frame(t(River.data.3[,c("INDEX.x","INDEX.y")]))) #,River.data.3[,c("INDEX.y")]);
+
+names(River.data.4)<-paste0("R_",River.data.3$FID.x)  ;
+
+str(River.data.4)
+
+
+
+##### Trinagle elements node data set
+
+
+ele.data<-as.list(as.data.frame(t(Watershed.1.ele[,c("node1" , "node2" , "node3")])))
+
+names(ele.data)<-paste0("T_" ,Watershed.1.ele$triangle);
+
+str(ele.data)
+
+RivSeg.Triangle<-data.frame(character(), character()) ;
+names(RivSeg.Triangle)<-c('Triangle','RiverSegment') ;
+
+for (i in seq(1,length(ele.data))) {
+  for(j in seq(1,length(River.data.4))) {
+    if (as.set(River.data.4[[j]]) <= as.set(ele.data[[i]])) {
+      RivSeg.Triangle<-rbind(RivSeg.Triangle,data.frame(as.character(names(ele.data[i])),as.character(names(River.data.4[j]))))
+    }
+  }
+}
+
+
+names(RivSeg.Triangle)<-c('Triangle','RiverSegment') ;
+print(RivSeg.Triangle)
 
 ####### check the boudaries of the .poly and .node files to find the river segments ########
+
 
 
 #  https://www.cs.cmu.edu/~quake/triangle.help.html

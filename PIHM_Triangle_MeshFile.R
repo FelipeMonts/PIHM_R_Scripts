@@ -35,7 +35,7 @@
 #      set the working directory
 
 
-setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs') ;      #  setwd(RevisedOutputs.dir)   ;
+setwd("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\Yahara20200110") ;      #  setwd(RevisedOutputs.dir)   ;
 
 
 
@@ -100,7 +100,7 @@ Watershed.TIN.info<-ogrInfo("../Oct0920191330/DomainDecomposition/MergeFeatures_
 
 
 
-Watershed.TIN<-readOGR("../Oct0920191330/DomainDecomposition/MergeFeatures_q30_a1000000_o.shp",  p4s='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' );
+Watershed.TIN<-readOGR('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110_q30_a1000000.shp',  p4s='+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' );
 
 print(Watershed.TIN)
 
@@ -123,11 +123,11 @@ plot(Watershed.TIN)
 # In output .ele files, all triangles have three nodes each unless the -o2 switch is used, in which case subparametric quadratic elements with six nodes are generated. The fourth, fifth, and sixth nodes lie on the midpoints of the edges opposite the first, second, and third vertices. 
 
 
-Watershed.1.ele<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.ele", header=FALSE, sep= "", skip=1) ;
+Watershed.1.ele<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.1.ele', header=FALSE, sep= "", skip=1) ;
 
 names(Watershed.1.ele)<-c("triangle", "node1","node2","node3") ;
 
-Watershed.NUMELE<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.ele", header=FALSE, sep= "", nrows= 1)[1,1] ;
+Watershed.NUMELE<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.1.ele', header=FALSE, sep= "", nrows= 1)[1,1] ;
 
 str(Watershed.1.ele)
 tail(Watershed.1.ele)
@@ -150,11 +150,11 @@ View(Watershed.1.ele)
 # 
 # If the fourth entry of the first line is `1', the last column of the remainder of the file is assumed to contain boundary markers. Boundary markers are used to identify boundary vertices and vertices resting on PSLG segments. The .node files produced by Triangle contain boundary markers in the last column unless they are suppressed by the -B switch. 
 
-Watershed.1.node<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.node", header=FALSE, sep= "", skip=1) ;
+Watershed.1.node<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.1.node', header=FALSE, sep= "", skip=1) ;
 
 names(Watershed.1.node)<-c("INDEX" , "X" , "Y" , "BoundaryMarker") ;
 
-Watershed.NUMNODE<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.node", header=FALSE, sep= "", nrows=1)[1,1] ;
+Watershed.NUMNODE<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.1.node', header=FALSE, sep= "", nrows=1)[1,1] ;
 
 str(Watershed.1.node)
 tail(Watershed.1.node)
@@ -205,7 +205,7 @@ Node.Points.ZMAX[is.na(Node.Points.ZMAX$raster..extract.FillPits..Node.Points.),
 # Triangle can produce .neigh files (use the -n switch), but cannot read them. 
 
 
-Watershed.1.neigh<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.neigh", header=FALSE, sep= "", skip=1) ;
+Watershed.1.neigh<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.1.neigh', header=FALSE, sep= "", skip=1) ;
 
 names(Watershed.1.neigh)<-c("triangle", "neighbor1","neighbor2","neighbor3") ;
 
@@ -215,10 +215,33 @@ tail(Watershed.1.neigh)
 
 ####### Read the 1.poly file from triangle
 
+# poly files
+# 
+# First line: <# of vertices> <dimension (must be 2)> <# of attributes> <# of boundary markers (0 or 1)>
+#   Following lines: <vertex #> <x> <y> [attributes] [boundary marker]
+# One line: <# of segments> <# of boundary markers (0 or 1)>
+#   Following lines: <segment #> <endpoint> <endpoint> [boundary marker]
+# One line: <# of holes>
+#   Following lines: <hole #> <x> <y>
+# Optional line: <# of regional attributes and/or area constraints>
+#   Optional following lines: <region #> <x> <y> <attribute> <maximum area> 
+# 
+# A .poly file represents a PSLG, as well as some additional information. PSLG stands for Planar Straight Line Graph, a term familiar to computational geometers. By definition, a PSLG is just a list of vertices and segments. A .poly file can also contain information about holes and concavities, as well as regional attributes and constraints on the areas of triangles.
+# 
+# The first section lists all the vertices, and is identical to the format of .node files. <# of vertices> may be set to zero to indicate that the vertices are listed in a separate .node file; .poly files produced by Triangle always have this format. A vertex set represented this way has the advantage that it may easily be triangulated with or without segments (depending on whether the .poly or .node file is read).
+#   
+#   The second section lists the segments. Segments are edges whose presence in the triangulation is enforced (although each segment may be subdivided into smaller edges). Each segment is specified by listing the indices of its two endpoints. This means that you must include its endpoints in the vertex list. Each segment, like each vertex, may have a boundary marker.
 
-Watershed.1.poly.info<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.poly", header=FALSE, sep= "", skip=1, nrows=1) ;
 
-Watershed.1.poly<-read.table("../Oct0920191330/DomainDecomposition/MergeFeatures.1.poly", header=FALSE, sep= "", skip=2, nrows=Watershed.1.poly.info$V1) ;
+Watershed.1.poly.info<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.poly', header=FALSE, sep= "", nrows=1) ;
+
+Watershed.1.poly.info[2,1:2]<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.poly', header=FALSE, sep= "", skip=Watershed.1.poly.info$V1+2, nrows=1) ;
+
+
+Watershed.1.poly.Nodes<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.poly', header=FALSE, sep= "", skip=1, nrows=Watershed.1.poly.info$V1) ;
+
+Watershed.1.poly.edges<-read.table('.\\Jan1020201420\\3DomainDecomposition\\MergefeaturesModExploded20200110.poly', header=FALSE, sep= "", skip=Watershed.1.poly.info$V1+3, nrows=Watershed.1.poly.info$V1) ;
+
 
 View(Watershed.1.poly)
 
