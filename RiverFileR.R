@@ -112,7 +112,7 @@ River.data.2<-merge(River.shp@data, Watershed.1.node, by.x=c("to.X","to.Y"), by.
 
 River.data.3<-merge(River.data.1, River.data.2, by="ID") ;
 
-
+View(River.data.3)
 ####### match the river edges with the edges from the trianglulation and tin mesh
 
 head(River.data.3)
@@ -131,13 +131,15 @@ River.data.3[,c("INDEX.x", "S_Order.x" , "BoundaryMarker.x", "INDEX.y" ,"S_Order
 
 River.data.4<-as.list(as.data.frame(t(River.data.3[,c("INDEX.x","INDEX.y")]))) #,River.data.3[,c("INDEX.y")]);
 
-names(River.data.4)<-paste0("R_",River.data.3$FID.x)  ;
+names(River.data.4)<-paste0("R_",River.data.3$ID)  ;
 
 str(River.data.4)
 
 
 
-##### Trinagle elements node data set
+##### Trinagle elements node data set preocessing
+
+### convert the tringel nodes data set into a list with each element composed of the nodes that form each trinagle.
 
 
 ele.data<-as.list(as.data.frame(t(Watershed.1.ele[,c("node1" , "node2" , "node3")])))
@@ -146,196 +148,145 @@ names(ele.data)<-paste0("T_" ,Watershed.1.ele$triangle);
 
 str(ele.data)
 
-RivSeg.Triangle<-data.frame(character(), character()) ;
-names(RivSeg.Triangle)<-c('Triangle','RiverSegment') ;
+
+
+#####  use set operations using the sets package https://cran.r-project.org/web/packages/sets/index.html to compare each river segment node pairs with all the triangles node triplets and find the ones that are propper subsets; that is the trinagles that contain the two nodes of the river.
+
+#### also calculate the symetric difference between the river nodes and the Trinagle nodes to extract the node that belongs to each trinagle neighboring a river segment 
+
+
+
+RivSeg.Triangle<-data.frame(character(), character(),integer(), integer(),integer(), integer(),integer(), integer()) ;
+names(RivSeg.Triangle)<-c('Triangle','Tnode_1', 'Tnode_2' , 'Tnode_3', 'RiverSegment', 'Rnode_1', 'Rnode_2', 'SymDiff') ;
 
 for (i in seq(1,length(ele.data))) {
   for(j in seq(1,length(River.data.4))) {
     if (as.set(River.data.4[[j]]) <= as.set(ele.data[[i]])) {
-      RivSeg.Triangle<-rbind(RivSeg.Triangle,data.frame(as.character(names(ele.data[i])),as.character(names(River.data.4[j]))))
+      
+      #as.integer(as.set(ele.data[[i]]) %D% as.set(River.data.4[[j]]))
+
+      RivSeg.Triangle<-rbind(RivSeg.Triangle,data.frame(as.character(names(ele.data[i])), as.integer(ele.data[[i]][1]),as.integer(ele.data[[i]][2]), as.integer(ele.data[[i]][3]) , as.character(names(River.data.4[j])), as.integer(River.data.4[[j]][1]),as.integer(River.data.4[[j]][2]),as.integer(as.set(ele.data[[i]]) %D% as.set(River.data.4[[j]])) ))
+      
+      
     }
   }
 }
 
 
-names(RivSeg.Triangle)<-c('Triangle','RiverSegment') ;
+names(RivSeg.Triangle)<-c('Triangle','Tnode_1', 'Tnode_2' , 'Tnode_3', 'RiverSegment', 'Rnode_1', 'Rnode_2', 'SymDiff') ;
 print(RivSeg.Triangle)
 
-####### check the boudaries of the .poly and .node files to find the river segments ########
+
+
+####### Organize the river segments and the triangle neighbors ########
+
+
+RivSeg.Triangle.1<-merge(RivSeg.Triangle,River.data.3[,c("RiverSegment" ,"INDEX.x", "from.X.x" , "from.Y.x" , "INDEX.y" ,  "to.X.x" , "to.Y.x" )], by="RiverSegment") ;
+
+##### The river segment orinetation is opposite to the direction of the river segment; that is the right triangle is the trinagle to the right of the river segment from the perspective of the "to" to "from" nodes coordinates. This is opposite the water flow in the river.
 
 
 
-#  https://www.cs.cmu.edu/~quake/triangle.help.html
-# Boundary Markers from :
-#   
-#   Boundary markers are tags used mainly to identify which output vertices
-# and edges are associated with which PSLG segment, and to identify which
-# vertices and edges occur on a boundary of the triangulation.  A common
-# use is to determine where boundary conditions should be applied to a
-# finite element mesh.  You can prevent boundary markers from being written
-# into files produced by Triangle by using the -B switch.
-# 
-# The boundary marker associated with each segment in an output .poly file
-# and each edge in an output .edge file is chosen as follows:
-#   - If an output edge is part or all of a PSLG segment with a nonzero
-# boundary marker, then the edge is assigned the same marker.
-# - Otherwise, if the edge lies on a boundary of the triangulation
-# (even the boundary of a hole), then the edge is assigned the marker
-# one (1).
-# - Otherwise, the edge is assigned the marker zero (0).
-# The boundary marker associated with each vertex in an output .node file
-# is chosen as follows:
-#   - If a vertex is assigned a nonzero boundary marker in the input file,
-# then it is assigned the same marker in the output .node file.
-# - Otherwise, if the vertex lies on a PSLG segment (even if it is an
-#                                                    endpoint of the segment) with a nonzero boundary marker, then the
-# vertex is assigned the same marker.  If the vertex lies on several
-# such segments, one of the markers is chosen arbitrarily.
-# - Otherwise, if the vertex occurs on a boundary of the triangulation,
-# then the vertex is assigned the marker one (1).
-# - Otherwise, the vertex is assigned the marker zero (0).
-# 
-# If you want Triangle to determine for you which vertices and edges are on
-# the boundary, assign them the boundary marker zero (or use no markers at
-#                                                     all) in your input files.  In the output files, all boundary vertices,
-# edges, and segments will be assigned the value one.
-# 
-# 
-# 
+head(RivSeg.Triangle.1)
+
+head(Watershed.1.node)
+
+
+RivSeg.Triangle.2<-merge(RivSeg.Triangle.1,Watershed.1.node, by.x="SymDiff", by.y="INDEX", all.x=T) ;
+
+#### from the symetric difference between the river nodes and the Trinagle nodes  and the  extracted the node that belongs to each trinagle neighboring a river segment find the angle between the river segment and the triangle segment, formed by the comon origin node of the river and the trinagle ( the "to" node coordinates) and the simetrical difference node only belonging to the triangle. 
+
+### to find the angle between two vectors use the dot product (scalar product) of the two vectors
+
+
+### Calculate the scalar product (dot product) of the river and the triangle segments using matrix multiplication  - %*%  - and extracting the diago0nal of the resulting matrix
+
+RivSeg.Triangle.2$RivS_vect_X<-RivSeg.Triangle.2$from.X.x - RivSeg.Triangle.2$to.X.x  ;
+
+RivSeg.Triangle.2$RivS_vect_Y<-RivSeg.Triangle.2$from.Y.x - RivSeg.Triangle.2$to.Y.x  ;
+
+RivSeg.Triangle.2$TriS_vect_X<-RivSeg.Triangle.2$X - RivSeg.Triangle.2$to.X.x  ;
+
+RivSeg.Triangle.2$TriS_vect_Y<-RivSeg.Triangle.2$Y -  RivSeg.Triangle.2$to.Y.x  ;
 
 
 
 
+Riv_dot_TriangleEdge<-diag(as.matrix(RivSeg.Triangle.2[,c("RivS_vect_X","RivS_vect_Y")]) %*%  t(as.matrix(RivSeg.Triangle.2[,c("TriS_vect_X" , "TriS_vect_Y")] ))) ;
+
+
+### to calculate the norm of each vector use the scalar product (dot product) of the segment to itself- %*%  - extracting the diago0nal of the resulting matrix and finding the square root of it
+
+Riv_norm<-sqrt(diag(as.matrix(RivSeg.Triangle.2[,c("RivS_vect_X", "RivS_vect_Y")]) %*% t(as.matrix(RivSeg.Triangle.2[,c("RivS_vect_X", "RivS_vect_Y")])))) ;
+
+TriangleEdge_norm<-sqrt(diag(as.matrix(RivSeg.Triangle.2[,c("TriS_vect_X" , "TriS_vect_Y" )]) %*% t(as.matrix(RivSeg.Triangle.2[,c("TriS_vect_X" , "TriS_vect_Y" )])))) ;
+
+
+##### Get vthe unit vector coordinates for each  river and triangle vector
+
+
+RivSeg.Triangle.2$RivS_Uvect_X<-RivSeg.Triangle.2$RivS_vect_X/Riv_norm ;
+
+RivSeg.Triangle.2$RivS_Uvect_Y<-RivSeg.Triangle.2$RivS_vect_Y/Riv_norm ;
+
+RivSeg.Triangle.2$RivS_vect_AngleFromX<-acos(RivSeg.Triangle.2$RivS_Uvect_X) ;
 
 
 
+##### Using Matrix rotation to allign both vectors to the x axis 
 
-# # get the ID's of the line segments in the shape file read
-# 
-# River.SegID<-as.numeric(sapply(slot(River.shp,"lines"), function(x) slot(x,"ID")));
-# 
-# 
-# #get the coordinates of the first line segment of the shape file read
-# 
-# coordinates(River.shp)[[1]]
-# 
-# 
-# # get the coordinates of all the line segments of the shape file read as an  array
-# 
-# 
-# River.FromPoint<-data.frame(t(sapply(coordinates(River.shp),function(x) x[[1]][1,]))) ;
-# 
-# River.FromPoint$ID<-River.SegID ;
-# 
-# River.ToPoint<-data.frame(t(sapply(coordinates(River.shp),function(x) x[[1]][2,]))) ;
-# 
-# 
-# River.ToPoint$ID<-River.SegID ;
-# 
-# 
-# 
-# 
-# ###### match the coordinates of the river segments with the coordinates of the nodes of the triangles
-# 
-# River.FromNode<-merge(River.FromPoint, Watershed.1.node, by.x=c("X1", "X2"), by.y=c('X' , 'Y')) ;
-# 
-# River.ToNode<-merge(River.ToPoint, Watershed.1.node, by.x=c("X1", "X2"), by.y=c('X' , 'Y')) ;
-# 
-# 
-# River.FromTo<-merge(River.FromNode[,c('ID' , 'INDEX')] , River.ToNode[,c('ID' , 'INDEX')], by=c('ID')) ;
-# 
-# str(River.FromTo)
-# tail(River.FromTo)
-# 
-# 
-# 
-# ##### create a list of two nodes combination corresponding to each river element
-# 
-# 
-# 
-# River.SegList<-as.list(as.data.frame(t(River.FromTo)[c(2,3),]))  ;
-# 
-# 
-# names(River.SegList)<-River.FromTo$ID  ;
-# 
-# 
-# head(River.SegList)
-# 
-# 
-# ##### create a list of two nodes combinations correponding to each trinagle side element
-# 
-# 
-# 
-# 
-# Triangle.NodeList<-as.list(as.data.frame(t(Watershed.1.ele)[2:4,])) ;
-# 
-# names(Triangle.NodeList)<-Watershed.1.ele[,c('triangle')] ;
-# 
-# 
-# ##### take a permutation (combn2) of two at time on each triangle node set to represent all the edges of the triangle
-# 
-# 
-# Triangle.EdgeList<-lapply(Triangle.NodeList, function(x) combn2(x)) ;
-# 
-# 
-# head(River.SegList)
-# 
-# 
-# ##### convert the trinagle edges nodes and the river segments into point sets and compare them to determine whic trinagles have edges on the river
-# 
-# 
-# str(River.SegList[[1]])   # Are different classes int and num. River.SegList needs tobe converted to integer before set comparison
-# 
-# str(Triangle.EdgeList[[1]][1,])
-# 
-# str(as.integer(River.SegList[[1]]))
-# 
-# ####  compare the river segmenst witth each traingles edge set using set comparison
-# 
-# 
-# 
-# set(as.integer(River.SegList[[1]]))
-# 
-# set(Triangle.EdgeList[[1]][1,], Triangle.EdgeList[[1]][2,] ,Triangle.EdgeList[[1]][3,])
-# 
-# 
-# #### initialize a dataframe for the trinagle elements number
-# 
-# 
-# 
-# 
-# 
-# RiverTriangles<-data.frame(triangle = integer(), node1 = integer(), node2 = integer(), node3 = integer(), River.Seg = integer()  ) ;
-# 
-# Row.counter = 0 ;
-# 
-# for (j in seq(1, length(River.SegList))) {
-#   for (i in seq(1,length(Triangle.EdgeList))) {
-#     if (set(as.integer(River.SegList[[j]][1]),as.integer(River.SegList[[j]][2])) %e% set(set(Triangle.EdgeList[[i]][1,1],Triangle.EdgeList[[i]][1,2]),set(Triangle.EdgeList[[i]][2,1],Triangle.EdgeList[[i]][2,2]),set(Triangle.EdgeList[[i]][3,1],Triangle.EdgeList[[i]][3,2]))) {
-# 
-#       Row.counter = Row.counter +1
-# 
-#       RiverTriangles[Row.counter, c("triangle", "node1" , "node2" , "node3")]<-Watershed.1.ele[i,]
-#       RiverTriangles[Row.counter, c("River.Seg")]<-as.integer(names(River.SegList)[j])
-# 
-# 
-#     }
-# 
-#   }
-# }
-# 
-# RiverTriangles[duplicated(RiverTriangles$triangle),]
-# 
-# 
-# RiverTriangles[RiverTriangles$triangle == 220,]
-# 
-# 
-# River.neigh<-merge(RiverTriangles,Watershed.1.neigh, by='triangle',all.x=T)[order(River.neigh$River.Seg),]
+RivSeg.Triangle.2$RivS_Uvect_X_axs<-(RivSeg.Triangle.2$RivS_Uvect_X * cos(-RivSeg.Triangle.2$RivS_vect_AngleFromX)) - (RivSeg.Triangle.2$RivS_Uvect_Y*sin(-RivSeg.Triangle.2$RivS_vect_AngleFromX))  ;
 
-
-head(River.FromTo)
+RivSeg.Triangle.2$RivS_Uvect_Y_axs<-(RivSeg.Triangle.2$RivS_Uvect_X * sin(-RivSeg.Triangle.2$RivS_vect_AngleFromX)) + (RivSeg.Triangle.2$RivS_Uvect_Y*cos(-RivSeg.Triangle.2$RivS_vect_AngleFromX))  ;
 
 
 
 
 
+
+RivSeg.Triangle.2$TriS_Uvect_X<-RivSeg.Triangle.2$TriS_vect_X/TriangleEdge_norm
+
+RivSeg.Triangle.2$TriS_Uvect_Y<-RivSeg.Triangle.2$TriS_vect_Y/TriangleEdge_norm
+
+
+RivSeg.Triangle.2$TriS_Uvect_X_axs<-(RivSeg.Triangle.2$TriS_Uvect_X * cos(-RivSeg.Triangle.2$RivS_vect_AngleFromX )) - (RivSeg.Triangle.2$TriS_Uvect_Y *sin(-RivSeg.Triangle.2$RivS_vect_AngleFromX) ) ;
+
+RivSeg.Triangle.2$TriS_Uvect_Y_axs<-(RivSeg.Triangle.2$TriS_Uvect_X * sin(-RivSeg.Triangle.2$RivS_vect_AngleFromX) ) + (RivSeg.Triangle.2$TriS_Uvect_Y * cos(-RivSeg.Triangle.2$RivS_vect_AngleFromX) ) ;
+
+CosineRiv_TriangleEdge<-Riv_dot_TriangleEdge/(Riv_norm*TriangleEdge_norm) ;
+
+RivSeg.Triangle.2$Angle<-(acos(CosineRiv_TriangleEdge)*180)/pi
+
+
+head(RivSeg.Triangle.2)
+
+
+RivSeg.Triangle.2$Side<-"A" 
+
+RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs > 0) , "Side" ]<-c("LEFT") ;
+RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs < 0), "Side" ]<-c("RIGHT") ;
+
+
+
+RivSeg.Triangle.2[which(RivSeg.Triangle.2$Side == "RIGHT") , ] 
+
+
+RivSeg.Triangle.2[which(RivSeg.Triangle.2$Side == "LEFT") , ] 
+
+
+diag(as.matrix(RivSeg.Triangle.2[,c('to.X.x' , 'to.Y.x', 'from.X.x', 'from.Y.x')]) %*%  t(as.matrix(RivSeg.Triangle.2[,c('to.X.x' , 'to.Y.x', 'X', 'Y')])))
+
+diag()
+
+
+t(as.matrix(RivSeg.Triangle.2[,c('to.X.x' , 'to.Y.x', 'X', 'Y')]))
+
+
+
+
+
+
+
+
+
+                            
