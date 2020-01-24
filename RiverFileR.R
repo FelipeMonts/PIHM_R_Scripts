@@ -121,6 +121,7 @@ head(River.data.3)
 
 River.data.3[,c("INDEX.x", "S_Order.x" , "BoundaryMarker.x", "INDEX.y" ,"S_Order.y", "BoundaryMarker.y")]
 
+River.data.3$RiverSegment<-paste0("R_",River.data.3$ID)  ;
 
 ###### creating a 'sets' object to be used with the "sets" package and perform set operations on the river segments and nodes and traingle elements and nodes
 ### https://cran.r-project.org/web/packages/sets/index.html
@@ -156,7 +157,7 @@ str(ele.data)
 
 
 
-RivSeg.Triangle<-data.frame(character(), character(),integer(), integer(),integer(), integer(),integer(), integer()) ;
+RivSeg.Triangle<-data.frame(character(), integer(),integer(), integer(),character(), integer(),integer(), integer() ) ;
 names(RivSeg.Triangle)<-c('Triangle','Tnode_1', 'Tnode_2' , 'Tnode_3', 'RiverSegment', 'Rnode_1', 'Rnode_2', 'SymDiff') ;
 
 for (i in seq(1,length(ele.data))) {
@@ -165,7 +166,7 @@ for (i in seq(1,length(ele.data))) {
       
       #as.integer(as.set(ele.data[[i]]) %D% as.set(River.data.4[[j]]))
 
-      RivSeg.Triangle<-rbind(RivSeg.Triangle,data.frame(as.character(names(ele.data[i])), as.integer(ele.data[[i]][1]),as.integer(ele.data[[i]][2]), as.integer(ele.data[[i]][3]) , as.character(names(River.data.4[j])), as.integer(River.data.4[[j]][1]),as.integer(River.data.4[[j]][2]),as.integer(as.set(ele.data[[i]]) %D% as.set(River.data.4[[j]])) ))
+      RivSeg.Triangle<-rbind(RivSeg.Triangle,data.frame(as.character(names(ele.data[i])), as.integer(ele.data[[i]][1]),as.integer(ele.data[[i]][2]), as.integer(ele.data[[i]][3]) , as.character(names(River.data.4[j])), as.integer(River.data.4[[j]][1]),as.integer(River.data.4[[j]][2]),as.integer(as.set(ele.data[[i]]) %D% as.set(River.data.4[[j]]))))
       
       
     }
@@ -181,7 +182,7 @@ print(RivSeg.Triangle)
 ####### Organize the river segments and the triangle neighbors ########
 
 
-RivSeg.Triangle.1<-merge(RivSeg.Triangle,River.data.3[,c("RiverSegment" ,"INDEX.x", "from.X.x" , "from.Y.x" , "INDEX.y" ,  "to.X.x" , "to.Y.x" )], by="RiverSegment") ;
+RivSeg.Triangle.1<-merge(RivSeg.Triangle,River.data.3[,c("RiverSegment" ,"INDEX.x", "from.X.x" , "from.Y.x" , "INDEX.y" ,  "to.X.x" , "to.Y.x", "S_Order.x" )], by="RiverSegment") ;
 
 ##### The river segment orinetation is opposite to the direction of the river segment; that is the right triangle is the trinagle to the right of the river segment from the perspective of the "to" to "from" nodes coordinates. This is opposite the water flow in the river.
 
@@ -266,27 +267,44 @@ RivSeg.Triangle.2$Side<-"A"
 RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs > 0) , "Side" ]<-c("LEFT") ;
 RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs < 0), "Side" ]<-c("RIGHT") ;
 
+RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs == 0),] ;
+
+RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs == 0), "Side" ]<-c("UP") ;
 
 
-RivSeg.Triangle.2[which(RivSeg.Triangle.2$Side == "RIGHT") , ] 
+RivSeg.Triangle.2[which(RivSeg.Triangle.2$Triangle == 'T_94'),]
+                        
+
+RivSeg.Triangle.3<-RivSeg.Triangle.2[order(RivSeg.Triangle.2$Rnode_1),] ;
+
+#RivSeg.Triangle.3$RivXTriangle<-paste0(RivSeg.Triangle.3$RiverSegment,'_' , RivSeg.Triangle.3$Triangle) ;
 
 
-RivSeg.Triangle.2[which(RivSeg.Triangle.2$Side == "LEFT") , ] 
-
-
-diag(as.matrix(RivSeg.Triangle.2[,c('to.X.x' , 'to.Y.x', 'from.X.x', 'from.Y.x')]) %*%  t(as.matrix(RivSeg.Triangle.2[,c('to.X.x' , 'to.Y.x', 'X', 'Y')])))
-
-diag()
-
-
-t(as.matrix(RivSeg.Triangle.2[,c('to.X.x' , 'to.Y.x', 'X', 'Y')]))
-
-
-
-
+names(RivSeg.Triangle.3)
+head(RivSeg.Triangle.3)
 
 
 
+str(RivSeg.Triangle.3[, c("RiverSegment", "Rnode_1" , "Rnode_2"  )])
+
+Riv.1<-RivSeg.Triangle.3[which(RivSeg.Triangle.3$Side == 'LEFT'), c("RiverSegment", "Rnode_1" , "Rnode_2",'Side' , 'Triangle', 'BoundaryMarker', "S_Order.x")] ;
+
+Riv.2<-RivSeg.Triangle.3[which(RivSeg.Triangle.3$Side == 'RIGHT'), c("RiverSegment", "Rnode_1" , "Rnode_2",'Side' , 'Triangle' ,'BoundaryMarker' ,"S_Order.x")] ;
 
 
-                            
+Riv.3<-merge(Riv.1,Riv.2, by=c("RiverSegment", "Rnode_1" , "Rnode_2", "S_Order.x" ), all=T);
+
+Riv.4<-Riv.3[order(Riv.3$Rnode_1),] ;
+
+head(Riv.4)
+
+str(Riv.4)
+
+View(Riv.4)
+
+which(Riv.3$RiverSegment %in% RivSeg.Triangle.2$RiverSegment )
+
+
+
+ 
+ 
