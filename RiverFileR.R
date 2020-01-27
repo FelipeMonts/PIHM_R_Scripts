@@ -223,7 +223,7 @@ Riv_norm<-sqrt(diag(as.matrix(RivSeg.Triangle.2[,c("RivS_vect_X", "RivS_vect_Y")
 TriangleEdge_norm<-sqrt(diag(as.matrix(RivSeg.Triangle.2[,c("TriS_vect_X" , "TriS_vect_Y" )]) %*% t(as.matrix(RivSeg.Triangle.2[,c("TriS_vect_X" , "TriS_vect_Y" )])))) ;
 
 
-##### Get vthe unit vector coordinates for each  river and triangle vector
+##### Get the unit vector coordinates for each  river and triangle vector by scaling them by their norm
 
 
 RivSeg.Triangle.2$RivS_Uvect_X<-RivSeg.Triangle.2$RivS_vect_X/Riv_norm ;
@@ -234,25 +234,28 @@ RivSeg.Triangle.2$RivS_vect_AngleFromX<-acos(RivSeg.Triangle.2$RivS_Uvect_X) ;
 
 
 
-##### Using Matrix rotation to allign both vectors to the x axis 
+##### Using Matrix rotation to allign both unitary river vectors to the x axis 
 
 RivSeg.Triangle.2$RivS_Uvect_X_axs<-(RivSeg.Triangle.2$RivS_Uvect_X * cos(-RivSeg.Triangle.2$RivS_vect_AngleFromX)) - (RivSeg.Triangle.2$RivS_Uvect_Y*sin(-RivSeg.Triangle.2$RivS_vect_AngleFromX))  ;
 
 RivSeg.Triangle.2$RivS_Uvect_Y_axs<-(RivSeg.Triangle.2$RivS_Uvect_X * sin(-RivSeg.Triangle.2$RivS_vect_AngleFromX)) + (RivSeg.Triangle.2$RivS_Uvect_Y*cos(-RivSeg.Triangle.2$RivS_vect_AngleFromX))  ;
 
 
-
-
+##### Make the triangle and the river vestors unit vectors by scalling them to their norm
 
 
 RivSeg.Triangle.2$TriS_Uvect_X<-RivSeg.Triangle.2$TriS_vect_X/TriangleEdge_norm
 
 RivSeg.Triangle.2$TriS_Uvect_Y<-RivSeg.Triangle.2$TriS_vect_Y/TriangleEdge_norm
 
+##### Using Matrix rotation to allign both unitary trinagle vectors to the x axis 
+
 
 RivSeg.Triangle.2$TriS_Uvect_X_axs<-(RivSeg.Triangle.2$TriS_Uvect_X * cos(-RivSeg.Triangle.2$RivS_vect_AngleFromX )) - (RivSeg.Triangle.2$TriS_Uvect_Y *sin(-RivSeg.Triangle.2$RivS_vect_AngleFromX) ) ;
 
 RivSeg.Triangle.2$TriS_Uvect_Y_axs<-(RivSeg.Triangle.2$TriS_Uvect_X * sin(-RivSeg.Triangle.2$RivS_vect_AngleFromX) ) + (RivSeg.Triangle.2$TriS_Uvect_Y * cos(-RivSeg.Triangle.2$RivS_vect_AngleFromX) ) ;
+
+##### Caluclating the cosine of the angle between the river vector and the triangle vector using the dot product 
 
 CosineRiv_TriangleEdge<-Riv_dot_TriangleEdge/(Riv_norm*TriangleEdge_norm) ;
 
@@ -262,18 +265,48 @@ RivSeg.Triangle.2$Angle<-(acos(CosineRiv_TriangleEdge)*180)/pi
 head(RivSeg.Triangle.2)
 
 
+
+###########################################################################################################################################################
+# ##### Determining at which side is each trinagle by the sign of the sine of the angle (y Coordinate) between of the unit river vector alligned with the x axis and the unit trinagle vector. The direction of the triangles is based on the to-from direction of the eiver segments as follows:
+# 
+#                             River from node \/                            \/
+#                                             |                             |
+#                                             |        River flow direction |
+#                                             |                             |
+#                         Left Triangle       |       Right Triangle        \/
+#                                             | 
+#                                             | 
+#                                             |
+#                                             |
+#                              River to node  \/
+#
+##########################################################################################################################################################
+
+
+####### Collecting the trinagel siedsa on the "Side" column of the data frame.
+
 RivSeg.Triangle.2$Side<-"A" 
 
 RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs > 0) , "Side" ]<-c("LEFT") ;
 RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs < 0), "Side" ]<-c("RIGHT") ;
+
+
+###### Checking that there is no parallel or 0 angles on the river and trinagel vectors
 
 RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs == 0),] ;
 
 RivSeg.Triangle.2[which(RivSeg.Triangle.2$TriS_Uvect_Y_axs == 0), "Side" ]<-c("UP") ;
 
 
+###### Check ona of the river segments to test if the results agree with the shape files
+
 RivSeg.Triangle.2[which(RivSeg.Triangle.2$Triangle == 'T_94'),]
                         
+
+
+
+###### ordering the data frame according to the river nodes, starting from the river node "from" 
+
 
 RivSeg.Triangle.3<-RivSeg.Triangle.2[order(RivSeg.Triangle.2$Rnode_1),] ;
 
@@ -283,14 +316,24 @@ RivSeg.Triangle.3<-RivSeg.Triangle.2[order(RivSeg.Triangle.2$Rnode_1),] ;
 names(RivSeg.Triangle.3)
 head(RivSeg.Triangle.3)
 
-
+###### aggregating results according to the river format required fro PIHM
 
 str(RivSeg.Triangle.3[, c("RiverSegment", "Rnode_1" , "Rnode_2"  )])
 
+
+##### collect all the left side triangles
+
 Riv.1<-RivSeg.Triangle.3[which(RivSeg.Triangle.3$Side == 'LEFT'), c("RiverSegment", "Rnode_1" , "Rnode_2",'Side' , 'Triangle', 'BoundaryMarker', "S_Order.x")] ;
+
+
+##### collect all the right side triangles
+
+
 
 Riv.2<-RivSeg.Triangle.3[which(RivSeg.Triangle.3$Side == 'RIGHT'), c("RiverSegment", "Rnode_1" , "Rnode_2",'Side' , 'Triangle' ,'BoundaryMarker' ,"S_Order.x")] ;
 
+
+##### Merge left and side trinagles in the fromat reqired by PIHM
 
 Riv.3<-merge(Riv.1,Riv.2, by=c("RiverSegment", "Rnode_1" , "Rnode_2", "S_Order.x" ), all=T);
 
@@ -302,9 +345,82 @@ str(Riv.4)
 
 View(Riv.4)
 
-which(Riv.3$RiverSegment %in% RivSeg.Triangle.2$RiverSegment )
+
+#### indexing the river segments from 1 to N 
+
+map_Riv_Seg<-data.frame(Riv.Indx_GIS=unique(as.character(Riv.4$RiverSegment)), Riv.Indx_PIHM=seq(1,length(unique(as.character(Riv.4$RiverSegment))))) ; 
+
+Riv.5<-merge(Riv.4,map_Riv_Seg, by.x='RiverSegment', by.y='Riv.Indx_GIS' ) ;
+head(Riv.5)
 
 
 
- 
- 
+#### work on getting the down river stream segment to match PIHM format
+
+
+
+##### get the down river segment
+Riv.6<-merge(Riv.5, Riv.5[,c('RiverSegment' , 'Rnode_1', 'Rnode_2')], by.x='Rnode_2', by.y='Rnode_1') ;
+head(Riv.6)
+
+Riv.7<-merge(Riv.6,map_Riv_Seg, by.x='RiverSegment.y', by.y='Riv.Indx_GIS' ) ;
+
+print(names(Riv.7))
+head(Riv.7)
+
+Riv.7.Nam<-c("DOWN_GIS", "TO" , "INDEX_GIS" ,   "FROM" , "SHAPE" , "Side.x" ,  "LEFT_TRIANGLE" , "BoundaryMarker.x", "Side.y" , "RIGHT_TRIANGLE", "BoundaryMarker.y" ,"INDEX_PIHM" ,   "Rnode_2.y", "DOWN_PIHM"  )
+
+data.frame(names(Riv.7),Riv.7.Nam)
+
+names(Riv.7)<-Riv.7.Nam ;
+
+head(Riv.7)
+
+
+##### Final format of the file  to conform to the .riv file in PIHM
+
+Riv.7[,c("INDEX_PIHM","FROM", "TO" , "DOWN_PIHM" , "LEFT_TRIANGLE" ,"RIGHT_TRIANGLE", "SHAPE" )] ;
+
+Riv.7$LEFT<-as.integer(substr(Riv.7$LEFT_TRIANGLE,start=3,stop=10));
+
+Riv.7$RIGHT<-as.integer(substr(Riv.7$RIGHT_TRIANGLE,start=3,stop=10));
+
+head(Riv.7)
+
+Riv.8<-Riv.7[,c('INDEX_PIHM' , 'FROM' , 'TO' , 'DOWN_PIHM' , 'LEFT' , 'RIGHT', 'SHAPE' , 'SHAPE')];
+
+Riv.8$BC<-0 ;
+
+Riv.8$RES<-0 ;
+
+
+head(Riv.8) 
+
+names(Riv.8)<-c( 'INDEX', 'FROM' , 'TO' , 'DOWN' , 'LEFT' , 'RIGHT', 'SHAPE' , 'MATL' , 'BC ' , 'RES') ;
+
+head(Riv.8) 
+
+
+Riv.NUMRIV<-data.frame(c('NUMRIV'), NUMRIV=dim(Riv.8)[1] , stringsAsFactors = F) ;
+
+####### Write the river file into the text file. riv.
+
+
+
+######## Print the NUMRIV line
+
+Riv.NUMRIV
+
+write.table(Riv.NUMRIV, file=paste0(Watershed.name, ".riv"), row.names=F ,col.names=F, quote=F, sep ="\t") ;
+
+
+
+####   write the river  section of the river file 
+
+write.table(Riv.8, file=paste0(Watershed.name, ".riv"), row.names=F ,col.names=T, quote=F, sep ="\t", append = T) ;
+
+
+
+
+
+
