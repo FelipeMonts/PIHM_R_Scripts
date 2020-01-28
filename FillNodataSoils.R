@@ -34,8 +34,9 @@
 
 #      set the working directory
 
+readClipboard()
 
-setwd('C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\MM_PHIM_inputs') ;       #  setwd(RevisedOutputs.dir)   ;
+setwd("C:\\Felipe\\PIHM-CYCLES\\PIHM\\PIHM SIMULATIONS\\YAHARA\\Yahara20200110\\MMPIHM_inputs") ; 
 
 
 
